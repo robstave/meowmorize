@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Meowmerize - Home</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+
+<body>
+    <h1 style="text-align: center;">Meowmerize - Your Flashcard App</h1>
+
+    <div class="navigation">
+        <button onclick="window.location.href='/add-deck'" style="padding: 10px 20px;">Add New Deck</button>
+    </div>
+
+    <div class="deck-list" style="max-width: 800px; margin: 0 auto;">
+        {{if .Decks}}
+        <ul style="list-style-type: none; padding: 0;">
+            {{range .Decks}}
+            <li class="deck-item">
+                <h2>{{.Name}}</h2>
+                {{if .Cards}}
+                <ul>
+                    {{range .Cards}}
+                    <li>
+                        <strong>Front:</strong> {{.Front}} <br>
+                        <strong>Back:</strong> {{.Back}}
+                    </li>
+                    {{end}}
+                </ul>
+                {{else}}
+                <p>No cards in this deck.</p>
+                {{end}}
+            </li>
+            {{end}}
+        </ul>
+        {{else}}
+        <p style="text-align: center;">No decks available.</p>
+        {{end}}
+    </div>
+</body>
+
+</html>

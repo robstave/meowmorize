@@ -1,0 +1,21 @@
+#readme.md
+#observations.md
+#directives.md
+ 
+meow-adapters:
+  - internal/adapters/controller/home.go
+  - internal/adapters/repositories/card.go
+  - internal/adapters/repositories/deck.go
+  - internal/adapters/repositories/prefs.go
+  - internal/adapters/repositories/service.go
+  - internal/adapters/repositories/preference_repository.go
+  - cmd/main/main.go
+  - internal/domain/types/card.go
+  - internal/domain/types/deck.go
+  - internal/domain/service.go
+
+meow-templates:
+  - static/css/styles.css
+  - templates/home.html
+
+# Add more groups as needed
