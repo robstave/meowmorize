@@ -13,12 +13,13 @@ type Service struct {
 	cardRepo repositories.CardRepository
 }
 
-type RTOBLL interface {
+type BLL interface {
 	GetAllDecks() ([]types.Deck, error)
 	CreateDefaultDeck() error
+	CreateDeck(types.Deck) error
 }
 
-func NewService(logger *slog.Logger, deckRepo repositories.DeckRepository, cardRepo repositories.CardRepository) RTOBLL {
+func NewService(logger *slog.Logger, deckRepo repositories.DeckRepository, cardRepo repositories.CardRepository) BLL {
 	return &Service{
 		logger:   logger,
 		deckRepo: deckRepo,
@@ -33,25 +34,4 @@ func (s *Service) GetAllDecks() ([]types.Deck, error) {
 		return nil, err
 	}
 	return decks, nil
-}
-
-func (s *Service) CreateDefaultDeck() error {
-	defaultDeck := types.Deck{
-		Name: "Default Deck",
-		Cards: []types.Card{
-			{
-				Front: "Sample Front",
-				Back:  "Sample Back",
-			},
-		},
-	}
-
-	err := s.deckRepo.CreateDeck(defaultDeck)
-	if err != nil {
-		s.logger.Error("Failed to create default deck", "error", err)
-		return err
-	}
-
-	s.logger.Info("Default deck created successfully")
-	return nil
 }

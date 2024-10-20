@@ -44,7 +44,6 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	// Auto Migrate
 	err = db.AutoMigrate(&types.Deck{}, &types.Card{})
 	if err != nil {
 		slogger.Error("Failed to migrate database", "error", err)
@@ -59,7 +58,7 @@ func main() {
 	service := domain.NewService(slogger, deckRepo, cardRepo)
 
 	// Initialize Controller
-	homeController := controller.NewHomeController(service)
+	homeController := controller.NewHomeController(service, slogger)
 
 	// Initialize Echo
 	e := echo.New()
@@ -76,6 +75,8 @@ func main() {
 
 	// Routes
 	e.GET("/", homeController.Home)
+
+	e.POST("/import-deck", homeController.ImportDeck)
 
 	// Start Server
 	port := "8789"

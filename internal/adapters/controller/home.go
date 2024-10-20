@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/robstave/meowmorize/internal/domain"
@@ -9,11 +10,12 @@ import (
 )
 
 type HomeController struct {
-	service domain.RTOBLL
+	service domain.BLL
+	logger  *slog.Logger
 }
 
-func NewHomeController(service domain.RTOBLL) *HomeController {
-	return &HomeController{service: service}
+func NewHomeController(service domain.BLL, logger *slog.Logger) *HomeController {
+	return &HomeController{service: service, logger: logger}
 }
 
 // Home handles the home page and lists all decks

@@ -24,11 +24,12 @@
                 <ul>
                     {{range .Cards}}
                     <li>
-                        <strong>Front:</strong> {{.Front}} <br>
-                        <strong>Back:</strong> {{.Back}}
+                        <strong>Front:</strong> {{.Front.Text}} <br>
+                        <strong>Back:</strong> {{.Back.Text}}
                     </li>
                     {{end}}
                 </ul>
+                
                 {{else}}
                 <p>No cards in this deck.</p>
                 {{end}}
@@ -39,6 +40,14 @@
         <p style="text-align: center;">No decks available.</p>
         {{end}}
     </div>
+
+    <div class="navigation">
+        <form action="/import-deck" method="post" enctype="multipart/form-data">
+            <input type="file" name="deck_file" accept=".json" required>
+            <button type="submit">Import Deck</button>
+        </form>
+    </div>
+    
 </body>
 
 </html>

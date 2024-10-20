@@ -7,7 +7,7 @@ import (
 )
 
 type CardRepository interface {
-	GetCardsByDeckID(deckID uint) ([]types.Card, error)
+	GetCardsByDeckID(deckID string) ([]types.Card, error)
 	CreateCard(card types.Card) error
 }
 
@@ -19,7 +19,7 @@ func NewCardRepositorySQLite(db *gorm.DB) CardRepository {
 	return &CardRepositorySQLite{db: db}
 }
 
-func (r *CardRepositorySQLite) GetCardsByDeckID(deckID uint) ([]types.Card, error) {
+func (r *CardRepositorySQLite) GetCardsByDeckID(deckID string) ([]types.Card, error) {
 	var cards []types.Card
 	if err := r.db.Where("deck_id = ?", deckID).Find(&cards).Error; err != nil {
 		return nil, err
