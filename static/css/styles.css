@@ -104,7 +104,7 @@ tr.deck-item:hover {
     border-radius: 2px;
     padding: 16px;
     position: fixed;
-    z-index: 1;
+    z-index: 1000;
     left: 50%;
     bottom: 30px;
     font-size: 17px;
@@ -116,4 +116,76 @@ tr.deck-item:hover {
 .toast.show {
     visibility: visible;
     opacity: 1;
+}
+
+/* Specific Styles for Deck Page */
+.deck-details {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid var(--color-border);
+    border-radius: 5px;
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.deck-details h2 {
+    color: var(--color-primary);
+}
+
+.deck-details p.description {
+    font-size: 16px;
+    color: var(--color-text);
+}
+
+.deck-actions {
+    margin-top: 20px;
+}
+
+.deck-actions button {
+    padding: 10px 20px;
+    background-color: #f44336; /* Red for delete */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.deck-actions button:hover {
+    background-color: darkred;
+}
+
+.deck-actions button.back-button {
+    background-color: var(--color-secondary);
+    margin-left: 10px;
+}
+
+.deck-actions button.back-button:hover {
+    background-color: darkblue;
+}
+
+/* Cards List */
+.cards-list {
+    margin-top: 30px;
+}
+
+.cards-list h3 {
+    color: var(--color-secondary);
+}
+
+.cards-list ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.card-item {
+    background-color: #f1f1f1;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.card-item p {
+    margin: 5px 0;
 }

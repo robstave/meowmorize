@@ -29,6 +29,12 @@
             if (urlParams.get('import') === 'success') {
                 showToast('Deck imported successfully!');
             }
+            if (urlParams.get('delete') === 'success') {
+                showToast('Deck deleted successfully!');
+            }
+            if (urlParams.get('delete') === 'error') {
+                showToast('Failed to delete deck.');
+            }
         };
     </script>
     <style>
@@ -78,6 +84,15 @@
             background-color: var(--color-hover);
             cursor: pointer;
         }
+
+        /* Optional: Make entire row clickable */
+        .deck-link {
+            display: block;
+            color: inherit;
+            text-decoration: none;
+            width: 100%;
+            height: 100%;
+        }
     </style>
 </head>
 
@@ -85,6 +100,7 @@
     <h1 style="text-align: center;">Meowmerize - Dashboard</h1>
 
     <div class="navigation">
+        <button onclick="window.location.href='/add-deck'" style="padding: 10px 20px; margin-right: 10px;">Add New Deck</button>
         <button onclick="window.location.href='/import-deck'" style="padding: 10px 20px;">Import Deck</button>
     </div>
 
@@ -101,7 +117,7 @@
             <tbody>
                 {{range .Decks}}
                 <tr class="deck-item">
-                    <td>{{.Name}}</td>
+                    <td><a href="/deck/{{.ID}}" class="deck-link">{{.Name}}</a></td>
                     <td>{{.Description}}</td>
                     <td>{{len .Cards}}</td>
                 </tr>

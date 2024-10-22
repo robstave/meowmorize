@@ -17,6 +17,8 @@ type BLL interface {
 	GetAllDecks() ([]types.Deck, error)
 	CreateDefaultDeck() error
 	CreateDeck(types.Deck) error
+	GetDeckByID(deckID string) (types.Deck, error) // New method
+	DeleteDeck(deckID string) error
 }
 
 func NewService(logger *slog.Logger, deckRepo repositories.DeckRepository, cardRepo repositories.CardRepository) BLL {
