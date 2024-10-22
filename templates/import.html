@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Import Deck - Meowmerize</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script>
+        // Toast Notification Function
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerText = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100); // Allow time for CSS transition
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000); // Hide after 3 seconds
+        }
+
+        // On page load, check if there's a success or error message
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('import') === 'success') {
+                showToast('Deck imported successfully!', 'success');
+            } else if (urlParams.get('import') === 'error') {
+                showToast('Failed to import deck.', 'error');
+            }
+        };
+    </script>
+    <style>
+        /* Toast Styles */
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            font-size: 17px;
+            opacity: 0;
+            transform: translateX(-50%);
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        .toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Different styles for success and error */
+        .toast.success {
+            background-color: #4CAF50; /* Green */
+        }
+
+        .toast.error {
+            background-color: #f44336; /* Red */
+        }
+
+        /* Form Styles */
+        .import-form {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            border: 1px solid var(--color-border);
+            border-radius: 5px;
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .import-form input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid var(--color-border);
+            border-radius: 5px;
+        }
+
+        .import-form button {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 16px;
+        }
+
+        .import-form button:hover {
+            background-color: darkgreen;
+        }
+
+        .back-button {
+            display: block;
+            width: 100%;
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: var(--color-secondary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .back-button:hover {
+            background-color: darkblue;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 style="text-align: center;">Import Deck</h1>
+
+    <div class="import-form">
+        <form action="/import-deck" method="post" enctype="multipart/form-data">
+            <label for="deck_file">Choose JSON File:</label>
+            <input type="file" id="deck_file" name="deck_file" accept=".json" required>
+            <button type="submit">Import Deck</button>
+        </form>
+        <button class="back-button" onclick="window.location.href='/'">Back to Dashboard</button>
+    </div>
+</body>
+
+</html>

@@ -76,6 +76,8 @@ func main() {
 	// Routes
 	e.GET("/", homeController.Home)
 
+	e.GET("/import-deck", homeController.RenderImportDeck) // New route for rendering import page
+
 	e.POST("/import-deck", homeController.ImportDeck)
 
 	// Start Server

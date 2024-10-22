@@ -18,10 +18,11 @@ func NewHomeController(service domain.BLL, logger *slog.Logger) *HomeController 
 	return &HomeController{service: service, logger: logger}
 }
 
-// Home handles the home page and lists all decks
+// Home handles the dashboard page and lists all decks
 func (hc *HomeController) Home(c echo.Context) error {
 	decks, err := hc.service.GetAllDecks()
 	if err != nil {
+		hc.logger.Error("Failed to retrieve decks", "error", err)
 		return c.String(http.StatusInternalServerError, "Failed to retrieve decks")
 	}
 
@@ -29,6 +30,7 @@ func (hc *HomeController) Home(c echo.Context) error {
 	if len(decks) == 0 {
 		err := hc.service.CreateDefaultDeck()
 		if err != nil {
+			hc.logger.Error("Failed to create default deck", "error", err)
 			return c.String(http.StatusInternalServerError, "Failed to create default deck")
 		}
 		decks, _ = hc.service.GetAllDecks()

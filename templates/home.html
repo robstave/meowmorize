@@ -3,51 +3,115 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Meowmerize - Home</title>
+    <title>Meowmerize - Dashboard</title>
     <link rel="stylesheet" href="/static/css/styles.css">
+    <script>
+        // Toast Notification Function
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100); // Allow time for CSS transition
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000); // Hide after 3 seconds
+        }
+
+        // On page load, check if there's a success message
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('import') === 'success') {
+                showToast('Deck imported successfully!');
+            }
+        };
+    </script>
+    <style>
+        /* Toast Styles */
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            font-size: 17px;
+            opacity: 0;
+            transform: translateX(-50%);
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        .toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid var(--color-border);
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--color-primary);
+            color: white;
+        }
+
+        tr.deck-item:hover {
+            background-color: var(--color-hover);
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
-    <h1 style="text-align: center;">Meowmerize - Your Flashcard App</h1>
+    <h1 style="text-align: center;">Meowmerize - Dashboard</h1>
 
     <div class="navigation">
-        <button onclick="window.location.href='/add-deck'" style="padding: 10px 20px;">Add New Deck</button>
+        <button onclick="window.location.href='/import-deck'" style="padding: 10px 20px;">Import Deck</button>
     </div>
 
-    <div class="deck-list" style="max-width: 800px; margin: 0 auto;">
+    <div class="deck-list" style="max-width: 800px; margin: 20px auto;">
         {{if .Decks}}
-        <ul style="list-style-type: none; padding: 0;">
-            {{range .Decks}}
-            <li class="deck-item">
-                <h2>{{.Name}}</h2>
-                {{if .Cards}}
-                <ul>
-                    {{range .Cards}}
-                    <li>
-                        <strong>Front:</strong> {{.Front.Text}} <br>
-                        <strong>Back:</strong> {{.Back.Text}}
-                    </li>
-                    {{end}}
-                </ul>
-                
-                {{else}}
-                <p>No cards in this deck.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Card Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Decks}}
+                <tr class="deck-item">
+                    <td>{{.Name}}</td>
+                    <td>{{.Description}}</td>
+                    <td>{{len .Cards}}</td>
+                </tr>
                 {{end}}
-            </li>
-            {{end}}
-        </ul>
+            </tbody>
+        </table>
         {{else}}
         <p style="text-align: center;">No decks available.</p>
         {{end}}
     </div>
-
-    <div class="navigation">
-        <form action="/import-deck" method="post" enctype="multipart/form-data">
-            <input type="file" name="deck_file" accept=".json" required>
-            <button type="submit">Import Deck</button>
-        </form>
-    </div>
-    
 </body>
 
 </html>
