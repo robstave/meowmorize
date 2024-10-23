@@ -18,7 +18,7 @@ import (
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /decks [post]
-func (hc *HomeController) CreateDeck(c echo.Context) error {
+func (hc *MeowController) CreateDeck(c echo.Context) error {
 	var deck types.Deck
 	if err := c.Bind(&deck); err != nil {
 		hc.logger.Error("Failed to bind deck data", "error", err)
@@ -48,7 +48,7 @@ func (hc *HomeController) CreateDeck(c echo.Context) error {
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /decks/default [post]
-func (hc *HomeController) CreateDefaultDeck(c echo.Context) error {
+func (hc *MeowController) CreateDefaultDeck(c echo.Context) error {
 	hc.logger.Info("Creating default deck")
 
 	if err := hc.service.CreateDefaultDeck(); err != nil {
@@ -73,7 +73,7 @@ func (hc *HomeController) CreateDefaultDeck(c echo.Context) error {
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /decks/{id} [delete]
-func (hc *HomeController) DeleteDeck(c echo.Context) error {
+func (hc *MeowController) DeleteDeck(c echo.Context) error {
 	deckID := c.Param("id")
 
 	// Perform deletion
@@ -98,7 +98,7 @@ func (hc *HomeController) DeleteDeck(c echo.Context) error {
 // @Success 200 {array} types.Deck
 // @Failure 500 {object} map[string]string
 // @Router /decks [get]
-func (hc *HomeController) GetAllDecks(c echo.Context) error {
+func (hc *MeowController) GetAllDecks(c echo.Context) error {
 	decks, err := hc.service.GetAllDecks()
 	if err != nil {
 		hc.logger.Error("Failed to retrieve decks", "error", err)
@@ -121,7 +121,7 @@ func (hc *HomeController) GetAllDecks(c echo.Context) error {
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /decks/{id} [get]
-func (hc *HomeController) GetDeckByID(c echo.Context) error {
+func (hc *MeowController) GetDeckByID(c echo.Context) error {
 	deckID := c.Param("id")
 
 	deck, err := hc.service.GetDeckByID(deckID)
@@ -154,7 +154,7 @@ func (hc *HomeController) GetDeckByID(c echo.Context) error {
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /decks/{id} [put]
-func (hc *HomeController) UpdateDeck(c echo.Context) error {
+func (hc *MeowController) UpdateDeck(c echo.Context) error {
 	deckID := c.Param("id")
 	var updatedDeck types.Deck
 

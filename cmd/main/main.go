@@ -53,7 +53,7 @@ func main() {
 	service := domain.NewService(slogger, deckRepo, cardRepo)
 
 	// Initialize Controller
-	homeController := controller.NewHomeController(service, slogger)
+	meowController := controller.NewMeowController(service, slogger)
 
 	// Initialize Echo
 	e := echo.New()
@@ -78,14 +78,14 @@ func main() {
 	api := e.Group("/api")
 	deckGroup := api.Group("/decks")
 
-	deckGroup.GET("", homeController.GetAllDecks)
-	deckGroup.GET("/default", homeController.CreateDefaultDeck)
-	deckGroup.GET("/:id", homeController.GetDeckByID)
-	deckGroup.POST("", homeController.CreateDeck)
-	deckGroup.PUT("/:id", homeController.UpdateDeck)
-	deckGroup.DELETE("/:id", homeController.DeleteDeck)
+	deckGroup.GET("", meowController.GetAllDecks)
+	deckGroup.GET("/default", meowController.CreateDefaultDeck)
+	deckGroup.GET("/:id", meowController.GetDeckByID)
+	deckGroup.POST("", meowController.CreateDeck)
+	deckGroup.PUT("/:id", meowController.UpdateDeck)
+	deckGroup.DELETE("/:id", meowController.DeleteDeck)
 
-	deckGroup.POST("/import", homeController.ImportDeck)
+	deckGroup.POST("/import", meowController.ImportDeck)
 
 	// Swagger endpoint
 	e.GET("/swagger/*", httpSwagger.WrapHandler)

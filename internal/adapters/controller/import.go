@@ -21,9 +21,7 @@ import (
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /decks/import [post]
-func (hc *HomeController) ImportDeck(c echo.Context) error {
-
-	hc.logger.Info("Importing deck")
+func (hc *MeowController) ImportDeck(c echo.Context) error {
 
 	// Read JSON from file upload
 	file, err := c.FormFile("deck_file")
@@ -59,6 +57,7 @@ func (hc *HomeController) ImportDeck(c echo.Context) error {
 	// Logging for debugging
 	hc.logger.Info("Imported deck", "id", deckData.Deck.ID, "name", deckData.Deck.Name,
 		"number_of_cards", len(deckData.Deck.Cards))
+
 	for _, card := range deckData.Deck.Cards {
 		if card.ID == "" || card.DeckID == "" || card.Front.Text == "" || card.Back.Text == "" {
 			hc.logger.Warn("Incomplete card data", "card", card)
