@@ -8,3 +8,9 @@ swag init --dir ./cmd/main --parseDependency --parseInternal --output ./docs --v
  
 run from cmd/main
 swag init --parseDependency --parseInternal --output ../../docs
+
+
+# Mock tests
+to generate
+ 
+mockery --dir=internal/domain  --name=MeowDomain --output=internal/domain/mocks --outpkg=mocks --case=underscore

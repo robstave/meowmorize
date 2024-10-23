@@ -7,10 +7,10 @@ import (
 )
 
 type HomeController struct {
-	service domain.BLL
+	service domain.MeowDomain
 	logger  *slog.Logger
 }
 
-func NewHomeController(service domain.BLL, logger *slog.Logger) *HomeController {
+func NewHomeController(service domain.MeowDomain, logger *slog.Logger) *HomeController {
 	return &HomeController{service: service, logger: logger}
 }

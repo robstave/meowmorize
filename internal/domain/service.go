@@ -13,7 +13,7 @@ type Service struct {
 	cardRepo repositories.CardRepository
 }
 
-type BLL interface {
+type MeowDomain interface {
 	GetAllDecks() ([]types.Deck, error)
 	CreateDefaultDeck() error
 	CreateDeck(types.Deck) error
@@ -22,7 +22,7 @@ type BLL interface {
 	UpdateDeck(deck types.Deck) error // New method
 }
 
-func NewService(logger *slog.Logger, deckRepo repositories.DeckRepository, cardRepo repositories.CardRepository) BLL {
+func NewService(logger *slog.Logger, deckRepo repositories.DeckRepository, cardRepo repositories.CardRepository) MeowDomain {
 	return &Service{
 		logger:   logger,
 		deckRepo: deckRepo,
