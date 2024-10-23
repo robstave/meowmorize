@@ -4,7 +4,7 @@
  
 meow-adapters:
   - internal/adapters/controller/deck.go
-  - internal/adapters/controller/home.go
+  - internal/adapters/controller/controller.go
   - internal/adapters/controller/import.go
   - internal/adapters/repositories/card.go
   - internal/adapters/repositories/deck.go

@@ -1,17 +1,185 @@
 package controller
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
+	"github.com/robstave/meowmorize/internal/domain/types"
 )
 
+// CreateDeck handles the creation of a new deck
+// @Summary Create a new deck
+// @Description Create a new deck with provided details
+// @Tags Decks
+// @Accept  json
+// @Produce  json
+// @Param deck body types.Deck true "Deck to create"
+// @Success 201 {object} types.Deck
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /decks [post]
+func (hc *MeowController) CreateDeck(c echo.Context) error {
+	var deck types.Deck
+	if err := c.Bind(&deck); err != nil {
+		hc.logger.Error("Failed to bind deck data", "error", err)
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Invalid deck data",
+		})
+	}
+
+	if err := hc.service.CreateDeck(deck); err != nil {
+		hc.logger.Error("Failed to create deck", "error", err)
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"message": "Failed to create deck",
+		})
+	}
+
+	return c.JSON(http.StatusCreated, deck)
+}
+
+// CreateDeck handles the creation of a new deck
+// @Summary Create a default deck
+// @Description Create a new deck with provided details
+// @Tags Decks
+// @Accept  json
+// @Produce  json
+// @Param deck body types.Deck true "Deck to create"
+// @Success 201 {object} types.Deck
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /decks/default [post]
+func (hc *MeowController) CreateDefaultDeck(c echo.Context) error {
+	hc.logger.Info("Creating default deck")
+
+	if err := hc.service.CreateDefaultDeck(); err != nil {
+		hc.logger.Error("Failed to create default deck", "error", err)
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"message": "Failed to create default deck",
+		})
+	}
+
+	return c.JSON(http.StatusCreated, echo.Map{
+		"message": "created default deck",
+	})
+}
+
 // DeleteDeck handles the deletion of a deck
-func (hc *HomeController) DeleteDeck(c echo.Context) error {
+// @Summary Delete a deck
+// @Description Delete a deck by its ID
+// @Tags Decks
+// @Param id path string true "Deck ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /decks/{id} [delete]
+func (hc *MeowController) DeleteDeck(c echo.Context) error {
 	deckID := c.Param("id")
 
 	// Perform deletion
 	err := hc.service.DeleteDeck(deckID)
+	if err != nil {
+		hc.logger.Error("Failed to delete deck", "error", err)
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"message": "Failed to delete deck",
+		})
+	}
 
-	//TODO
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "Deck deleted successfully",
+	})
+}
+
+// GetAllDecks retrieves all decks
+// @Summary Get all decks
+// @Description Retrieve a list of all decks
+// @Tags Decks
+// @Produce  json
+// @Success 200 {array} types.Deck
+// @Failure 500 {object} map[string]string
+// @Router /decks [get]
+func (hc *MeowController) GetAllDecks(c echo.Context) error {
+	decks, err := hc.service.GetAllDecks()
+	if err != nil {
+		hc.logger.Error("Failed to retrieve decks", "error", err)
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"message": "Failed to retrieve decks",
+		})
+	}
+
+	return c.JSON(http.StatusOK, decks)
+}
+
+// GetDeckByID retrieves a deck by its ID
+// @Summary Get a deck by ID
+// @Description Retrieve a single deck by its ID
+// @Tags Decks
+// @Produce  json
+// @Param id path string true "Deck ID"
+// @Success 200 {object} types.Deck
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /decks/{id} [get]
+func (hc *MeowController) GetDeckByID(c echo.Context) error {
+	deckID := c.Param("id")
+
+	deck, err := hc.service.GetDeckByID(deckID)
+	if err != nil {
+		hc.logger.Error("Failed to get deck by ID", "error", err)
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"message": "Failed to retrieve deck",
+		})
+	}
+
+	//if (deck == types.Deck{}) {
+	//	return c.JSON(http.StatusNotFound, echo.Map{
+	//		"message": "Deck not found",
+	//	})
+	//}
+
+	return c.JSON(http.StatusOK, deck)
+}
+
+// UpdateDeck handles updating an existing deck
+// @Summary Update a deck
+// @Description Update an existing deck by its ID
+// @Tags Decks
+// @Accept  json
+// @Produce  json
+// @Param id path string true "Deck ID"
+// @Param deck body types.Deck true "Updated Deck"
+// @Success 200 {object} types.Deck
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /decks/{id} [put]
+func (hc *MeowController) UpdateDeck(c echo.Context) error {
+	deckID := c.Param("id")
+	var updatedDeck types.Deck
+
+	if err := c.Bind(&updatedDeck); err != nil {
+		hc.logger.Error("Failed to bind deck data", "error", err)
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Invalid deck data",
+		})
+	}
+
+	// Ensure the ID in the path matches the ID in the payload
+	if updatedDeck.ID != deckID {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Deck ID mismatch",
+		})
+	}
+
+	if err := hc.service.UpdateDeck(updatedDeck); err != nil {
+		hc.logger.Error("Failed to update deck", "error", err)
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"message": "Failed to update deck",
+		})
+	}
+
+	return c.JSON(http.StatusOK, updatedDeck)
 }
 
 
@@ -25,17 +193,19 @@ import (
 	"github.com/robstave/meowmorize/internal/domain"
 )
 
-type HomeController struct {
-	service domain.BLL
+type MeowController struct {
+	service domain.MeowDomain
 	logger  *slog.Logger
 }
 
-func NewHomeController(service domain.BLL, logger *slog.Logger) *HomeController {
-	return &HomeController{service: service, logger: logger}
+func NewMeowController(service domain.MeowDomain, logger *slog.Logger) *MeowController {
+	return &MeowController{service: service, logger: logger}
 }
 
 
-=== End of internal/adapters/controller/home.go ===
+=== End of internal/adapters/controller/controller.go ===
+
+// internal/adapters/controller/import.go
 
 package controller
 
@@ -48,21 +218,33 @@ import (
 )
 
 // ImportDeck handles the import deck POST request
-func (hc *HomeController) ImportDeck(c echo.Context) error {
-
-	hc.logger.Info("Importing deck")
+// @Summary Import a deck from a JSON file
+// @Description Import a new deck by uploading a JSON file
+// @Tags Decks
+// @Accept multipart/form-data
+// @Produce json
+// @Param deck_file formData file true "Deck JSON File"
+// @Success 201 {object} types.Deck
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /decks/import [post]
+func (hc *MeowController) ImportDeck(c echo.Context) error {
 
 	// Read JSON from file upload
 	file, err := c.FormFile("deck_file")
 	if err != nil {
 		hc.logger.Error("Failed to read deck file", "error", err)
-		return //error  todo
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Deck file is required",
+		})
 	}
 
 	src, err := file.Open()
 	if err != nil {
 		hc.logger.Error("Failed to open file", "error", err)
-		return //error  todo
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"message": "Failed to open deck file",
+		})
 	}
 	defer src.Close()
 
@@ -70,16 +252,19 @@ func (hc *HomeController) ImportDeck(c echo.Context) error {
 		Deck types.Deck `json:"deck"`
 	}
 
-	hc.logger.Info("Decoding")
+	hc.logger.Info("Decoding deck JSON")
 
 	if err := json.NewDecoder(src).Decode(&deckData); err != nil {
 		hc.logger.Error("JSON decoding failed", "error", err)
-		return c.Redirect(http.StatusSeeOther, "/import-deck?import=error")
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Invalid JSON format",
+		})
 	}
 
 	// Logging for debugging
 	hc.logger.Info("Imported deck", "id", deckData.Deck.ID, "name", deckData.Deck.Name,
 		"number_of_cards", len(deckData.Deck.Cards))
+
 	for _, card := range deckData.Deck.Cards {
 		if card.ID == "" || card.DeckID == "" || card.Front.Text == "" || card.Back.Text == "" {
 			hc.logger.Warn("Incomplete card data", "card", card)
@@ -102,10 +287,14 @@ func (hc *HomeController) ImportDeck(c echo.Context) error {
 	// Save the deck to the database
 	if err := hc.service.CreateDeck(deckData.Deck); err != nil {
 		hc.logger.Error("Failed to save deck", "error", err)
-		return c.Redirect(http.StatusSeeOther, "/import-deck?import=error")
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"message": "Failed to save deck",
+		})
 	}
 
-	///TODO
+	hc.logger.Info("Deck imported successfully", "id", deckData.Deck.ID)
+
+	return c.JSON(http.StatusCreated, deckData.Deck)
 }
 
 
@@ -158,8 +347,9 @@ import (
 type DeckRepository interface {
 	GetAllDecks() ([]types.Deck, error)
 	CreateDeck(deck types.Deck) error
-	DeleteDeck(deckID string) error // New method
+	DeleteDeck(deckID string) error
 	GetDeckByID(deckID string) (types.Deck, error)
+	UpdateDeck(deck types.Deck) error // New method
 }
 
 type DeckRepositorySQLite struct {
@@ -211,6 +401,10 @@ func (r *DeckRepositorySQLite) DeleteDeck(deckID string) error {
 
 	// Commit the transaction
 	return tx.Commit().Error
+}
+
+func (r *DeckRepositorySQLite) UpdateDeck(deck types.Deck) error {
+	return r.db.Save(&deck).Error
 }
 
 

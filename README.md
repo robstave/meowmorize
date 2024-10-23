@@ -14,3 +14,7 @@ swag init --parseDependency --parseInternal --output ../../docs
 to generate
  
 mockery --dir=internal/domain  --name=MeowDomain --output=internal/domain/mocks --outpkg=mocks --case=underscore
+
+npm
+in meowmorize dir
+  npm run
