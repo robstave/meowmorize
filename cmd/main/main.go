@@ -67,21 +67,6 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	// Template Renderer
-	renderer := &TemplateRenderer{
-		templates: template.Must(template.ParseGlob("templates/*.html")),
-	}
-	e.Renderer = renderer
-
-	// Routes
-	e.GET("/", homeController.Home)
-
-	e.GET("/import-deck", homeController.RenderImportDeck) // New route for rendering import page
-
-	e.POST("/import-deck", homeController.ImportDeck)
-	e.GET("/deck/:id", homeController.RenderDeckPage)     // New route for viewing a deck
-	e.POST("/deck/:id/delete", homeController.DeleteDeck) // New route for deleting a deck
-
 	// Start Server
 	port := "8789"
 	if p := os.Getenv("PORT"); p != "" {

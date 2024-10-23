@@ -8,6 +8,11 @@ import (
 	"github.com/robstave/meowmorize/internal/domain/types"
 )
 
+// RenderImportDeck handles rendering the import deck page
+func (hc *HomeController) RenderImportDeck(c echo.Context) error {
+	return c.Render(http.StatusOK, "import.html", nil)
+}
+
 // ImportDeck handles the import deck POST request
 func (hc *HomeController) ImportDeck(c echo.Context) error {
 
@@ -17,13 +22,13 @@ func (hc *HomeController) ImportDeck(c echo.Context) error {
 	file, err := c.FormFile("deck_file")
 	if err != nil {
 		hc.logger.Error("Failed to read deck file", "error", err)
-		return //error  todo
+		return c.Redirect(http.StatusSeeOther, "/import-deck?import=error")
 	}
 
 	src, err := file.Open()
 	if err != nil {
 		hc.logger.Error("Failed to open file", "error", err)
-		return //error  todo
+		return c.Redirect(http.StatusSeeOther, "/import-deck?import=error")
 	}
 	defer src.Close()
 
@@ -66,5 +71,6 @@ func (hc *HomeController) ImportDeck(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/import-deck?import=error")
 	}
 
-	///TODO
+	// Redirect to import page with success message
+	return c.Redirect(http.StatusSeeOther, "/import-deck?import=success")
 }

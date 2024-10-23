@@ -39,6 +39,43 @@ button:hover {
     background-color: darkgreen;
 }
 
+
+
+/* Primary Button Style */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Specific Styles for Different Button Types */
+.btn-primary {
+    background-color: var(--color-primary);
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background-color: darken(var(--color-primary), 10%);
+}
+
+.btn-secondary {
+    background-color: var(--color-secondary);
+    color: #ffffff;
+}
+
+.btn-secondary:hover {
+    background-color: darken(var(--color-secondary), 10%);
+}
+
+/* Utility Classes for Margin */
+.mr-10 {
+    margin-right: 10px;
+}
+
+
 .deck-list ul {
     list-style-type: none;
     padding: 0;
@@ -70,6 +107,22 @@ button:hover {
 .deck-item li {
     margin-bottom: 5px;
 }
+
+
+.delete-button {
+    background-color: #f44336; /* Red */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.delete-button:hover {
+    background-color: #d32f2f;
+}
+
 
 /* Table Styles */
 table {
@@ -117,6 +170,17 @@ tr.deck-item:hover {
     visibility: visible;
     opacity: 1;
 }
+
+        /* Different styles for success and error */
+        .toast.success {
+            background-color: #4CAF50; /* Green */
+        }
+
+        .toast.error {
+            background-color: #f44336; /* Red */
+        }
+  
+
 
 /* Specific Styles for Deck Page */
 .deck-details {

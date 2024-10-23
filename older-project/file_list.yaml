@@ -19,7 +19,14 @@ meow-domain:
   - internal/domain/service.go
 
 
-meow-example:
+meow-templates:
+  - static/css/styles.css
+  - templates/deck.html
+  - templates/home.html
+  - templates/import.html
   - capitols.json
+
+meow-example:
+  
 
 # Add more groups as needed
