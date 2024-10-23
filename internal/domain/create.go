@@ -45,3 +45,22 @@ func (s *Service) GetDeckByID(deckID string) (types.Deck, error) {
 	}
 	return deck, nil
 }
+
+func (s *Service) GetAllDecks() ([]types.Deck, error) {
+	decks, err := s.deckRepo.GetAllDecks()
+	if err != nil {
+		s.logger.Error("Failed to retrieve decks", "error", err)
+		return nil, err
+	}
+	return decks, nil
+}
+
+func (s *Service) UpdateDeck(deck types.Deck) error {
+	err := s.deckRepo.UpdateDeck(deck)
+	if err != nil {
+		s.logger.Error("Failed to update deck", "error", err)
+		return err
+	}
+	s.logger.Info("Deck updated successfully", "deck_id", deck.ID)
+	return nil
+}

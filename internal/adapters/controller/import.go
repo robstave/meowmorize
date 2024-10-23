@@ -1,3 +1,5 @@
+// internal/adapters/controller/import.go
+
 package controller
 
 import (
@@ -9,6 +11,16 @@ import (
 )
 
 // ImportDeck handles the import deck POST request
+// @Summary Import a deck from a JSON file
+// @Description Import a new deck by uploading a JSON file
+// @Tags Decks
+// @Accept multipart/form-data
+// @Produce json
+// @Param deck_file formData file true "Deck JSON File"
+// @Success 201 {object} types.Deck
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /decks/import [post]
 func (hc *HomeController) ImportDeck(c echo.Context) error {
 
 	hc.logger.Info("Importing deck")
@@ -17,13 +29,17 @@ func (hc *HomeController) ImportDeck(c echo.Context) error {
 	file, err := c.FormFile("deck_file")
 	if err != nil {
 		hc.logger.Error("Failed to read deck file", "error", err)
-		return //error  todo
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Deck file is required",
+		})
 	}
 
 	src, err := file.Open()
 	if err != nil {
 		hc.logger.Error("Failed to open file", "error", err)
-		return //error  todo
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"message": "Failed to open deck file",
+		})
 	}
 	defer src.Close()
 
@@ -31,11 +47,13 @@ func (hc *HomeController) ImportDeck(c echo.Context) error {
 		Deck types.Deck `json:"deck"`
 	}
 
-	hc.logger.Info("Decoding")
+	hc.logger.Info("Decoding deck JSON")
 
 	if err := json.NewDecoder(src).Decode(&deckData); err != nil {
 		hc.logger.Error("JSON decoding failed", "error", err)
-		return c.Redirect(http.StatusSeeOther, "/import-deck?import=error")
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Invalid JSON format",
+		})
 	}
 
 	// Logging for debugging
@@ -63,8 +81,12 @@ func (hc *HomeController) ImportDeck(c echo.Context) error {
 	// Save the deck to the database
 	if err := hc.service.CreateDeck(deckData.Deck); err != nil {
 		hc.logger.Error("Failed to save deck", "error", err)
-		return c.Redirect(http.StatusSeeOther, "/import-deck?import=error")
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"message": "Failed to save deck",
+		})
 	}
 
-	///TODO
+	hc.logger.Info("Deck imported successfully", "id", deckData.Deck.ID)
+
+	return c.JSON(http.StatusCreated, deckData.Deck)
 }

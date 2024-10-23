@@ -9,8 +9,9 @@ import (
 type DeckRepository interface {
 	GetAllDecks() ([]types.Deck, error)
 	CreateDeck(deck types.Deck) error
-	DeleteDeck(deckID string) error // New method
+	DeleteDeck(deckID string) error
 	GetDeckByID(deckID string) (types.Deck, error)
+	UpdateDeck(deck types.Deck) error // New method
 }
 
 type DeckRepositorySQLite struct {
@@ -62,4 +63,8 @@ func (r *DeckRepositorySQLite) DeleteDeck(deckID string) error {
 
 	// Commit the transaction
 	return tx.Commit().Error
+}
+
+func (r *DeckRepositorySQLite) UpdateDeck(deck types.Deck) error {
+	return r.db.Save(&deck).Error
 }

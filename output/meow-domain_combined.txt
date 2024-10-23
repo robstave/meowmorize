@@ -1,0 +1,273 @@
+package main
+
+import (
+	"html/template"
+	"io"
+	"log"
+	"net/http"
+	"os"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/robstave/meowmorize/internal/adapters/controller"
+	"github.com/robstave/meowmorize/internal/adapters/repositories"
+	"github.com/robstave/meowmorize/internal/domain"
+	"github.com/robstave/meowmorize/internal/domain/types"
+	"github.com/robstave/meowmorize/internal/logger"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
+)
+
+// TemplateRenderer is a custom renderer for Echo
+type TemplateRenderer struct {
+	templates *template.Template
+}
+
+// Render renders a template document
+func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+	return t.templates.ExecuteTemplate(w, name, data)
+}
+
+func main() {
+	// Initialize Logger
+	slogger := logger.InitializeLogger()
+	logger.SetLogger(slogger) // Optional: If you prefer setting a package-level logger
+
+	// Initialize Database
+	dbPath := "./meowmerize.db"
+	if path := os.Getenv("DB_PATH"); path != "" {
+		dbPath = path
+	}
+	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
+	if err != nil {
+		slogger.Error("Failed to connect to database", "error", err)
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+
+	err = db.AutoMigrate(&types.Deck{}, &types.Card{})
+	if err != nil {
+		slogger.Error("Failed to migrate database", "error", err)
+		log.Fatalf("Failed to migrate database: %v", err)
+	}
+
+	// Initialize Repositories
+	deckRepo := repositories.NewDeckRepositorySQLite(db)
+	cardRepo := repositories.NewCardRepositorySQLite(db)
+
+	// Initialize Service
+	service := domain.NewService(slogger, deckRepo, cardRepo)
+
+	// Initialize Controller
+	homeController := controller.NewHomeController(service, slogger)
+
+	// Initialize Echo
+	e := echo.New()
+
+	// Middleware
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+
+	// Start Server
+	port := "8789"
+	if p := os.Getenv("PORT"); p != "" {
+		port = p
+	}
+	slogger.Info("Starting server", "port", port)
+	if err := e.Start(":" + port); err != nil && err != http.ErrServerClosed {
+		slogger.Error("Shutting down the server", "error", err)
+		log.Fatalf("Shutting down the server: %v", err)
+	}
+}
+
+
+=== End of cmd/main/main.go ===
+
+package types
+
+type Card struct {
+	ID     string `gorm:"primaryKey" json:"id"`
+	DeckID string `gorm:"not null" json:"deck_id"`
+	Front  struct {
+		Text string `gorm:"type:text;not null" json:"text"`
+	} `gorm:"embedded;embeddedPrefix:front_" json:"front"` // Embedded field for 'front' details
+	Back struct {
+		Text string `gorm:"type:text;not null" json:"text"`
+	} `gorm:"embedded;embeddedPrefix:back_" json:"back"` // Embedded field for 'back' details
+}
+
+
+=== End of internal/domain/types/card.go ===
+
+package types
+
+type Deck struct {
+	ID          string `gorm:"primaryKey" json:"id"` // UUID string as the primary key
+	Name        string `gorm:"type:varchar(100);not null" json:"name"`
+	Cards       []Card `gorm:"foreignKey:DeckID" json:"cards"`
+	Description string `gorm:"type:text" json:"description"` // New Description field
+
+}
+
+
+=== End of internal/domain/types/deck.go ===
+
+package domain
+
+import (
+	"github.com/robstave/meowmorize/internal/domain/types"
+)
+
+func (s *Service) CreateDeck(deck types.Deck) error {
+
+	for _, card := range deck.Cards {
+		s.logger.Info("Imported Card",
+			"uuid", card.ID,
+			"did", card.DeckID,
+			"front", card.Front.Text,
+			"back", card.Back.Text)
+	}
+
+	err := s.deckRepo.CreateDeck(deck)
+	if err != nil {
+		s.logger.Error("Failed to create deck", "error", err)
+		return err
+	}
+
+	s.logger.Info("Deck created successfully")
+	return nil
+}
+
+// DeleteDeck deletes a deck by its ID
+func (s *Service) DeleteDeck(deckID string) error {
+	err := s.deckRepo.DeleteDeck(deckID)
+	if err != nil {
+		s.logger.Error("Failed to delete deck", "deck_id", deckID, "error", err)
+		return err
+	}
+
+	s.logger.Info("Deck deleted successfully", "deck_id", deckID)
+	return nil
+}
+
+// GetDeckByID retrieves a deck by its ID
+func (s *Service) GetDeckByID(deckID string) (types.Deck, error) {
+	deck, err := s.deckRepo.GetDeckByID(deckID)
+	if err != nil {
+		s.logger.Error("Failed to get deck by ID", "deck_id", deckID, "error", err)
+		return types.Deck{}, err
+	}
+	return deck, nil
+}
+
+
+=== End of internal/domain/create.go ===
+
+package domain
+
+import (
+	"github.com/robstave/meowmorize/internal/domain/types"
+
+	"github.com/google/uuid"
+)
+
+// CreateDefaultDeck creates a default deck with a sample card
+func (s *Service) CreateDefaultDeck() error {
+	// Generate a UUID for the default deck
+	deckID := uuid.New().String()
+
+	defaultDeck := types.Deck{
+		ID:          deckID,
+		Name:        "Default Deck",
+		Description: "This is the default deck containing basic cards.",
+
+		Cards: []types.Card{
+			{
+				ID:     uuid.New().String(), // Generate a UUID for the card
+				DeckID: deckID,
+
+				Front: struct {
+					Text string `gorm:"type:text;not null" json:"text"`
+				}{
+					Text: "Capital of France",
+				},
+				Back: struct {
+					Text string `gorm:"type:text;not null" json:"text"`
+				}{
+					Text: "Paris",
+				},
+			},
+			{
+				ID:     uuid.New().String(), // Generate a UUID for the card
+				DeckID: deckID,
+
+				Front: struct {
+					Text string `gorm:"type:text;not null" json:"text"`
+				}{
+					Text: "Capital of Norway",
+				},
+				Back: struct {
+					Text string `gorm:"type:text;not null" json:"text"`
+				}{
+					Text: "Oslo",
+				},
+			},
+		},
+	}
+
+	// Save the default deck to the database
+	err := s.deckRepo.CreateDeck(defaultDeck)
+	if err != nil {
+		s.logger.Error("Failed to create default deck", "error", err)
+		return err
+	}
+
+	s.logger.Info("Default deck created successfully")
+	return nil
+}
+
+
+=== End of internal/domain/default.go ===
+
+package domain
+
+import (
+	"log/slog"
+
+	"github.com/robstave/meowmorize/internal/adapters/repositories"
+	"github.com/robstave/meowmorize/internal/domain/types"
+)
+
+type Service struct {
+	logger   *slog.Logger
+	deckRepo repositories.DeckRepository
+	cardRepo repositories.CardRepository
+}
+
+type BLL interface {
+	GetAllDecks() ([]types.Deck, error)
+	CreateDefaultDeck() error
+	CreateDeck(types.Deck) error
+	GetDeckByID(deckID string) (types.Deck, error) // New method
+	DeleteDeck(deckID string) error
+}
+
+func NewService(logger *slog.Logger, deckRepo repositories.DeckRepository, cardRepo repositories.CardRepository) BLL {
+	return &Service{
+		logger:   logger,
+		deckRepo: deckRepo,
+		cardRepo: cardRepo,
+	}
+}
+
+func (s *Service) GetAllDecks() ([]types.Deck, error) {
+	decks, err := s.deckRepo.GetAllDecks()
+	if err != nil {
+		s.logger.Error("Failed to retrieve decks", "error", err)
+		return nil, err
+	}
+	return decks, nil
+}
+
+
+=== End of internal/domain/service.go ===
+

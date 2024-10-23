@@ -17,8 +17,9 @@ type BLL interface {
 	GetAllDecks() ([]types.Deck, error)
 	CreateDefaultDeck() error
 	CreateDeck(types.Deck) error
-	GetDeckByID(deckID string) (types.Deck, error) // New method
+	GetDeckByID(deckID string) (types.Deck, error)
 	DeleteDeck(deckID string) error
+	UpdateDeck(deck types.Deck) error // New method
 }
 
 func NewService(logger *slog.Logger, deckRepo repositories.DeckRepository, cardRepo repositories.CardRepository) BLL {
@@ -27,13 +28,4 @@ func NewService(logger *slog.Logger, deckRepo repositories.DeckRepository, cardR
 		deckRepo: deckRepo,
 		cardRepo: cardRepo,
 	}
-}
-
-func (s *Service) GetAllDecks() ([]types.Deck, error) {
-	decks, err := s.deckRepo.GetAllDecks()
-	if err != nil {
-		s.logger.Error("Failed to retrieve decks", "error", err)
-		return nil, err
-	}
-	return decks, nil
 }
