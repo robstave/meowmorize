@@ -2,6 +2,20 @@
 #observations.md
 #directives.md
  
+meow-front:
+  - meowmorize-frontend/package.json
+  - meowmorize-frontend/src/App.css
+  - meowmorize-frontend/src/App.js
+  - meowmorize-frontend/src/index.css
+  - meowmorize-frontend/src/index.js  
+  - meowmorize-frontend/src/components/DecksDashboard.jsx  
+  - meowmorize-frontend/src/components/DecksDashboard.css  
+  - meowmorize-frontend/src/components/ImportDeck.jsx  
+  - meowmorize-frontend/src/components/Navbar.jsx  
+  - meowmorize-frontend/src/pages/Dashboard.jsx 
+  - meowmorize-frontend/src/pages/ImportPage.jsx 
+  - meowmorize-frontend/src/services/api.js
+
 meow-adapters:
   - internal/adapters/controller/deck.go
   - internal/adapters/controller/controller.go

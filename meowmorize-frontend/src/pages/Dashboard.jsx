@@ -1,12 +1,44 @@
 // src/pages/Dashboard.jsx
 import React, { useEffect, useState } from 'react';
-import { fetchDecks } from '../services/api';
-import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, CircularProgress, Alert } from '@mui/material';
+import { fetchDecks, deleteDeck } from '../services/api';
+import {
+  Container,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  CircularProgress,
+  Alert,
+  IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button,
+  Snackbar,
+} from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const Dashboard = () => {
   const [decks, setDecks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // **State for Delete Confirmation Dialog**
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedDeck, setSelectedDeck] = useState(null);
+
+  // **State for Snackbar Notifications**
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success', // 'success' | 'error' | 'warning' | 'info'
+  });
 
   useEffect(() => {
     const getDecks = async () => {
@@ -23,6 +55,53 @@ const Dashboard = () => {
 
     getDecks();
   }, []);
+
+  // **Handle Open Delete Confirmation Dialog**
+  const handleOpenDialog = (deck) => {
+    setSelectedDeck(deck);
+    setOpenDialog(true);
+  };
+
+  // **Handle Close Delete Confirmation Dialog**
+  const handleCloseDialog = () => {
+    setSelectedDeck(null);
+    setOpenDialog(false);
+  };
+
+  // **Handle Delete Deck**
+  const handleDeleteDeck = async () => {
+    if (!selectedDeck) return;
+
+    try {
+      await deleteDeck(selectedDeck.id);
+      // Remove the deleted deck from the state
+      setDecks((prevDecks) => prevDecks.filter((deck) => deck.id !== selectedDeck.id));
+      // Show success notification
+      setSnackbar({
+        open: true,
+        message: `Deck "${selectedDeck.name}" deleted successfully.`,
+        severity: 'success',
+      });
+    } catch (err) {
+      // Show error notification
+      setSnackbar({
+        open: true,
+        message: 'Failed to delete the deck. Please try again.',
+        severity: 'error',
+      });
+      console.error(err);
+    } finally {
+      handleCloseDialog();
+    }
+  };
+
+  // **Handle Close Snackbar**
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
 
   if (loading) {
     return (
@@ -61,6 +140,7 @@ const Dashboard = () => {
               <TableCell>Name</TableCell>
               <TableCell>Description</TableCell>
               <TableCell align="right">Number of Cards</TableCell>
+              <TableCell align="center">Actions</TableCell> {/* New Actions Column */}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -71,11 +151,56 @@ const Dashboard = () => {
                 </TableCell>
                 <TableCell>{deck.description || 'No description provided.'}</TableCell>
                 <TableCell align="right">{deck.cards.length}</TableCell>
+                <TableCell align="center">
+                  {/* **Delete Button** */}
+                  <IconButton
+                    aria-label="delete"
+                    color="error"
+                    onClick={() => handleOpenDialog(deck)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* **Delete Confirmation Dialog** */}
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">Delete Deck</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Are you sure you want to delete the deck "{selectedDeck?.name}"? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteDeck} color="error" variant="contained" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* **Snackbar for Notifications** */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

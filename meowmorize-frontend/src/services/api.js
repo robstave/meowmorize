@@ -34,6 +34,13 @@ export const importDeck = async (formData) => {
   }
 };
 
-// You can add more API methods here as needed
+export const deleteDeck = async (deckId) => {
+  try {
+    const response = await api.delete(`/decks/${deckId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 
 export default api;
