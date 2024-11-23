@@ -20,6 +20,20 @@ export const fetchDecks = async () => {
   }
 };
 
+// Import a deck
+export const importDeck = async (formData) => {
+  try {
+    const response = await api.post('/decks/import', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // You can add more API methods here as needed
 
 export default api;

@@ -1,15 +1,18 @@
 // src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import DecksDashboard from './components/DecksDashboard';
-// Import other components as you create them
+import Navbar from './components/Navbar';
+import Dashboard from './pages/Dashboard';
+import ImportPage from './pages/ImportPage';
 
 function App() {
   return (
     <Router>
+      <Navbar />
       <Routes>
-        <Route path="/" element={<DecksDashboard />} />
-        {/* Add more routes here */}
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/import" element={<ImportPage />} />
+        {/* Add more routes here as you create them */}
       </Routes>
     </Router>
   );
