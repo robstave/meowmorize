@@ -34,6 +34,17 @@ export const importDeck = async (formData) => {
   }
 };
 
+// Fetch a single deck by ID
+export const fetchDeckById = async (deckId) => {
+  try {
+    const response = await api.get(`/decks/${deckId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
 export const deleteDeck = async (deckId) => {
   try {
     const response = await api.delete(`/decks/${deckId}`);

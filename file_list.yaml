@@ -9,11 +9,12 @@ meow-front:
   - meowmorize-frontend/src/index.css
   - meowmorize-frontend/src/index.js  
   - meowmorize-frontend/src/components/DecksDashboard.jsx  
-  - meowmorize-frontend/src/components/DecksDashboard.css  
+  - meowmorize-frontend/src/components/DecksDashboard.css
   - meowmorize-frontend/src/components/ImportDeck.jsx  
   - meowmorize-frontend/src/components/Navbar.jsx  
   - meowmorize-frontend/src/pages/Dashboard.jsx 
   - meowmorize-frontend/src/pages/ImportPage.jsx 
+  - meowmorize-frontend/src/pages/DeckPage.jsx
   - meowmorize-frontend/src/services/api.js
 
 meow-adapters:

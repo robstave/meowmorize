@@ -23,6 +23,7 @@ import {
   Snackbar,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { Link as RouterLink } from 'react-router-dom'; // **Import RouterLink**
 
 const Dashboard = () => {
   const [decks, setDecks] = useState([]);
@@ -147,7 +148,16 @@ const Dashboard = () => {
             {decks.map((deck) => (
               <TableRow key={deck.id}>
                 <TableCell component="th" scope="row">
-                  {deck.name}
+                  {/* **Deck Name as a Link to DeckPage** */}
+                  <Typography
+                    component={RouterLink}
+                    to={`/decks/${deck.id}`}
+                    variant="body1"
+                    color="primary"
+                    sx={{ textDecoration: 'none' }}
+                  >
+                    {deck.name}
+                  </Typography>
                 </TableCell>
                 <TableCell>{deck.description || 'No description provided.'}</TableCell>
                 <TableCell align="right">{deck.cards.length}</TableCell>
