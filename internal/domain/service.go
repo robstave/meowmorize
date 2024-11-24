@@ -19,7 +19,9 @@ type MeowDomain interface {
 	CreateDeck(types.Deck) error
 	GetDeckByID(deckID string) (types.Deck, error)
 	DeleteDeck(deckID string) error
-	UpdateDeck(deck types.Deck) error // New method
+	UpdateDeck(deck types.Deck) error               // New method
+	GetCardByID(cardID string) (*types.Card, error) // New method added
+
 }
 
 func NewService(logger *slog.Logger, deckRepo repositories.DeckRepository, cardRepo repositories.CardRepository) MeowDomain {

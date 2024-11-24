@@ -3,20 +3,22 @@ definitions:
   types.Card:
     properties:
       back:
-        description: Embedded field for 'back' details
-        properties:
-          text:
-            type: string
-        type: object
+        $ref: '#/definitions/types.CardBack'
       deck_id:
         type: string
       front:
-        description: Embedded field for 'front' details
-        properties:
-          text:
-            type: string
-        type: object
+        $ref: '#/definitions/types.CardFront'
       id:
+        type: string
+    type: object
+  types.CardBack:
+    properties:
+      text:
+        type: string
+    type: object
+  types.CardFront:
+    properties:
+      text:
         type: string
     type: object
   types.Deck:
@@ -41,6 +43,43 @@ info:
   title: MeowMorize Flashcard API
   version: "1.0"
 paths:
+  /cards/{id}:
+    get:
+      description: Retrieve a single card by its ID
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Card'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a card by ID
+      tags:
+      - Cards
   /decks:
     get:
       description: Retrieve a list of all decks

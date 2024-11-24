@@ -24,7 +24,7 @@ init_swagger() {
 # Function to redo swagger from project root
 redo_swagger() {
     echo "Redoing swagger documentation from cmd/main..."
-    swag init --parseDependency --parseInternal --output ../../docs
+    swag init  --dir ./cmd/main  --parseDependency --parseInternal --output ./docs
 }
 
 # Function to generate mocks

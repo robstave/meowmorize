@@ -77,6 +77,29 @@ func (_m *MeowDomain) GetAllDecks() ([]types.Deck, error) {
 	return r0, r1
 }
 
+// GetCardByID provides a mock function with given fields: cardID
+func (_m *MeowDomain) GetCardByID(cardID string) (*types.Card, error) {
+	ret := _m.Called(cardID)
+
+	var r0 *types.Card
+	if rf, ok := ret.Get(0).(func(string) *types.Card); ok {
+		r0 = rf(cardID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*types.Card)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(cardID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetDeckByID provides a mock function with given fields: deckID
 func (_m *MeowDomain) GetDeckByID(deckID string) (types.Deck, error) {
 	ret := _m.Called(deckID)

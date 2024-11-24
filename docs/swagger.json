@@ -9,6 +9,62 @@
     "host": "192.168.86.176:8789",
     "basePath": "/api",
     "paths": {
+        "/cards/{id}": {
+            "get": {
+                "description": "Retrieve a single card by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Get a card by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Card ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.Card"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/decks": {
             "get": {
                 "description": "Retrieve a list of all decks",
@@ -375,27 +431,31 @@
             "type": "object",
             "properties": {
                 "back": {
-                    "description": "Embedded field for 'back' details",
-                    "type": "object",
-                    "properties": {
-                        "text": {
-                            "type": "string"
-                        }
-                    }
+                    "$ref": "#/definitions/types.CardBack"
                 },
                 "deck_id": {
                     "type": "string"
                 },
                 "front": {
-                    "description": "Embedded field for 'front' details",
-                    "type": "object",
-                    "properties": {
-                        "text": {
-                            "type": "string"
-                        }
-                    }
+                    "$ref": "#/definitions/types.CardFront"
                 },
                 "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.CardBack": {
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.CardFront": {
+            "type": "object",
+            "properties": {
+                "text": {
                     "type": "string"
                 }
             }
