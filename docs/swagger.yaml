@@ -10,6 +10,11 @@ definitions:
         $ref: '#/definitions/types.CardFront'
       id:
         type: string
+      links:
+        description: Added field for links
+        items:
+          type: string
+        type: array
     type: object
   types.CardBack:
     properties:
