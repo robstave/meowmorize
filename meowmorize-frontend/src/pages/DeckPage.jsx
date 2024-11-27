@@ -19,6 +19,14 @@ import {
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
+
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+
+
+
+
+
+
 const DeckPage = () => {
   const { id } = useParams(); // Extract the deck ID from the URL
   const [deck, setDeck] = useState(null);
@@ -27,6 +35,19 @@ const DeckPage = () => {
 
   // State to manage the visibility of the cards list
   const [showCards, setShowCards] = useState(false);
+
+ 
+  const navigate = useNavigate(); // Initialize navigate
+
+  // Function to select a random card
+  const selectCard = () => {
+    console.log('Selecting card');
+    if (deck.cards.length === 0) return;
+
+    const randomCard = deck.cards[Math.floor(Math.random() * deck.cards.length)];
+    navigate(`/card/${randomCard.id}`);
+  };
+
 
   useEffect(() => {
     const getDeck = async () => {
@@ -92,6 +113,17 @@ const DeckPage = () => {
           {deck.description}
         </Typography>
       )}
+
+ 
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={selectCard}
+        sx={{ mt: 2 }}
+      >
+        View Random Card
+      </Button>
+
 
       {/* Preview Button to Toggle Cards List */}
       <Button

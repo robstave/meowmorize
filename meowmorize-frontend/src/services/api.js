@@ -44,6 +44,16 @@ export const fetchDeckById = async (deckId) => {
   }
 };
 
+export const fetchCardById = async (cardId) => {
+  try {
+    const response = await api.get(`/cards/${cardId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
 
 export const deleteDeck = async (deckId) => {
   try {

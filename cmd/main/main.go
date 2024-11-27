@@ -87,6 +87,9 @@ func main() {
 
 	deckGroup.POST("/import", meowController.ImportDeck)
 
+	cardGroup := api.Group("/cards")
+	cardGroup.GET("/:id", meowController.GetCardByID)
+
 	// Swagger endpoint
 	e.GET("/swagger/*", httpSwagger.WrapHandler)
 
