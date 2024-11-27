@@ -107,3 +107,103 @@ func TestCardRepositorySQLite_CreateCard_DuplicateID(t *testing.T) {
 	err := cardRepo.CreateCard(duplicateCard)
 	assert.Error(t, err)
 }
+
+func TestUpdateCard(t *testing.T) {
+	// Setup: Create a test card and save it to the database
+	originalCard := types.Card{
+		ID:     "test-id",
+		DeckID: "deck-1",
+		Front:  types.CardFront{Text: "Original Front"},
+		Back:   types.CardBack{Text: "Original Back"},
+	}
+
+	cardRepo, _ := initializeCardRepository(t)
+
+	err := cardRepo.CreateCard(originalCard)
+	if err != nil {
+		t.Fatalf("Failed to create card: %v", err)
+	}
+
+	// Update the card
+	updatedCard := originalCard
+	updatedCard.Front.Text = "Updated Front"
+	err = cardRepo.UpdateCard(updatedCard)
+	if err != nil {
+		t.Fatalf("Failed to update card: %v", err)
+	}
+
+	// Retrieve the card and verify the update
+	retrievedCard, err := cardRepo.GetCardByID("test-id")
+	if err != nil {
+		t.Fatalf("Failed to retrieve card: %v", err)
+	}
+	if retrievedCard.Front.Text != "Updated Front" {
+		t.Errorf("Expected Front text to be 'Updated Front', got '%s'", retrievedCard.Front.Text)
+	}
+}
+
+func TestDeleteCardByID(t *testing.T) {
+	// Setup: Create a test card
+	card := types.Card{
+		ID:     "delete-id",
+		DeckID: "deck-1",
+		Front:  types.CardFront{Text: "Front"},
+		Back:   types.CardBack{Text: "Back"},
+	}
+	repo, _ := initializeCardRepository(t)
+
+	err := repo.CreateCard(card)
+	if err != nil {
+		t.Fatalf("Failed to create card: %v", err)
+	}
+
+	// Delete the card
+	err = repo.DeleteCardByID("delete-id")
+	if err != nil {
+		t.Fatalf("Failed to delete card: %v", err)
+	}
+
+	// Verify deletion
+	deletedCard, err := repo.GetCardByID("delete-id")
+	if err != nil {
+		t.Fatalf("Error retrieving card: %v", err)
+	}
+	if deletedCard != nil {
+		t.Errorf("Expected card to be deleted, but found: %+v", deletedCard)
+	}
+}
+
+/*
+func TestCloneCardToDeck(t *testing.T) {
+	// Setup: Create a source card
+	sourceCard := types.Card{
+		ID:     "source-id",
+		DeckID: "deck-1",
+		Front:  types.CardFront{Text: "Source Front"},
+		Back:   types.CardBack{Text: "Source Back"},
+	}
+	repo, _ := initializeCardRepository(t)
+
+	err := repo.CreateCard(sourceCard)
+	if err != nil {
+		t.Fatalf("Failed to create source card: %v", err)
+	}
+
+	// Clone the card to a new deck
+	clonedCard, err := repo.CloneCardToDeck("source-id", "deck-2")
+	if err != nil {
+		t.Fatalf("Failed to clone card: %v", err)
+	}
+
+	// Verify the cloned card
+	if clonedCard.ID == "" {
+		t.Errorf("Expected cloned card to have a new ID")
+	}
+	if clonedCard.DeckID != "deck-2" {
+		t.Errorf("Expected cloned card to have DeckID 'deck-2', got '%s'", clonedCard.DeckID)
+	}
+	if clonedCard.Front.Text != "Source Front" || clonedCard.Back.Text != "Source Back" {
+		t.Errorf("Cloned card's content does not match the source card")
+	}
+}
+*/

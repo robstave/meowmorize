@@ -12,6 +12,29 @@ type MeowDomain struct {
 	mock.Mock
 }
 
+// CloneCardToDeck provides a mock function with given fields: cardID, targetDeckID
+func (_m *MeowDomain) CloneCardToDeck(cardID string, targetDeckID string) (*types.Card, error) {
+	ret := _m.Called(cardID, targetDeckID)
+
+	var r0 *types.Card
+	if rf, ok := ret.Get(0).(func(string, string) *types.Card); ok {
+		r0 = rf(cardID, targetDeckID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*types.Card)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(cardID, targetDeckID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CreateDeck provides a mock function with given fields: _a0
 func (_m *MeowDomain) CreateDeck(_a0 types.Deck) error {
 	ret := _m.Called(_a0)
@@ -33,6 +56,20 @@ func (_m *MeowDomain) CreateDefaultDeck() error {
 	var r0 error
 	if rf, ok := ret.Get(0).(func() error); ok {
 		r0 = rf()
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DeleteCardByID provides a mock function with given fields: cardID
+func (_m *MeowDomain) DeleteCardByID(cardID string) error {
+	ret := _m.Called(cardID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(cardID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -119,6 +156,20 @@ func (_m *MeowDomain) GetDeckByID(deckID string) (types.Deck, error) {
 	}
 
 	return r0, r1
+}
+
+// UpdateCard provides a mock function with given fields: card
+func (_m *MeowDomain) UpdateCard(card types.Card) error {
+	ret := _m.Called(card)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(types.Card) error); ok {
+		r0 = rf(card)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // UpdateDeck provides a mock function with given fields: deck

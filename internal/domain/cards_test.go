@@ -44,29 +44,3 @@ func TestCardService_GetCardDetails_Success(t *testing.T) {
 	// Assert that the expectations were met
 	cardRepo.AssertExpectations(t)
 }
-
-/*
-func TestCardService_GetCardDetails_NotFound(t *testing.T) {
-	// Create a mock CardRepository
-	mockRepo := new(mocks.CardRepository)
-
-	// Setup expectations
-	mockRepo.On("GetCardByID", "non-existent").Return(nil, nil)
-
-	// Initialize the service with the mock repository
-	cardService := services.NewCardService(mockRepo)
-
-	// Call the method
-	card, err := cardService.GetCardDetails("non-existent")
-
-	// Assertions
-	assert.NoError(t, err)
-	assert.Nil(t, card)
-
-	// Assert that the expectations were met
-	mockRepo.AssertExpectations(t)
-}
-
-
-
-*/
