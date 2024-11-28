@@ -22,6 +22,7 @@ type MeowDomain interface {
 	UpdateDeck(deck types.Deck) error               // New method
 	GetCardByID(cardID string) (*types.Card, error) // New method added
 	UpdateCard(card types.Card) error
+	CreateCard(card types.Card) error
 	DeleteCardByID(cardID string) error
 	CloneCardToDeck(cardID string, targetDeckID string) (*types.Card, error)
 }

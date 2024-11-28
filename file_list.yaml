@@ -15,6 +15,7 @@ meow-front:
   - meowmorize-frontend/src/pages/Dashboard.jsx 
   - meowmorize-frontend/src/pages/ImportPage.jsx 
   - meowmorize-frontend/src/pages/DeckPage.jsx
+  - meowmorize-frontend/src/pages/CardPage.jsx
   - meowmorize-frontend/src/services/api.js
 
 meow-adapters:

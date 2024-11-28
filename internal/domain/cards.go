@@ -34,6 +34,14 @@ func (s *Service) UpdateCard(card types.Card) error {
 	return s.cardRepo.UpdateCard(card)
 }
 
+func (s *Service) CreateCard(card types.Card) error {
+	if card.ID == "" {
+		return fmt.Errorf("card ID must be provided for update")
+	}
+	// Additional validation or business rules can be applied here
+	return s.cardRepo.CreateCard(card)
+}
+
 // New method: DeleteCardByID
 func (s *Service) DeleteCardByID(cardID string) error {
 	if cardID == "" {
