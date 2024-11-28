@@ -81,7 +81,7 @@ const CardPage = () => {
 
     try {
       const deck = await fetchDeckById(deckId);
-            const randomIndex = getUniqueRandomIndex(deck.cards.length);
+      const randomIndex = getUniqueRandomIndex(deck.cards.length);
       //const randomIndex = Math.floor(rng() * deck.cards.length);
       const randomCard = deck.cards[randomIndex];
       setShowFront(true); // Reset to show the front of the new card

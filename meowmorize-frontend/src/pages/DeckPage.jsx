@@ -13,9 +13,11 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Box,
   Paper,
   Button,
   Collapse,
+
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
@@ -114,12 +116,13 @@ const DeckPage = () => {
         </Typography>
       )}
 
- 
+<Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
+
       <Button
         variant="contained"
         color="primary"
         onClick={selectCard}
-        sx={{ mt: 2 }}
+         
       >
         View Random Card
       </Button>
@@ -130,11 +133,22 @@ const DeckPage = () => {
         variant="contained"
         color="primary"
         onClick={handleToggleCards}
-        sx={{ mt: 2 }}
+        
       >
         {showCards ? 'Hide Preview' : 'Show Preview'}
       </Button>
 
+ {/* Back to Dashboard Button */}
+ <Button
+        component={RouterLink}
+        to="/"
+        variant="outlined"
+        color="secondary"
+        
+      >
+        Back to Dashboard
+      </Button>
+      </Box>
       {/* Cards List (Conditionally Rendered) */}
       <Collapse in={showCards}>
         <TableContainer component={Paper} sx={{ mt: 2 }}>
@@ -157,16 +171,7 @@ const DeckPage = () => {
         </TableContainer>
       </Collapse>
 
-      {/* Back to Dashboard Button */}
-      <Button
-        component={RouterLink}
-        to="/"
-        variant="outlined"
-        color="secondary"
-        sx={{ mt: 2 }}
-      >
-        Back to Dashboard
-      </Button>
+     
     </Container>
   );
 };
