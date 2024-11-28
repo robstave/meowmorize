@@ -8,9 +8,12 @@ import {
   Box,
   CircularProgress,
   Alert,
-  List,
-  ListItem,
+
 } from '@mui/material';
+import ReactMarkdown from 'react-markdown';
+import seedrandom from 'seedrandom';
+
+const rng = seedrandom(Date.now().toString()); // Use a seed for predictable results
 
 const CardPage = () => {
   const { id } = useParams(); // Get card ID from URL
@@ -20,14 +23,13 @@ const CardPage = () => {
   const [showFront, setShowFront] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [history, setHistory] = useState([]); // History of recently used indices
 
   // Fetch the card on component mount or when the ID changes
   useEffect(() => {
     const getCard = async () => {
       try {
-        console.log('getting card');
         const data = await fetchCardById(id);
-        console.log(card);
         setCard(data);
         setDeckId(data.deck_id); // Set the deckId for future fetches
       } catch (err) {
@@ -41,19 +43,46 @@ const CardPage = () => {
     getCard();
   }, [id]);
 
+  // Utility function to get a unique random index
+  const getUniqueRandomIndex = (deckLength) => {
+    if (deckLength <= history.length) {
+      console.warn('Deck does not have enough unique cards to avoid repeats.');
+      return Math.floor(rng() * deckLength); // Fallback: pick any random index
+    }
+
+    let randomIndex;
+    do {
+      randomIndex = Math.floor(rng() * deckLength);
+    } while (history.includes(randomIndex));
+
+    // Update history
+    setHistory((prevHistory) => {
+      const updatedHistory = [...prevHistory, randomIndex];
+      if (updatedHistory.length > 2) {
+        updatedHistory.shift(); // Keep only the last two indices
+      }
+      return updatedHistory;
+    });
+
+    return randomIndex;
+  };
+
+
   // Function to select a random card from the current deck
   const selectCard = async () => {
-    console.log('select');
+
     if (!deckId) {
-        console.log('Deck ID is not available');
+      console.log('Deck ID is not available');
       setError('Deck ID is not available.');
       return;
     }
-    console.log(deckId);
 
     try {
       const deck = await fetchDeckById(deckId);
-      const randomCard = deck.cards[Math.floor(Math.random() * deck.cards.length)];
+            const randomIndex = getUniqueRandomIndex(deck.cards.length);
+      //const randomIndex = Math.floor(rng() * deck.cards.length);
+      const randomCard = deck.cards[randomIndex];
+      setShowFront(true); // Reset to show the front of the new card
       navigate(`/card/${randomCard.id}`);
     } catch (err) {
       setError('Failed to fetch a random card.');
@@ -80,9 +109,13 @@ const CardPage = () => {
 
   return (
     <Container sx={{ mt: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        {showFront ? card.front.text : card.back.text}
-      </Typography>
+      {/* Render card text as Markdown */}
+      <Box sx={{ mt: 2, p: 2, border: '1px solid #ddd', borderRadius: 2 }}>
+        <Typography variant="h5" gutterBottom>
+          {showFront ? 'Front' : 'Back'}
+        </Typography>
+        <ReactMarkdown>{showFront ? card.front.text : card.back.text}</ReactMarkdown>
+      </Box>
 
       <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
         <Button variant="contained" color="primary" onClick={() => setShowFront(!showFront)}>
@@ -101,23 +134,19 @@ const CardPage = () => {
 
       <Box sx={{ mt: 4 }}>
         <Typography variant="h6" gutterBottom>
-          Links
+          Link
         </Typography>
-        <List>
-          {card.links && card.links.length > 0 ? (
-            card.links.map((link, index) => (
-              <ListItem key={index}>
-                <a href={link} target="_blank" rel="noopener noreferrer">
-                  {link}
-                </a>
-              </ListItem>
-            ))
-          ) : (
-            <Typography variant="body2" color="textSecondary">
-              No links available.
-            </Typography>
-          )}
-        </List>
+        {card.link ? (
+          <Typography>
+            <a href={card.link} target="_blank" rel="noopener noreferrer">
+              {card.link}
+            </a>
+          </Typography>
+        ) : (
+          <Typography variant="body2" color="textSecondary">
+            No link available.
+          </Typography>
+        )}
       </Box>
     </Container>
   );

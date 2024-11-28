@@ -449,12 +449,8 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "links": {
-                    "description": "Added field for links",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                "link": {
+                    "type": "string"
                 }
             }
         },

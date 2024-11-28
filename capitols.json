@@ -3,13 +3,15 @@
     "id": "123e4567-e89b-12d3-a456-426614174000",
     "name": "Capitals",
     "description": "A deck of world capitals.",
+    
 
     "cards": [
       {
         "id": "e0c32c1c-b36f-4e10-9f47-b8e88c8ff383",
         "deck_id": "123e4567-e89b-12d3-a456-426614174000",
+        "link":"https://www.amazon.com/map-paris/s?k=map+of+paris",
         "front": {
-          "text": "Capital of France"
+          "text": "Capital of _France_"
         },
         "back": {
           "text": "Paris"
@@ -18,6 +20,7 @@
       {
         "id": "b0d7e62d-d1a8-4c2c-bbb3-7cfa905635ad",
         "deck_id": "123e4567-e89b-12d3-a456-426614174000",
+        "links":"www.google.com",
         "front": {
           "text": "Capital of Germany"
         },

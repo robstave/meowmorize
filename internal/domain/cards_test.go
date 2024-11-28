@@ -25,10 +25,7 @@ func TestCardService_GetCardDetails_Success(t *testing.T) {
 		Back: types.CardBack{
 			Text: "Back Text",
 		},
-		Links: []string{
-			"https://example.com/resource1",
-			"https://example.com/resource2",
-		},
+		Link: "https://example.com/resource1",
 	}
 
 	// Setup expectations
@@ -47,7 +44,7 @@ func TestCardService_GetCardDetails_Success(t *testing.T) {
 	assert.Equal(t, expectedCard.DeckID, card.DeckID)
 	assert.Equal(t, expectedCard.Front, card.Front)
 	assert.Equal(t, expectedCard.Back, card.Back)
-	assert.Equal(t, expectedCard.Links, card.Links) // Assert Links field
+	assert.Equal(t, expectedCard.Link, card.Link) // Assert Links field
 
 	// Assert that the expectations were met
 	cardRepo.AssertExpectations(t)

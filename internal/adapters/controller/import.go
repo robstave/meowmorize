@@ -62,9 +62,11 @@ func (hc *MeowController) ImportDeck(c echo.Context) error {
 		if card.ID == "" || card.DeckID == "" || card.Front.Text == "" || card.Back.Text == "" {
 			hc.logger.Warn("Incomplete card data", "card", card)
 		} else {
+
 			hc.logger.Info("Imported Card",
 				"uuid", card.ID,
 				"did", card.DeckID,
+				"link", card.Link,
 				"front", card.Front.Text,
 				"back", card.Back.Text)
 		}
@@ -75,6 +77,7 @@ func (hc *MeowController) ImportDeck(c echo.Context) error {
 		if deckData.Deck.Cards[i].DeckID == "" {
 			deckData.Deck.Cards[i].DeckID = deckData.Deck.ID
 		}
+
 	}
 
 	// Save the deck to the database
