@@ -8,15 +8,17 @@ meow-front:
   - meowmorize-frontend/src/App.js
   - meowmorize-frontend/src/index.css
   - meowmorize-frontend/src/index.js  
+  - meowmorize-frontend/src/services/api.js
   - meowmorize-frontend/src/components/DecksDashboard.jsx  
   - meowmorize-frontend/src/components/DecksDashboard.css
   - meowmorize-frontend/src/components/ImportDeck.jsx  
   - meowmorize-frontend/src/components/Navbar.jsx  
+
+meow-front2:
   - meowmorize-frontend/src/pages/Dashboard.jsx 
   - meowmorize-frontend/src/pages/ImportPage.jsx 
   - meowmorize-frontend/src/pages/DeckPage.jsx
   - meowmorize-frontend/src/pages/CardPage.jsx
-  - meowmorize-frontend/src/services/api.js
 
 meow-adapters:
   - internal/adapters/controller/deck.go
@@ -25,7 +27,6 @@ meow-adapters:
   - internal/adapters/repositories/card.go
   - internal/adapters/repositories/deck.go
 
-
 meow-domain:
   - cmd/main/main.go
   - internal/domain/types/card.go
@@ -33,7 +34,6 @@ meow-domain:
   - internal/domain/create.go
   - internal/domain/default.go
   - internal/domain/service.go
-
 
 meow-example:
   - capitols.json

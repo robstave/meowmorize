@@ -64,4 +64,26 @@ export const deleteDeck = async (deckId) => {
   }
 };
 
+
+// Create a new card
+export const createCard = async (cardData) => {
+  try {
+    const response = await api.post('/cards', cardData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Update an existing card
+export const updateCard = async (cardId, cardData) => {
+  try {
+    const response = await api.put(`/cards/${cardId}`, cardData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
 export default api;

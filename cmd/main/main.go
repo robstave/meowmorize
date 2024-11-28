@@ -89,6 +89,8 @@ func main() {
 
 	cardGroup := api.Group("/cards")
 	cardGroup.GET("/:id", meowController.GetCardByID)
+	cardGroup.POST("", meowController.CreateCard)
+	cardGroup.PUT("/:id", meowController.UpdateCard)
 
 	// Swagger endpoint
 	e.GET("/swagger/*", httpSwagger.WrapHandler)

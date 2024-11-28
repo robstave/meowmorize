@@ -3,14 +3,13 @@ import React from 'react';
 import { AppBar, Toolbar, Typography, Button } from '@mui/material';
 import ImportExportIcon from '@mui/icons-material/ImportExport';
 import { Link as RouterLink } from 'react-router-dom';
-
+import Logo from '../logo512.png'; // Adjust the path if necessary
 const Navbar = () => {
   return (
     <AppBar position="static">
       <Toolbar>
         {/* App Logo or Icon */}
-        <ImportExportIcon sx={{ mr: 2 }} />
-        {/* App Name */}
+        <img src={Logo} alt="MeowMorize Logo" style={{ height: '40px', marginRight: '16px' }} />        {/* App Name */}
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           MeowMorize
         </Typography>

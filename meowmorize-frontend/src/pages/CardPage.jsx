@@ -12,6 +12,8 @@ import {
 } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import seedrandom from 'seedrandom';
+import { Link as RouterLink } from 'react-router-dom';
+
 
 const rng = seedrandom(Date.now().toString()); // Use a seed for predictable results
 
@@ -129,6 +131,22 @@ const CardPage = () => {
         </Button>
         <Button variant="contained" color="error" onClick={selectCard}>
           Fail
+        </Button>
+        <Button
+          variant="outlined"
+          color="secondary"
+          component={RouterLink}
+          to={`/card-form/${id}`}
+        >
+          Edit Card
+        </Button>
+        <Button
+          variant="outlined"
+          color="secondary"
+          component={RouterLink}
+          to={`/card-form/`}
+        >
+          Add Card
         </Button>
       </Box>
 

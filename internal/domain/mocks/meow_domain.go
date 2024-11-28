@@ -36,17 +36,26 @@ func (_m *MeowDomain) CloneCardToDeck(cardID string, targetDeckID string) (*type
 }
 
 // CreateCard provides a mock function with given fields: card
-func (_m *MeowDomain) CreateCard(card types.Card) error {
+func (_m *MeowDomain) CreateCard(card types.Card) (*types.Card, error) {
 	ret := _m.Called(card)
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(types.Card) error); ok {
+	var r0 *types.Card
+	if rf, ok := ret.Get(0).(func(types.Card) *types.Card); ok {
 		r0 = rf(card)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*types.Card)
+		}
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func(types.Card) error); ok {
+		r1 = rf(card)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // CreateDeck provides a mock function with given fields: _a0

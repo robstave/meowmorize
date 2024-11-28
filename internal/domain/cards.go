@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/robstave/meowmorize/internal/domain/types"
 )
 
@@ -25,21 +26,52 @@ func (s *Service) GetCardByID(cardID string) (*types.Card, error) {
 	return card, nil
 }
 
-// New method: UpdateCard
-func (s *Service) UpdateCard(card types.Card) error {
+// CreateCard adds a new card to the repository
+func (s *Service) CreateCard(card types.Card) (*types.Card, error) {
+	// Generate a UUID for the card if not already set
 	if card.ID == "" {
-		return fmt.Errorf("card ID must be provided for update")
+		card.ID = uuid.New().String()
 	}
-	// Additional validation or business rules can be applied here
-	return s.cardRepo.UpdateCard(card)
+
+	// Validate DeckID exists
+	_, err := s.deckRepo.GetDeckByID(card.DeckID)
+	if err != nil {
+		s.logger.Error("Deck not found", "deck_id", card.DeckID, "error", err)
+		return nil, err
+	}
+
+	// Create the card
+	if err := s.cardRepo.CreateCard(card); err != nil {
+		s.logger.Error("Failed to create card", "error", err)
+		return nil, err
+	}
+
+	s.logger.Info("Card created successfully", "card_id", card.ID)
+	return &card, nil
 }
 
-func (s *Service) CreateCard(card types.Card) error {
-	if card.ID == "" {
-		return fmt.Errorf("card ID must be provided for update")
+// UpdateCard updates an existing card in the repository
+func (s *Service) UpdateCard(card types.Card) error {
+	// Ensure the card exists
+	existingCard, err := s.cardRepo.GetCardByID(card.ID)
+	if err != nil {
+		s.logger.Error("Card not found", "card_id", card.ID, "error", err)
+		return err
 	}
-	// Additional validation or business rules can be applied here
-	return s.cardRepo.CreateCard(card)
+
+	// Update fields
+	existingCard.Front = card.Front
+	existingCard.Back = card.Back
+	existingCard.Link = card.Link
+
+	// Save the updated card
+	if err := s.cardRepo.UpdateCard(*existingCard); err != nil {
+		s.logger.Error("Failed to update card", "card_id", card.ID, "error", err)
+		return err
+	}
+
+	s.logger.Info("Card updated successfully", "card_id", card.ID)
+	return nil
 }
 
 // New method: DeleteCardByID

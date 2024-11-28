@@ -1,5 +1,40 @@
 basePath: /api
 definitions:
+  controller.CardContentReq:
+    properties:
+      text:
+        type: string
+    required:
+    - text
+    type: object
+  controller.CreateCardRequest:
+    properties:
+      back:
+        $ref: '#/definitions/controller.CardContentReq'
+      deck_id:
+        type: string
+      front:
+        $ref: '#/definitions/controller.CardContentReq'
+      link:
+        type: string
+    required:
+    - back
+    - deck_id
+    - front
+    type: object
+  controller.UpdateCardRequest:
+    properties:
+      back:
+        $ref: '#/definitions/controller.CardContentReq'
+      front:
+        $ref: '#/definitions/controller.CardContentReq'
+      link:
+        type: string
+    type: object
+  echo.HTTPError:
+    properties:
+      message: {}
+    type: object
   types.Card:
     properties:
       back:
@@ -45,6 +80,36 @@ info:
   title: MeowMorize Flashcard API
   version: "1.0"
 paths:
+  /cards:
+    post:
+      consumes:
+      - application/json
+      description: Create a new card and associate it with a deck
+      parameters:
+      - description: Create Card
+        in: body
+        name: card
+        required: true
+        schema:
+          $ref: '#/definitions/controller.CreateCardRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/types.Card'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Create a new card
+      tags:
+      - cards
   /cards/{id}:
     get:
       description: Retrieve a single card by its ID
@@ -82,6 +147,44 @@ paths:
       summary: Get a card by ID
       tags:
       - Cards
+    put:
+      consumes:
+      - application/json
+      description: Update the details of an existing card by its ID
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Card
+        in: body
+        name: card
+        required: true
+        schema:
+          $ref: '#/definitions/controller.UpdateCardRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Card'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Update an existing card
+      tags:
+      - cards
   /decks:
     get:
       description: Retrieve a list of all decks
