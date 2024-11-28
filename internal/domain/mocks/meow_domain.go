@@ -114,6 +114,27 @@ func (_m *MeowDomain) DeleteDeck(deckID string) error {
 	return r0
 }
 
+// ExportDeck provides a mock function with given fields: deckID
+func (_m *MeowDomain) ExportDeck(deckID string) (types.Deck, error) {
+	ret := _m.Called(deckID)
+
+	var r0 types.Deck
+	if rf, ok := ret.Get(0).(func(string) types.Deck); ok {
+		r0 = rf(deckID)
+	} else {
+		r0 = ret.Get(0).(types.Deck)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(deckID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetAllDecks provides a mock function with given fields:
 func (_m *MeowDomain) GetAllDecks() ([]types.Deck, error) {
 	ret := _m.Called()

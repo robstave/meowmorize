@@ -1,7 +1,7 @@
 // src/pages/DeckPage.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchDeckById } from '../services/api';
+import { fetchDeckById, exportDeck } from '../services/api';
 import {
   Container,
   Typography,
@@ -16,6 +16,11 @@ import {
   Box,
   Paper,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Collapse,
 
 } from '@mui/material';
@@ -24,6 +29,8 @@ import { Link as RouterLink } from 'react-router-dom';
 
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
+import GetAppIcon from '@mui/icons-material/GetApp'; // Icon for export button
+import { saveAs } from 'file-saver'; // To save files on client-side
 
 
 
@@ -38,7 +45,11 @@ const DeckPage = () => {
   // State to manage the visibility of the cards list
   const [showCards, setShowCards] = useState(false);
 
- 
+  // State for Export Dialog
+  const [openExportDialog, setOpenExportDialog] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState('');
+
   const navigate = useNavigate(); // Initialize navigate
 
   // Function to select a random card
@@ -71,6 +82,36 @@ const DeckPage = () => {
   const handleToggleCards = () => {
     setShowCards((prev) => !prev);
   };
+
+
+  // Handlers for Export Dialog
+  const handleOpenExportDialog = () => {
+    setExportError('');
+    setOpenExportDialog(true);
+  };
+
+  const handleCloseExportDialog = () => {
+    if (!exporting) {
+      setOpenExportDialog(false);
+    }
+  };
+
+  // Function to handle exporting the deck
+  const handleExportDeck = async () => {
+    try {
+      setExporting(true);
+      const blob = await exportDeck(id);
+      const deckNameSanitized = deck.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      saveAs(blob, `${deckNameSanitized}.json`);
+      setOpenExportDialog(false);
+    } catch (err) {
+      setExportError('Failed to export deck. Please try again.');
+      console.error(err);
+    } finally {
+      setExporting(false);
+    }
+  };
+
 
   if (loading) {
     return (
@@ -116,38 +157,50 @@ const DeckPage = () => {
         </Typography>
       )}
 
-<Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
+      <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={selectCard}
-         
-      >
-        View Random Card
-      </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={selectCard}
+
+        >
+          View Random Card
+        </Button>
 
 
-      {/* Preview Button to Toggle Cards List */}
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleToggleCards}
-        
-      >
-        {showCards ? 'Hide Preview' : 'Show Preview'}
-      </Button>
+        {/* Preview Button to Toggle Cards List */}
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleToggleCards}
 
- {/* Back to Dashboard Button */}
- <Button
-        component={RouterLink}
-        to="/"
-        variant="outlined"
-        color="secondary"
-        
-      >
-        Back to Dashboard
-      </Button>
+        >
+          {showCards ? 'Hide Preview' : 'Show Preview'}
+        </Button>
+
+        {/* Back to Dashboard Button */}
+        <Button
+          component={RouterLink}
+          to="/"
+          variant="outlined"
+          color="secondary"
+
+        >
+          Back to Dashboard
+        </Button>
+
+        {/* Export Deck Button */}
+        <Button
+          variant="outlined"
+          color="secondary"
+          startIcon={<GetAppIcon />}
+          onClick={handleOpenExportDialog}
+        >
+          Export Deck
+        </Button>
+
+
       </Box>
       {/* Cards List (Conditionally Rendered) */}
       <Collapse in={showCards}>
@@ -171,7 +224,29 @@ const DeckPage = () => {
         </TableContainer>
       </Collapse>
 
-     
+     {/* Export Deck Confirmation Dialog */}
+     <Dialog
+        open={openExportDialog}
+        onClose={handleCloseExportDialog}
+        aria-labelledby="export-dialog-title"
+        aria-describedby="export-dialog-description"
+      >
+        <DialogTitle id="export-dialog-title">Export Deck</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="export-dialog-description">
+            Do you want to export the deck "{deck.name}" as a JSON file?
+          </DialogContentText>
+          {exportError && <Alert severity="error" sx={{ mt: 2 }}>{exportError}</Alert>}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseExportDialog} disabled={exporting}>Cancel</Button>
+          <Button onClick={handleExportDeck} color="secondary" variant="contained" disabled={exporting}>
+            {exporting ? 'Exporting...' : 'Export'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+
     </Container>
   );
 };

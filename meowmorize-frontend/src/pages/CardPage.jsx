@@ -113,7 +113,7 @@ const CardPage = () => {
     <Container sx={{ mt: 4 }}>
       {/* Render card text as Markdown */}
       <Box sx={{ mt: 2, p: 2, border: '1px solid #ddd', borderRadius: 2 }}>
-        <Typography variant="h5" gutterBottom>
+        <Typography variant="h6" gutterBottom>
           {showFront ? 'Front' : 'Back'}
         </Typography>
         <ReactMarkdown>{showFront ? card.front.text : card.back.text}</ReactMarkdown>

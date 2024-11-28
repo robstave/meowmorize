@@ -86,7 +86,7 @@ func main() {
 	deckGroup.DELETE("/:id", meowController.DeleteDeck)
 
 	deckGroup.POST("/import", meowController.ImportDeck)
-
+	deckGroup.GET("/export/:id", meowController.ExportDeck) // New export route
 	cardGroup := api.Group("/cards")
 	cardGroup.GET("/:id", meowController.GetCardByID)
 	cardGroup.POST("", meowController.CreateCard)

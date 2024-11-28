@@ -302,6 +302,47 @@
                 }
             }
         },
+        "/decks/export/{id}": {
+            "get": {
+                "description": "Export a deck as a JSON file",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "decks"
+                ],
+                "summary": "Export a deck",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Deck ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.Deck"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/decks/import": {
             "post": {
                 "description": "Import a new deck by uploading a JSON file",

@@ -25,6 +25,7 @@ type MeowDomain interface {
 	CreateCard(card types.Card) (*types.Card, error)
 	DeleteCardByID(cardID string) error
 	CloneCardToDeck(cardID string, targetDeckID string) (*types.Card, error)
+	ExportDeck(deckID string) (types.Deck, error) // New method
 }
 
 func NewService(logger *slog.Logger, deckRepo repositories.DeckRepository, cardRepo repositories.CardRepository) MeowDomain {

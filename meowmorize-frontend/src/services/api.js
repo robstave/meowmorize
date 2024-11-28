@@ -85,5 +85,18 @@ export const updateCard = async (cardId, cardData) => {
   }
 };
 
+// Export a deck
+export const exportDeck = async (deckId) => {
+  try {
+    const response = await api.get(`/decks/export/${deckId}`, {
+      responseType: 'blob', // Important for handling binary data
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
 
 export default api;

@@ -390,6 +390,33 @@ paths:
       summary: Create a default deck
       tags:
       - Decks
+  /decks/export/{id}:
+    get:
+      description: Export a deck as a JSON file
+      parameters:
+      - description: Deck ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Deck'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Export a deck
+      tags:
+      - decks
   /decks/import:
     post:
       consumes:

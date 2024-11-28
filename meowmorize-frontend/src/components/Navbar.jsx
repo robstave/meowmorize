@@ -1,7 +1,6 @@
 // src/components/Navbar.jsx
 import React from 'react';
 import { AppBar, Toolbar, Typography, Button } from '@mui/material';
-import ImportExportIcon from '@mui/icons-material/ImportExport';
 import { Link as RouterLink } from 'react-router-dom';
 import Logo from '../logo512.png'; // Adjust the path if necessary
 const Navbar = () => {
