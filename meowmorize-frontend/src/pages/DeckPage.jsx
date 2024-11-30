@@ -31,6 +31,7 @@ import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 import GetAppIcon from '@mui/icons-material/GetApp'; // Icon for export button
 import { saveAs } from 'file-saver'; // To save files on client-side
+import ImportMarkdownDialog from '../components/ImportMarkdownDialog'; // Import the dialog
 
 
 
@@ -51,6 +52,10 @@ const DeckPage = () => {
   const [exportError, setExportError] = useState('');
 
   const navigate = useNavigate(); // Initialize navigate
+
+  // State for Import Markdown Dialog
+  const [openImportDialog, setOpenImportDialog] = useState(false);
+  const [importSuccessCount, setImportSuccessCount] = useState(0);
 
   // Function to select a random card
   const selectCard = () => {
@@ -111,6 +116,31 @@ const DeckPage = () => {
       setExporting(false);
     }
   };
+
+  
+  // Handlers for Import Markdown Dialog
+  const handleOpenImportDialog = () => {
+    setOpenImportDialog(true);
+  };
+
+  const handleCloseImportDialog = () => {
+    setOpenImportDialog(false);
+  };
+
+  const handleImportSuccess = (count) => {
+    setImportSuccessCount(count);
+    // Refresh the deck to include new cards
+    const refreshDeck = async () => {
+      try {
+        const data = await fetchDeckById(id);
+        setDeck(data);
+      } catch (err) {
+        console.error('Failed to refresh deck after import', err);
+      }
+    };
+    refreshDeck();
+  };
+
 
 
   if (loading) {
@@ -200,6 +230,14 @@ const DeckPage = () => {
           Export Deck
         </Button>
 
+        {/* Import Markdown Button */}
+        <Button
+          variant="outlined"
+          color="primary"
+          onClick={handleOpenImportDialog}
+        >
+          Import from Markdown
+        </Button>
 
       </Box>
       {/* Cards List (Conditionally Rendered) */}
@@ -246,6 +284,20 @@ const DeckPage = () => {
         </DialogActions>
       </Dialog>
 
+      {/* Import Markdown Dialog */}
+      <ImportMarkdownDialog
+        open={openImportDialog}
+        handleClose={handleCloseImportDialog}
+        deckId={deck.id}
+        onImportSuccess={handleImportSuccess}
+      />
+
+      {/* Snackbar for Import Success */}
+      {importSuccessCount > 0 && (
+        <Alert severity="success" sx={{ mt: 2 }}>
+          Successfully imported {importSuccessCount} card{importSuccessCount > 1 ? 's' : ''}.
+        </Alert>
+      )}
 
     </Container>
   );
