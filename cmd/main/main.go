@@ -91,6 +91,7 @@ func main() {
 	cardGroup.GET("/:id", meowController.GetCardByID)
 	cardGroup.POST("", meowController.CreateCard)
 	cardGroup.PUT("/:id", meowController.UpdateCard)
+	cardGroup.DELETE("/:id", meowController.DeleteCard) // Add the DELETE route
 
 	// Swagger endpoint
 	e.GET("/swagger/*", httpSwagger.WrapHandler)

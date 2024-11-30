@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -330,4 +331,464 @@ func TestImportDeck_DuplicateID(t *testing.T) {
 
 	// Assert that the expectations were met
 	mockService.AssertExpectations(t)
+}
+
+func TestCreateDeck_Success(t *testing.T) {
+	e := echo.New()
+	mockService := new(mocks.MeowDomain)
+
+	deck := getDeck()
+	mockService.On("CreateDeck", deck).Return(nil)
+
+	controller := NewMeowController(mockService, logger.GetLogger())
+
+	deckJSON, err := json.Marshal(deck)
+	assert.NoError(t, err)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/decks", bytes.NewReader(deckJSON))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	if assert.NoError(t, controller.CreateDeck(c)) {
+		assert.Equal(t, http.StatusCreated, rec.Code)
+
+		var response types.Deck
+		err := json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, deck, response)
+	}
+
+	mockService.AssertExpectations(t)
+}
+
+func TestCreateDeck_InvalidData(t *testing.T) {
+	e := echo.New()
+	mockService := new(mocks.MeowDomain)
+
+	controller := NewMeowController(mockService, logger.GetLogger())
+
+	// Missing required fields (e.g., Name)
+	invalidDeck := types.Deck{
+		ID:    "123e4567-e89b-12d3-a456-426614174000",
+		Cards: []types.Card{},
+	}
+	deckJSON, err := json.Marshal(invalidDeck)
+	assert.NoError(t, err)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/decks", bytes.NewReader(deckJSON))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	// Depending on your validation logic, you might need to adjust the expected response
+	if assert.NoError(t, controller.CreateDeck(c)) {
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+
+		var response map[string]string
+		err := json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, "Invalid deck data", response["message"])
+	}
+
+	mockService.AssertNotCalled(t, "CreateDeck", mock.Anything)
+}
+
+func TestCreateDeck_ServiceError(t *testing.T) {
+	e := echo.New()
+	mockService := new(mocks.MeowDomain)
+
+	deck := getDeck()
+	mockService.On("CreateDeck", deck).Return(errors.New("database error"))
+
+	controller := NewMeowController(mockService, logger.GetLogger())
+
+	deckJSON, err := json.Marshal(deck)
+	assert.NoError(t, err)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/decks", bytes.NewReader(deckJSON))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	if assert.NoError(t, controller.CreateDeck(c)) {
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+
+		var response map[string]string
+		err := json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, "Failed to create deck", response["message"])
+	}
+
+	mockService.AssertExpectations(t)
+}
+
+func TestCreateDefaultDeck_Success(t *testing.T) {
+	e := echo.New()
+	mockService := new(mocks.MeowDomain)
+
+	mockService.On("CreateDefaultDeck").Return(nil)
+
+	controller := NewMeowController(mockService, logger.GetLogger())
+
+	req := httptest.NewRequest(http.MethodPost, "/api/decks/default", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	if assert.NoError(t, controller.CreateDefaultDeck(c)) {
+		assert.Equal(t, http.StatusCreated, rec.Code)
+
+		var response map[string]string
+		err := json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, "created default deck", response["message"])
+	}
+
+	mockService.AssertExpectations(t)
+}
+
+func TestGetDeckByID_Success(t *testing.T) {
+	e := echo.New()
+	mockService := new(mocks.MeowDomain)
+
+	deck := getDeck()
+	mockService.On("GetDeckByID", deck.ID).Return(deck, nil)
+
+	controller := NewMeowController(mockService, logger.GetLogger())
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/decks/%s", deck.ID), nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("id")
+	c.SetParamValues(deck.ID)
+
+	if assert.NoError(t, controller.GetDeckByID(c)) {
+		assert.Equal(t, http.StatusOK, rec.Code)
+
+		var response types.Deck
+		err := json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, deck, response)
+	}
+
+	mockService.AssertExpectations(t)
+}
+
+func TestGetDeckByID_NotFound(t *testing.T) {
+	e := echo.New()
+	mockService := new(mocks.MeowDomain)
+
+	deckID := "non-existent-id"
+	mockService.On("GetDeckByID", deckID).Return(types.Deck{}, errors.New("deck not found"))
+
+	controller := NewMeowController(mockService, logger.GetLogger())
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/decks/%s", deckID), nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("id")
+	c.SetParamValues(deckID)
+
+	if assert.NoError(t, controller.GetDeckByID(c)) {
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+
+		var response map[string]string
+		err := json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, "Failed to retrieve deck", response["message"])
+	}
+
+	mockService.AssertExpectations(t)
+}
+
+func TestUpdateDeck_Success(t *testing.T) {
+	e := echo.New()
+	mockService := new(mocks.MeowDomain)
+
+	deck := getDeck()
+	updatedDeck := deck
+	updatedDeck.Name = "Updated Capitals"
+
+	mockService.On("UpdateDeck", updatedDeck).Return(nil)
+
+	controller := NewMeowController(mockService, logger.GetLogger())
+
+	deckJSON, err := json.Marshal(updatedDeck)
+	assert.NoError(t, err)
+
+	req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/api/decks/%s", deck.ID), bytes.NewReader(deckJSON))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("id")
+	c.SetParamValues(deck.ID)
+
+	if assert.NoError(t, controller.UpdateDeck(c)) {
+		assert.Equal(t, http.StatusOK, rec.Code)
+
+		var response types.Deck
+		err := json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, updatedDeck, response)
+	}
+
+	mockService.AssertExpectations(t)
+}
+
+func TestUpdateDeck_InvalidData(t *testing.T) {
+	e := echo.New()
+	mockService := new(mocks.MeowDomain)
+
+	deckID := "123e4567-e89b-12d3-a456-426614174000"
+	invalidDeck := types.Deck{
+		ID:    deckID,
+		Cards: []types.Card{},
+		// Missing Name and Description
+	}
+
+	controller := NewMeowController(mockService, logger.GetLogger())
+
+	deckJSON, err := json.Marshal(invalidDeck)
+	assert.NoError(t, err)
+
+	req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/api/decks/%s", deckID), bytes.NewReader(deckJSON))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("id")
+	c.SetParamValues(deckID)
+
+	if assert.NoError(t, controller.UpdateDeck(c)) {
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+
+		var response map[string]string
+		err := json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, "Invalid deck data", response["message"])
+	}
+
+	mockService.AssertNotCalled(t, "UpdateDeck", mock.Anything)
+}
+
+func TestUpdateDeck_IDMismatch(t *testing.T) {
+	e := echo.New()
+	mockService := new(mocks.MeowDomain)
+
+	controller := NewMeowController(mockService, logger.GetLogger())
+
+	deckIDPath := "123e4567-e89b-12d3-a456-426614174000"
+	deckIDPayload := "223e4567-e89b-12d3-a456-426614174000" // Different ID
+	deck := getDeck()
+	deck.ID = deckIDPayload
+
+	deckJSON, err := json.Marshal(deck)
+	assert.NoError(t, err)
+
+	req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/api/decks/%s", deckIDPath), bytes.NewReader(deckJSON))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("id")
+	c.SetParamValues(deckIDPath)
+
+	if assert.NoError(t, controller.UpdateDeck(c)) {
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+
+		var response map[string]string
+		err := json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, "Deck ID mismatch", response["message"])
+	}
+
+	mockService.AssertNotCalled(t, "UpdateDeck", mock.Anything)
+}
+
+func TestUpdateDeck_NotFound(t *testing.T) {
+	e := echo.New()
+	mockService := new(mocks.MeowDomain)
+
+	deckID := "non-existent-id"
+	updatedDeck := types.Deck{
+		ID:          deckID,
+		Name:        "Updated Name",
+		Description: "Updated Description",
+		Cards:       []types.Card{},
+	}
+
+	mockService.On("UpdateDeck", updatedDeck).Return(errors.New("deck not found"))
+
+	controller := NewMeowController(mockService, logger.GetLogger())
+
+	deckJSON, err := json.Marshal(updatedDeck)
+	assert.NoError(t, err)
+
+	req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/api/decks/%s", deckID), bytes.NewReader(deckJSON))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("id")
+	c.SetParamValues(deckID)
+
+	if assert.NoError(t, controller.UpdateDeck(c)) {
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+
+		var response map[string]string
+		err := json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, "Failed to update deck", response["message"])
+	}
+
+	mockService.AssertExpectations(t)
+}
+
+func TestDeleteDeck_Success(t *testing.T) {
+	e := echo.New()
+	mockService := new(mocks.MeowDomain)
+
+	deckID := "123e4567-e89b-12d3-a456-426614174000"
+	mockService.On("DeleteDeck", deckID).Return(nil)
+
+	controller := NewMeowController(mockService, logger.GetLogger())
+
+	req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/api/decks/%s", deckID), nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("id")
+	c.SetParamValues(deckID)
+
+	if assert.NoError(t, controller.DeleteDeck(c)) {
+		assert.Equal(t, http.StatusOK, rec.Code)
+
+		var response map[string]string
+		err := json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, "Deck deleted successfully", response["message"])
+	}
+
+	mockService.AssertExpectations(t)
+}
+func TestDeleteDeck_NotFound(t *testing.T) {
+	e := echo.New()
+	mockService := new(mocks.MeowDomain)
+
+	deckID := "non-existent-id"
+	mockService.On("DeleteDeck", deckID).Return(errors.New("deck not found"))
+
+	controller := NewMeowController(mockService, logger.GetLogger())
+
+	req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/api/decks/%s", deckID), nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("id")
+	c.SetParamValues(deckID)
+
+	if assert.NoError(t, controller.DeleteDeck(c)) {
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+
+		var response map[string]string
+		err := json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, "Failed to delete deck", response["message"])
+	}
+
+	mockService.AssertExpectations(t)
+}
+
+func TestDeleteDeck_InvalidID(t *testing.T) {
+	e := echo.New()
+	mockService := new(mocks.MeowDomain)
+
+	controller := NewMeowController(mockService, logger.GetLogger())
+
+	req := httptest.NewRequest(http.MethodDelete, "/api/decks/", nil) // Missing ID
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("id")
+	c.SetParamValues("") // Empty ID
+
+	if assert.NoError(t, controller.DeleteDeck(c)) {
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+
+		var response map[string]string
+		err := json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, "Deck ID is required", response["message"])
+	}
+
+	mockService.AssertExpectations(t)
+}
+
+func TestExportDeck_Success(t *testing.T) {
+	e := echo.New()
+	mockService := new(mocks.MeowDomain)
+
+	deck := getDeck()
+	mockService.On("ExportDeck", deck.ID).Return(deck, nil)
+
+	controller := NewMeowController(mockService, logger.GetLogger())
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/decks/export/%s", deck.ID), nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("id")
+	c.SetParamValues(deck.ID)
+
+	if assert.NoError(t, controller.ExportDeck(c)) {
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, "application/json", rec.Header().Get("Content-Type"))
+		expectedFilename := fmt.Sprintf("deck-%s.json", deck.ID)
+		assert.Equal(t, fmt.Sprintf("attachment; filename=\"%s\"", expectedFilename), rec.Header().Get("Content-Disposition"))
+
+		var response types.Deck
+		err := json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, deck, response)
+	}
+
+	mockService.AssertExpectations(t)
+}
+func TestExportDeck_NotFound(t *testing.T) {
+	e := echo.New()
+	mockService := new(mocks.MeowDomain)
+
+	deckID := "non-existent-id"
+	mockService.On("ExportDeck", deckID).Return(types.Deck{}, errors.New("deck not found"))
+
+	controller := NewMeowController(mockService, logger.GetLogger())
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/decks/export/%s", deckID), nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("id")
+	c.SetParamValues(deckID)
+
+	if assert.NoError(t, controller.ExportDeck(c)) {
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+
+		var response map[string]string
+		err := json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, "Failed to export deck", response["message"])
+	}
+
+	mockService.AssertExpectations(t)
+}
+func TestExportDeck_InvalidID(t *testing.T) {
+	e := echo.New()
+	mockService := new(mocks.MeowDomain)
+
+	controller := NewMeowController(mockService, logger.GetLogger())
+
+	req := httptest.NewRequest(http.MethodGet, "/api/decks/export/", nil) // Missing ID
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("id")
+	c.SetParamValues("") // Empty ID
+
+	if assert.NoError(t, controller.ExportDeck(c)) {
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+
+	}
+
+	mockService.AssertNotCalled(t, "ExportDeck", mock.Anything)
 }

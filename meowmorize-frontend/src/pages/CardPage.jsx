@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchCardById, fetchDeckById } from '../services/api';
+import { fetchCardById, fetchDeckById, deleteCard } from '../services/api';
 import {
   Container,
   Typography,
   Button,
   Box,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText,
+  Snackbar,
   CircularProgress,
   Alert,
 
@@ -13,6 +20,16 @@ import {
 import ReactMarkdown from 'react-markdown';
 import seedrandom from 'seedrandom';
 import { Link as RouterLink } from 'react-router-dom';
+
+import DeleteIcon from '@mui/icons-material/Delete'; // Import DeleteIcon
+import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
+
+const AlertSnackbar = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
+
+
 
 
 const rng = seedrandom(Date.now().toString()); // Use a seed for predictable results
@@ -26,6 +43,16 @@ const CardPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [history, setHistory] = useState([]); // History of recently used indices
+
+    // State for Delete Card Dialog
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+
+    // State for Snackbar Notifications
+    const [snackbar, setSnackbar] = useState({
+      open: false,
+      message: '',
+      severity: 'success', // 'success' | 'error' | 'warning' | 'info'
+    });
 
   // Fetch the card on component mount or when the ID changes
   useEffect(() => {
@@ -92,6 +119,50 @@ const CardPage = () => {
     }
   };
 
+  
+  // Handlers for Delete Card Dialog
+  const handleOpenDeleteDialog = () => {
+    setOpenDeleteDialog(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+  };
+
+  const handleDeleteCard = async () => {
+    if (!card) return;
+
+    try {
+      await deleteCard(card.id);
+      setSnackbar({
+        open: true,
+        message: 'Card deleted successfully.',
+        severity: 'success',
+      });
+      // Navigate back to the deck page after deletion
+      navigate(`/decks/${deckId}`);
+    } catch (err) {
+      console.error(err);
+      setSnackbar({
+        open: true,
+        message: 'Failed to delete the card. Please try again.',
+        severity: 'error',
+      });
+    } finally {
+      handleCloseDeleteDialog();
+    }
+  };
+
+  // Handler to close the Snackbar
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
+
+
+
   if (loading) {
     return (
       <Container sx={{ mt: 4, textAlign: 'center' }}>
@@ -148,6 +219,16 @@ const CardPage = () => {
         >
           Add Card
         </Button>
+
+                {/* Delete Card Button */}
+                <IconButton
+          aria-label="delete"
+          color="error"
+          onClick={handleOpenDeleteDialog}
+          sx={{ ml: 1 }}
+        >
+          <DeleteIcon />
+        </IconButton>
       </Box>
 
       <Box sx={{ mt: 4 }}>
@@ -166,6 +247,41 @@ const CardPage = () => {
           </Typography>
         )}
       </Box>
+
+      
+      {/* Delete Card Confirmation Dialog */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">Delete Card</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Are you sure you want to delete this card? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
+          <Button onClick={handleDeleteCard} color="error" variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for Notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <AlertSnackbar onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </AlertSnackbar>
+      </Snackbar>
+
     </Container>
   );
 };

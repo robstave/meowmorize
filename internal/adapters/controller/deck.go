@@ -29,6 +29,12 @@ func (hc *MeowController) CreateDeck(c echo.Context) error {
 		})
 	}
 
+	if deck.Name == "" {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Invalid deck data",
+		})
+	}
+
 	if err := hc.service.CreateDeck(deck); err != nil {
 		hc.logger.Error("Failed to create deck", "error", err)
 		return c.JSON(http.StatusInternalServerError, echo.Map{
@@ -77,6 +83,12 @@ func (hc *MeowController) CreateDefaultDeck(c echo.Context) error {
 // @Router /decks/{id} [delete]
 func (hc *MeowController) DeleteDeck(c echo.Context) error {
 	deckID := c.Param("id")
+
+	if deckID == "" {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Deck ID is required",
+		})
+	}
 
 	// Perform deletion
 	err := hc.service.DeleteDeck(deckID)
@@ -158,10 +170,22 @@ func (hc *MeowController) GetDeckByID(c echo.Context) error {
 // @Router /decks/{id} [put]
 func (hc *MeowController) UpdateDeck(c echo.Context) error {
 	deckID := c.Param("id")
+	if deckID == "" {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Deck ID is required",
+		})
+	}
+
 	var updatedDeck types.Deck
 
 	if err := c.Bind(&updatedDeck); err != nil {
 		hc.logger.Error("Failed to bind deck data", "error", err)
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Invalid deck data",
+		})
+	}
+
+	if updatedDeck.Name == "" {
 		return c.JSON(http.StatusBadRequest, echo.Map{
 			"message": "Invalid deck data",
 		})
@@ -197,13 +221,17 @@ func (hc *MeowController) UpdateDeck(c echo.Context) error {
 func (c *MeowController) ExportDeck(ctx echo.Context) error {
 	deckID := ctx.Param("id")
 	if deckID == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Deck ID is required")
+		return ctx.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Deck ID is required",
+		})
 	}
 
 	deck, err := c.service.ExportDeck(deckID)
 	if err != nil {
 		c.logger.Error("Failed to export deck", "deck_id", deckID, "error", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to export deck")
+		return ctx.JSON(http.StatusInternalServerError, echo.Map{
+			"message": "Failed to export deck",
+		})
 	}
 
 	// Marshal the deck into pretty JSON

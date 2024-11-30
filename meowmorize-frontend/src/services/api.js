@@ -99,4 +99,15 @@ export const exportDeck = async (deckId) => {
 
 
 
+// Delete a card by its ID
+export const deleteCard = async (cardId) => {
+  try {
+    const response = await api.delete(`/cards/${cardId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
 export default api;

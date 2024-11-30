@@ -74,7 +74,6 @@ func (s *Service) UpdateCard(card types.Card) error {
 	return nil
 }
 
-// New method: DeleteCardByID
 func (s *Service) DeleteCardByID(cardID string) error {
 	if cardID == "" {
 		return fmt.Errorf("card ID must be provided for deletion")
@@ -82,7 +81,6 @@ func (s *Service) DeleteCardByID(cardID string) error {
 	return s.cardRepo.DeleteCardByID(cardID)
 }
 
-// New method: CloneCardToDeck
 func (s *Service) CloneCardToDeck(cardID string, targetDeckID string) (*types.Card, error) {
 	if cardID == "" {
 		return nil, fmt.Errorf("source card ID must be provided for cloning")

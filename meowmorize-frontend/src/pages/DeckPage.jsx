@@ -1,7 +1,7 @@
 // src/pages/DeckPage.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchDeckById, exportDeck } from '../services/api';
+import { fetchDeckById, exportDeck, deleteCard } from '../services/api';
 import {
   Container,
   Typography,
@@ -12,10 +12,12 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
+  IconButton,
+   TableRow,
   Box,
   Paper,
   Button,
+  Snackbar,
   Dialog,
   DialogActions,
   DialogContent,
@@ -26,6 +28,7 @@ import {
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
+import DeleteIcon from '@mui/icons-material/Delete'; // Import DeleteIcon
 
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
@@ -33,7 +36,11 @@ import GetAppIcon from '@mui/icons-material/GetApp'; // Icon for export button
 import { saveAs } from 'file-saver'; // To save files on client-side
 import ImportMarkdownDialog from '../components/ImportMarkdownDialog'; // Import the dialog
 
+import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
 
+const AlertSnackbar = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 
 
@@ -56,6 +63,17 @@ const DeckPage = () => {
   // State for Import Markdown Dialog
   const [openImportDialog, setOpenImportDialog] = useState(false);
   const [importSuccessCount, setImportSuccessCount] = useState(0);
+
+  // State for Delete Card Dialog
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [cardToDelete, setCardToDelete] = useState(null);
+
+  // State for Snackbar Notifications
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success', // 'success' | 'error' | 'warning' | 'info'
+  });
 
   // Function to select a random card
   const selectCard = () => {
@@ -117,7 +135,7 @@ const DeckPage = () => {
     }
   };
 
-  
+
   // Handlers for Import Markdown Dialog
   const handleOpenImportDialog = () => {
     setOpenImportDialog(true);
@@ -141,7 +159,51 @@ const DeckPage = () => {
     refreshDeck();
   };
 
+  // Handlers for Delete Card Dialog
+  const handleOpenDeleteDialog = (card) => {
+    setCardToDelete(card);
+    setOpenDeleteDialog(true);
+  };
 
+  const handleCloseDeleteDialog = () => {
+    setCardToDelete(null);
+    setOpenDeleteDialog(false);
+  };
+
+  const handleDeleteCard = async () => {
+    if (!cardToDelete) return;
+
+    try {
+      await deleteCard(cardToDelete.id);
+      // Remove the deleted card from the deck state
+      setDeck((prevDeck) => ({
+        ...prevDeck,
+        cards: prevDeck.cards.filter((card) => card.id !== cardToDelete.id),
+      }));
+      setSnackbar({
+        open: true,
+        message: `Card "${cardToDelete.front.text}" deleted successfully.`,
+        severity: 'success',
+      });
+    } catch (err) {
+      console.error(err);
+      setSnackbar({
+        open: true,
+        message: 'Failed to delete the card. Please try again.',
+        severity: 'error',
+      });
+    } finally {
+      handleCloseDeleteDialog();
+    }
+  };
+
+  // Handler to close the Snackbar
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
 
   if (loading) {
     return (
@@ -255,6 +317,16 @@ const DeckPage = () => {
                 <TableRow key={card.id}>
                   <TableCell>{card.front.text}</TableCell>
                   <TableCell>{card.back.text}</TableCell>
+                  <TableCell align="center">
+                    {/* Delete Button */}
+                    <IconButton
+                      aria-label="delete"
+                      color="error"
+                      onClick={() => handleOpenDeleteDialog(card)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -262,8 +334,8 @@ const DeckPage = () => {
         </TableContainer>
       </Collapse>
 
-     {/* Export Deck Confirmation Dialog */}
-     <Dialog
+      {/* Export Deck Confirmation Dialog */}
+      <Dialog
         open={openExportDialog}
         onClose={handleCloseExportDialog}
         aria-labelledby="export-dialog-title"
@@ -292,12 +364,44 @@ const DeckPage = () => {
         onImportSuccess={handleImportSuccess}
       />
 
-      {/* Snackbar for Import Success */}
-      {importSuccessCount > 0 && (
-        <Alert severity="success" sx={{ mt: 2 }}>
-          Successfully imported {importSuccessCount} card{importSuccessCount > 1 ? 's' : ''}.
-        </Alert>
-      )}
+      
+
+
+      
+      {/* Delete Card Confirmation Dialog */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">Delete Card</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Are you sure you want to delete the card "{cardToDelete?.front.text}"? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} disabled={!cardToDelete}>
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteCard} color="error" variant="contained" disabled={!cardToDelete}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for Notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <AlertSnackbar onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </AlertSnackbar>
+      </Snackbar>
 
     </Container>
   );

@@ -157,3 +157,44 @@ func (c *MeowController) UpdateCard(ctx echo.Context) error {
 	c.logger.Info("Card updated successfully", "card_id", cardID)
 	return ctx.JSON(http.StatusOK, existingCard)
 }
+
+// DeleteCard deletes a card by its ID
+// @Summary Delete a card
+// @Description Delete a card by its ID
+// @Tags Cards
+// @Produce json
+// @Param id path string true "Card ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /cards/{id} [delete]
+func (c *MeowController) DeleteCard(ctx echo.Context) error {
+	cardID := ctx.Param("id")
+
+	if cardID == "" {
+		c.logger.Warn("DeleteCard called without card ID")
+		return echo.NewHTTPError(http.StatusBadRequest, "Card ID is required")
+	}
+
+	err := c.service.DeleteCardByID(cardID)
+	if err != nil {
+		// Check if the error is due to the card not being found
+		if err.Error() == "card not found" {
+			c.logger.Warn("Attempted to delete a non-existent card", "cardID", cardID)
+			return ctx.JSON(http.StatusNotFound, echo.Map{
+				"message": "Card not found",
+			})
+		}
+		// For other errors, return a generic internal server error
+		c.logger.Error("Failed to delete card", "cardID", cardID, "error", err)
+		return ctx.JSON(http.StatusInternalServerError, echo.Map{
+			"message": "Failed to delete card",
+		})
+	}
+
+	c.logger.Info("Card deleted successfully", "cardID", cardID)
+	return ctx.JSON(http.StatusOK, echo.Map{
+		"message": "Card deleted successfully",
+	})
+}
