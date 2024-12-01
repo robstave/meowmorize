@@ -86,12 +86,14 @@ func main() {
 	deckGroup.DELETE("/:id", meowController.DeleteDeck)
 
 	deckGroup.POST("/import", meowController.ImportDeck)
-	deckGroup.GET("/export/:id", meowController.ExportDeck) // New export route
+	deckGroup.GET("/export/:id", meowController.ExportDeck)
+
 	cardGroup := api.Group("/cards")
+	cardGroup.POST("/stats", meowController.UpdateCardStats)
 	cardGroup.GET("/:id", meowController.GetCardByID)
 	cardGroup.POST("", meowController.CreateCard)
 	cardGroup.PUT("/:id", meowController.UpdateCard)
-	cardGroup.DELETE("/:id", meowController.DeleteCard) // Add the DELETE route
+	cardGroup.DELETE("/:id", meowController.DeleteCard)
 
 	// Swagger endpoint
 	e.GET("/swagger/*", httpSwagger.WrapHandler)

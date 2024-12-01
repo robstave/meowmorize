@@ -13,6 +13,7 @@ meow-front:
   - meowmorize-frontend/src/components/DecksDashboard.jsx  
   - meowmorize-frontend/src/components/DecksDashboard.css
   - meowmorize-frontend/src/components/ImportDeck.jsx  
+  - meowmorize-frontend/src/components/ImportMarkdownDialog.jsx  
   - meowmorize-frontend/src/components/Navbar.jsx  
 
 meow-front2:
@@ -22,6 +23,7 @@ meow-front2:
   - meowmorize-frontend/src/pages/DeckPage.jsx
   - meowmorize-frontend/src/pages/CardPage.jsx
   - meowmorize-frontend/src/pages/CardForm.jsx
+  - meowmorize-frontend/src/utils/markdownParser.js
 
 meow-adapters:
   - prompts/instructions.md
@@ -29,6 +31,7 @@ meow-adapters:
   - internal/adapters/controller/controller.go
   - internal/adapters/controller/import.go
   - internal/adapters/controller/card.go
+  - internal/adapters/controller/card-stats.go
   - internal/adapters/repositories/card.go
   - internal/adapters/repositories/deck.go
 

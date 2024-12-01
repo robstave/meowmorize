@@ -4,6 +4,7 @@ package domain
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/robstave/meowmorize/internal/domain/types"
@@ -93,4 +94,53 @@ func (s *Service) CloneCardToDeck(cardID string, targetDeckID string) (*types.Ca
 
 	// Delegate the cloning operation to the repository
 	return s.cardRepo.CloneCardToDeck(cardID, targetDeckID)
+}
+
+// UpdateCardStats updates the card based on the provided action
+func (s *Service) UpdateCardStats(cardID string, action types.CardAction, value *int) error {
+	card, err := s.cardRepo.GetCardByID(cardID)
+	if err != nil {
+		s.logger.Error("Failed to retrieve card", "card_id", cardID, "error", err)
+		return err
+	}
+	if card == nil {
+		return errors.New("card not found")
+	}
+
+	switch action {
+	case types.IncrementFail:
+		card.FailCount++
+	case types.IncrementPass:
+		card.PassCount++
+	case types.IncrementSkip:
+		card.SkipCount++
+	case types.SetStars:
+		if value == nil {
+			return errors.New("star rating value is required")
+		}
+		card.StarRating = *value
+	case types.Retire:
+		card.Retired = true
+	case types.Unretire:
+		card.Retired = false
+	case types.ResetStats:
+		card.FailCount = 0
+		card.PassCount = 0
+		card.SkipCount = 0
+	default:
+		return fmt.Errorf("unknown action: %s", action)
+	}
+
+	// Update the ReviewedAt timestamp
+	card.ReviewedAt = time.Now()
+
+	// Update the UpdatedAt timestamp is handled by GORM automatically
+
+	if err := s.cardRepo.UpdateCard(*card); err != nil {
+		s.logger.Error("Failed to update card stats", "card_id", cardID, "error", err)
+		return err
+	}
+
+	s.logger.Info("Card stats updated successfully", "card_id", cardID, "action", action)
+	return nil
 }

@@ -216,6 +216,20 @@ func (_m *MeowDomain) UpdateCard(card types.Card) error {
 	return r0
 }
 
+// UpdateCardStats provides a mock function with given fields: cardID, action, value
+func (_m *MeowDomain) UpdateCardStats(cardID string, action types.CardAction, value *int) error {
+	ret := _m.Called(cardID, action, value)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, types.CardAction, *int) error); ok {
+		r0 = rf(cardID, action, value)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // UpdateDeck provides a mock function with given fields: deck
 func (_m *MeowDomain) UpdateDeck(deck types.Deck) error {
 	ret := _m.Called(deck)

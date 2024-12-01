@@ -62,6 +62,67 @@ const docTemplate = `{
                 }
             }
         },
+        "/cards/stats": {
+            "post": {
+                "description": "Update the statistics of a card based on the specified action",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Update card statistics",
+                "parameters": [
+                    {
+                        "description": "Card Stats Update",
+                        "name": "stats",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.CardStatsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.Card"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/cards/{id}": {
             "get": {
                 "description": "Retrieve a single card by its ID",
@@ -170,6 +231,63 @@ const docTemplate = `{
                         "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a card by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Delete a card",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Card ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -589,6 +707,34 @@ const docTemplate = `{
                 }
             }
         },
+        "controller.CardStatsRequest": {
+            "type": "object",
+            "required": [
+                "action",
+                "card_id"
+            ],
+            "properties": {
+                "action": {
+                    "type": "string",
+                    "enum": [
+                        "IncrementFail",
+                        "IncrementPass",
+                        "IncrementSkip",
+                        "SetStars",
+                        "Retire",
+                        "Unretire",
+                        "ResetStats"
+                    ]
+                },
+                "card_id": {
+                    "type": "string"
+                },
+                "value": {
+                    "description": "Used only for SetStars",
+                    "type": "integer"
+                }
+            }
+        },
         "controller.CreateCardRequest": {
             "type": "object",
             "required": [
@@ -637,8 +783,14 @@ const docTemplate = `{
                 "back": {
                     "$ref": "#/definitions/types.CardBack"
                 },
+                "created_at": {
+                    "type": "string"
+                },
                 "deck_id": {
                     "type": "string"
+                },
+                "fail_count": {
+                    "type": "integer"
                 },
                 "front": {
                     "$ref": "#/definitions/types.CardFront"
@@ -647,6 +799,24 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "link": {
+                    "type": "string"
+                },
+                "pass_count": {
+                    "type": "integer"
+                },
+                "retired": {
+                    "type": "boolean"
+                },
+                "reviewed_at": {
+                    "type": "string"
+                },
+                "skip_count": {
+                    "type": "integer"
+                },
+                "star_rating": {
+                    "type": "integer"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }

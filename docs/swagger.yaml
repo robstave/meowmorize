@@ -7,6 +7,27 @@ definitions:
     required:
     - text
     type: object
+  controller.CardStatsRequest:
+    properties:
+      action:
+        enum:
+        - IncrementFail
+        - IncrementPass
+        - IncrementSkip
+        - SetStars
+        - Retire
+        - Unretire
+        - ResetStats
+        type: string
+      card_id:
+        type: string
+      value:
+        description: Used only for SetStars
+        type: integer
+    required:
+    - action
+    - card_id
+    type: object
   controller.CreateCardRequest:
     properties:
       back:
@@ -39,13 +60,29 @@ definitions:
     properties:
       back:
         $ref: '#/definitions/types.CardBack'
+      created_at:
+        type: string
       deck_id:
         type: string
+      fail_count:
+        type: integer
       front:
         $ref: '#/definitions/types.CardFront'
       id:
         type: string
       link:
+        type: string
+      pass_count:
+        type: integer
+      retired:
+        type: boolean
+      reviewed_at:
+        type: string
+      skip_count:
+        type: integer
+      star_rating:
+        type: integer
+      updated_at:
         type: string
     type: object
   types.CardBack:
@@ -111,6 +148,44 @@ paths:
       tags:
       - cards
   /cards/{id}:
+    delete:
+      description: Delete a card by its ID
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a card
+      tags:
+      - Cards
     get:
       description: Retrieve a single card by its ID
       parameters:
@@ -185,6 +260,46 @@ paths:
       summary: Update an existing card
       tags:
       - cards
+  /cards/stats:
+    post:
+      consumes:
+      - application/json
+      description: Update the statistics of a card based on the specified action
+      parameters:
+      - description: Card Stats Update
+        in: body
+        name: stats
+        required: true
+        schema:
+          $ref: '#/definitions/controller.CardStatsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Card'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update card statistics
+      tags:
+      - Cards
   /decks:
     get:
       description: Retrieve a list of all decks
