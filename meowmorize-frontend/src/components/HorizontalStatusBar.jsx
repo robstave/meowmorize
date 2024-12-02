@@ -19,9 +19,9 @@ const HorizontalStatusBar = ({ pass, skip, fail, retire = false }) => {
     d3.select(svgRef.current).selectAll("*").remove();
 
     // Set up dimensions
-    const width = 400;
-    const height = 60;
-    const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+    const width = 300;
+    const height = 40;
+    const margin = { top: 10, right: 10, bottom: 10, left: 0 };
 
     // Calculate total for percentages
     const total = passNum + skipNum + failNum;
@@ -30,7 +30,7 @@ const HorizontalStatusBar = ({ pass, skip, fail, retire = false }) => {
     const data = retire
       ? [{ value: 1, color: '#808080', label: 'Retired', count: total }]
       : [
-        { value: passNum / total, color: '#4CAF50', label: 'Pass', count: passNum },
+        { value: passNum / total, color: '#2e7d32', label: 'Pass', count: passNum },
         { value: skipNum / total, color: '#ed6c02 ', label: 'Skip', count: skipNum },
         { value: failNum / total, color: '#d32f2f', label: 'Fail', count: failNum }
         ];
