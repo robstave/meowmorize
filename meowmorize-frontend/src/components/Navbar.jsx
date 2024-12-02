@@ -9,7 +9,8 @@ const Navbar = () => {
       <Toolbar>
         {/* App Logo or Icon */}
         <img src={Logo} alt="MeowMorize Logo" style={{ height: '40px', marginRight: '16px' }} />        {/* App Name */}
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+        <Typography color="inherit" variant="h6" component={RouterLink}
+          to="/" sx={{ flexGrow: 1 }}>
           MeowMorize
         </Typography>
         {/* Navigation Links */}
