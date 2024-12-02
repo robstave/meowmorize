@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchCardById, fetchDeckById, deleteCard } from '../services/api';
+import { updateCardStats } from '../services/api';
+
 import {
   Container,
   Typography,
@@ -24,6 +26,12 @@ import { Link as RouterLink } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete'; // Import DeleteIcon
 import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
 
+// src/pages/CardPage.jsx
+//import HorizontalStatusBar from '../components/HorizontalStatusBar';
+
+
+
+
 const AlertSnackbar = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
@@ -44,15 +52,15 @@ const CardPage = () => {
   const [error, setError] = useState(null);
   const [history, setHistory] = useState([]); // History of recently used indices
 
-    // State for Delete Card Dialog
-    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  // State for Delete Card Dialog
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
-    // State for Snackbar Notifications
-    const [snackbar, setSnackbar] = useState({
-      open: false,
-      message: '',
-      severity: 'success', // 'success' | 'error' | 'warning' | 'info'
-    });
+  // State for Snackbar Notifications
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success', // 'success' | 'error' | 'warning' | 'info'
+  });
 
   // Fetch the card on component mount or when the ID changes
   useEffect(() => {
@@ -96,9 +104,60 @@ const CardPage = () => {
     return randomIndex;
   };
 
+// Function to handle card actions: pass, fail, skip
+  const handleCardAction = async (action) => {
+    if (!card) return;
+
+    try {
+      // Send the action to the backend
+
+      switch(action) {
+        case 'pass':
+          await updateCardStats(card.id, 'IncrementPass');
+          break;
+        case 'skip':
+          await updateCardStats(card.id, 'IncrementSkip');
+
+          break;
+          case 'fail':
+            await updateCardStats(card.id, 'IncrementFail');
+
+            break;
+        default:
+          // code block
+          console.log('other click')
+      } 
+     
+
+      // Fetch the deck to get all cards
+      const deck = await fetchDeckById(deckId);
+
+      if (deck.cards.length === 0) {
+        setError('No cards available in the deck.');
+        return;
+      }
+
+      // Select a new random card
+      const randomIndex = getUniqueRandomIndex(deck.cards.length);
+      const randomCard = deck.cards[randomIndex];
+
+      setShowFront(true); // Reset to show the front of the new card
+
+      // Navigate to the new card
+      navigate(`/card/${randomCard.id}`);
+    } catch (err) {
+      console.error('Failed to process the card action:', err);
+      setSnackbar({
+        open: true,
+        message: 'Failed to process the action. Please try again.',
+        severity: 'error',
+      });
+    }
+  };
+
 
   // Function to select a random card from the current deck
-  const selectCard = async () => {
+  const selectCard = async (action) => {
 
     if (!deckId) {
       console.log('Deck ID is not available');
@@ -106,10 +165,21 @@ const CardPage = () => {
       return;
     }
 
+    //if (action == 'pass') {
+    // when I call this I get an endless looping
+    // of next cards.
+    //  await updateCardStats(card.id, 'IncrementPass');
+    //};
+    //
+    // I would like a switch with
+    // pass -> IncrementPass
+    //fail => incrementFail
+    //skip -> incrementSkip
+    
+
     try {
       const deck = await fetchDeckById(deckId);
       const randomIndex = getUniqueRandomIndex(deck.cards.length);
-      //const randomIndex = Math.floor(rng() * deck.cards.length);
       const randomCard = deck.cards[randomIndex];
       setShowFront(true); // Reset to show the front of the new card
       navigate(`/card/${randomCard.id}`);
@@ -119,7 +189,7 @@ const CardPage = () => {
     }
   };
 
-  
+
   // Handlers for Delete Card Dialog
   const handleOpenDeleteDialog = () => {
     setOpenDeleteDialog(true);
@@ -194,15 +264,16 @@ const CardPage = () => {
         <Button variant="contained" color="primary" onClick={() => setShowFront(!showFront)}>
           Flip
         </Button>
-        <Button variant="contained" color="success" onClick={selectCard}>
+        <Button variant="contained" color="success" onClick={() => handleCardAction('pass')}>
           Pass
         </Button>
-        <Button variant="contained" color="warning" onClick={selectCard}>
+        <Button variant="contained" color="warning" onClick={() => handleCardAction('pass')}>
           Skip
         </Button>
-        <Button variant="contained" color="error" onClick={selectCard}>
+        <Button variant="contained" color="error" onClick={() => handleCardAction('pass')}>
           Fail
         </Button>
+        
         <Button
           variant="outlined"
           color="secondary"
@@ -220,8 +291,8 @@ const CardPage = () => {
           Add Card
         </Button>
 
-                {/* Delete Card Button */}
-                <IconButton
+        {/* Delete Card Button */}
+        <IconButton
           aria-label="delete"
           color="error"
           onClick={handleOpenDeleteDialog}
@@ -248,7 +319,7 @@ const CardPage = () => {
         )}
       </Box>
 
-      
+
       {/* Delete Card Confirmation Dialog */}
       <Dialog
         open={openDeleteDialog}

@@ -109,5 +109,16 @@ export const deleteCard = async (cardId) => {
   }
 };
 
+export const updateCardStats = async (cardId, action) => {
+  try {
+    const response = await api.post('/cards/stats', { card_id: cardId, action });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+
 
 export default api;
