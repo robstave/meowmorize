@@ -11,8 +11,6 @@ This is the format that the app will understand
 
 What is the **largest planet** in our solar system?
 
-- Hint: It's a gas giant.
-- Second Hint: It has a famous red spot.
 
 ### Back
 
