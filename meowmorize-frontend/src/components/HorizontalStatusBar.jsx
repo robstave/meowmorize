@@ -1,40 +1,50 @@
+// src/components/HorizontalStatusBar.jsx
+
+// src/components/HorizontalStatusBar.jsx
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
+import PropTypes from 'prop-types';
 
-const HorizontalStatusBar = ({ pass = 10, skip = 4, fail = 6, retire = false }) => {
+const HorizontalStatusBar = ({ pass, skip, fail, retire = false }) => {
   const svgRef = useRef();
-  
+  const tooltipRef = useRef(); // Reference to the tooltip
+
   useEffect(() => {
-    // Clear any existing content
+    // Ensure pass, skip, fail are numbers
+    const passNum = Number(pass) || 0;
+    const skipNum = Number(skip) || 0;
+    const failNum = Number(fail) || 0;
+
+    // Clear any existing SVG content
     d3.select(svgRef.current).selectAll("*").remove();
-    
+
     // Set up dimensions
     const width = 400;
     const height = 60;
     const margin = { top: 20, right: 20, bottom: 20, left: 20 };
-    
+
     // Calculate total for percentages
-    const total = pass + skip + fail;
-    
+    const total = passNum + skipNum + failNum;
+
+    // Handle retire case
+    const data = retire
+      ? [{ value: 1, color: '#808080', label: 'Retired', count: total }]
+      : [
+        { value: passNum / total, color: '#4CAF50', label: 'Pass', count: passNum },
+        { value: skipNum / total, color: '#ed6c02 ', label: 'Skip', count: skipNum },
+        { value: failNum / total, color: '#d32f2f', label: 'Fail', count: failNum }
+        ];
+
     // Create SVG
     const svg = d3.select(svgRef.current)
       .attr('width', width)
       .attr('height', height);
-    
-    // Create data structure
-    const data = retire ? 
-      [{ value: 1, color: '#808080', label: 'Retired', count: total }] :
-      [
-        { value: pass/total, color: '#4CAF50', label: 'Pass', count: pass },
-        { value: skip/total, color: '#FFC107', label: 'Skip', count: skip },
-        { value: fail/total, color: '#F44336', label: 'Fail', count: fail }
-      ];
-    
+
     // Create scales
     const xScale = d3.scaleLinear()
       .domain([0, 1])
       .range([margin.left, width - margin.right]);
-    
+
     // Calculate cumulative values for x positions
     let cumulative = 0;
     data.forEach(d => {
@@ -42,13 +52,26 @@ const HorizontalStatusBar = ({ pass = 10, skip = 4, fail = 6, retire = false }) 
       cumulative += d.value;
       d.end = cumulative;
     });
-    
-    // Create tooltip
-    const tooltip = d3.select('body')
-      .append('div')
-      .attr('class', 'absolute hidden bg-gray-800 text-white p-2 rounded text-sm')
-      .style('pointer-events', 'none');
-    
+
+    // Create Tooltip if it doesn't exist
+    if (!tooltipRef.current) {
+      tooltipRef.current = d3.select('body')
+        .append('div')
+        .attr('class', 'tooltip') // Optional: for additional styling
+        .style('position', 'absolute')
+        .style('pointer-events', 'none')
+        .style('background-color', '#333')
+        .style('color', '#fff')
+        .style('padding', '6px 8px')
+        .style('border-radius', '4px')
+        .style('font-size', '12px')
+        .style('z-index', '1000')
+        .style('white-space', 'nowrap')
+        .style('display', 'none'); // Hidden by default
+    }
+
+    const tooltip = tooltipRef.current;
+
     // Draw bars
     svg.selectAll('rect')
       .data(data)
@@ -61,21 +84,29 @@ const HorizontalStatusBar = ({ pass = 10, skip = 4, fail = 6, retire = false }) 
       .attr('fill', d => d.color)
       .on('mouseover', (event, d) => {
         tooltip
-          .style('left', `${event.pageX + 10}px`)
-          .style('top', `${event.pageY - 10}px`)
+          .style('left', `${event.clientX + 10}px`)
+          .style('top', `${event.clientY - 28}px`)
           .html(`${d.label}: ${d.count}`)
-          .classed('hidden', false);
+          .style('display', 'block'); // Show tooltip
+      })
+      .on('mousemove', (event) => {
+        tooltip
+          .style('left', `${event.clientX + 10}px`)
+          .style('top', `${event.clientY - 28}px`);
       })
       .on('mouseout', () => {
-        tooltip.classed('hidden', true);
+        tooltip.style('display', 'none'); // Hide tooltip
       });
-    
-    // Cleanup function
+
+    // Cleanup function to remove tooltip on unmount
     return () => {
-      tooltip.remove();
+      if (tooltipRef.current) {
+        tooltipRef.current.remove();
+        tooltipRef.current = null;
+      }
     };
   }, [pass, skip, fail, retire]); // Dependencies array
-  
+
   return (
     <div className="relative">
       <svg ref={svgRef}></svg>
@@ -83,4 +114,14 @@ const HorizontalStatusBar = ({ pass = 10, skip = 4, fail = 6, retire = false }) 
   );
 };
 
+// Define prop types to enforce required props
+HorizontalStatusBar.propTypes = {
+  pass: PropTypes.number.isRequired,
+  skip: PropTypes.number.isRequired,
+  fail: PropTypes.number.isRequired,
+  retire: PropTypes.bool,
+};
+
 export default HorizontalStatusBar;
+
+ 

@@ -26,9 +26,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete'; // Import DeleteIcon
 import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
 
-// src/pages/CardPage.jsx
-//import HorizontalStatusBar from '../components/HorizontalStatusBar';
-
+import HorizontalStatusBar from '../components/HorizontalStatusBar';
 
 
 
@@ -52,6 +50,12 @@ const CardPage = () => {
   const [error, setError] = useState(null);
   const [history, setHistory] = useState([]); // History of recently used indices
 
+  const [passCount, setPassCount] = useState(0);
+const [skipCount, setSkipCount] = useState(0);
+const [failCount, setFailCount] = useState(0);
+
+
+
   // State for Delete Card Dialog
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
@@ -69,6 +73,11 @@ const CardPage = () => {
         const data = await fetchCardById(id);
         setCard(data);
         setDeckId(data.deck_id); // Set the deckId for future fetches
+        setPassCount(data.pass_count);
+        setSkipCount(data.skip_count);
+        setFailCount(data.fail_count);
+        
+
       } catch (err) {
         setError('Failed to fetch card details. Please try again later.');
         console.error(err);
@@ -301,6 +310,11 @@ const CardPage = () => {
           <DeleteIcon />
         </IconButton>
       </Box>
+
+    {/* Horizontal Status Bar */}
+    <Box sx={{ mt: 4 }}>
+      <HorizontalStatusBar pass={passCount} skip={skipCount} fail={failCount} />
+    </Box>
 
       <Box sx={{ mt: 4 }}>
         <Typography variant="h6" gutterBottom>
