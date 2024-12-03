@@ -33,9 +33,11 @@ func main() {
 	if path := os.Getenv("DB_PATH"); path != "" {
 		dbPath = path
 	}
+	slogger.Info("DBPath set", "dbpath", dbPath)
+
 	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
 	if err != nil {
-		slogger.Error("Failed to connect to database", "error", err)
+		slogger.Error("Failed to connect to database", "path", dbPath, "error", err)
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 

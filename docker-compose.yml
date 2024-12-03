@@ -1,0 +1,35 @@
+
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: meowmorize-backend
+    ports:
+      - "8789:8789"  # 
+    environment:
+      - DB_PATH=/app/data/db.sqlite3  # Consistent with Dockerfile.backend
+      # Add other environment variables here
+    volumes:
+      - db-data:/app/data # Mount the 'db-data' volume to /app/data in the container
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./meowmorize-frontend
+      dockerfile: Dockerfile
+    container_name: meowmorize-frontend
+    ports:
+      - "8999:80"  # Ensure frontend Dockerfile exposes port 8999
+    environment:
+      - REACT_APP_BACKEND_URL=http://backend:8789  # Example environment variable
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  db-data:
+    driver: local
+

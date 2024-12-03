@@ -52,4 +52,12 @@ meow-example:
   - capitols.json
   - prompts/markdown.md
 
+meow-docker:
+  - overview.md
+  - helper
+  - docker-compose.yml
+  - Dockerfile.backend
+  - meowmorize-frontend/Dockerfile
+  - meowmorize-frontend/.env
+
 # Add more groups as needed
