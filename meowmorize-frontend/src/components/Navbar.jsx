@@ -1,9 +1,12 @@
 // src/components/Navbar.jsx
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Switch, FormControlLabel } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import Logo from '../logo512.png'; // Adjust the path if necessary
-const Navbar = () => {
+
+ 
+
+const Navbar = ({ mode, toggleTheme }) => {
   return (
     <AppBar position="static">
       <Toolbar>
@@ -20,6 +23,19 @@ const Navbar = () => {
         <Button color="inherit" component={RouterLink} to="/import">
           Import Deck
         </Button>
+
+                {/* Theme Toggle Switch */}
+                <FormControlLabel
+          control={
+            <Switch
+              checked={mode === 'dark'}
+              onChange={toggleTheme}
+              color="default"
+            />
+          }
+          label="Dark Mode"
+        />
+
         {/* Add more navigation links here as needed */}
       </Toolbar>
     </AppBar>

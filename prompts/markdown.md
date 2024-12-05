@@ -1,40 +1,51 @@
 
-# Importing from Markdown
 
-I like to use Obsidian for most of my note taking.  Its nice to write flash card notes in.
-I also have written an app that can import flashcards from Markdown.
 
-This is the format that the app uses.
 
-``` 
+# V2
+
+Create a set of educational flashcards in Markdown format using the following structure:
+
+Each card must be wrapped in HTML comments:
+
+<!-- Card Start -->
+
+[card content]
+
+<!-- Card End -->
+
+For each card:
+
+1. Front side begins with "### Front" 
+
+   If it makes sense, add 4-5 title words in the same line as front
+
+  For example
+
+ ### Front AWS Lightsail features
+
+2. Back side begins with "### Back"
+
+3. Use standard Markdown formatting (bold, images, etc.) within the content
+
+4. Optional: Include "<!--- Card Link --->" before end comment to indicate linked cards
+
+Example card format:
+
 <!-- Card Start -->
 
 ### Front
 
-What is the **largest planet** in our solar system?
-
+Question here
 
 ### Back
 
-The largest planet is **Jupiter**.
-
-![Jupiter](https://example.com/jupiter.jpg)
+Answer here
 
 <!-- Card End -->
 
-```
-The format for each card starts with the HTML comment for start and end.
-All markdown after `### Front ` will be the front card and `### Back` for the back card.
+Please create the flashcards directly in this format, without any explanations or additional text. 
 
-Ignore any text in the same line as Front.  for example, if its `### Front Capitol Paris`  Treat it as `### Front` Just look for the first part.
+Focus on AWS Cloud certifaction questions or topics that relate to AWS Lambda and AWS Step functions.   You can have a few questions that compare.
 
-Before the end comment...if there is `<!--- Card Link --->` that is a link.
-
-Your job is to create the markdown so I can import it.  Do not show me how to do it, just create the markdown.
-
-
-
-
-
-
-
+and create 25 cards.
