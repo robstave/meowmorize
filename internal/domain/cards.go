@@ -97,7 +97,7 @@ func (s *Service) CloneCardToDeck(cardID string, targetDeckID string) (*types.Ca
 }
 
 // UpdateCardStats updates the card based on the provided action
-func (s *Service) UpdateCardStats(cardID string, action types.CardAction, value *int) error {
+func (s *Service) UpdateCardStats(cardID string, action types.CardAction, value *int, deckID string) error {
 	card, err := s.cardRepo.GetCardByID(cardID)
 	if err != nil {
 		s.logger.Error("Failed to retrieve card", "card_id", cardID, "error", err)
@@ -136,8 +136,15 @@ func (s *Service) UpdateCardStats(cardID string, action types.CardAction, value 
 
 	// Update the UpdatedAt timestamp is handled by GORM automatically
 
-	if err := s.cardRepo.UpdateCard(*card); err != nil {
+	err = s.cardRepo.UpdateCard(*card)
+	if err != nil {
 		s.logger.Error("Failed to update card stats", "card_id", cardID, "error", err)
+		return err
+	}
+
+	err = s.AdjustSession(deckID, cardID, action)
+	if err != nil {
+		s.logger.Error("Failed to update session", "card_id", cardID, "deck_id", deckID, "error", err)
 		return err
 	}
 

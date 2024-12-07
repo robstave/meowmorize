@@ -1,7 +1,7 @@
 // src/pages/DeckPage.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchDeckById, exportDeck, deleteCard } from '../services/api';
+import { fetchDeckById, exportDeck, deleteCard, startSession, getNextCard  } from '../services/api';
 import {
   Container,
   Typography,
@@ -75,14 +75,7 @@ const DeckPage = () => {
     severity: 'success', // 'success' | 'error' | 'warning' | 'info'
   });
 
-  // Function to select a random card
-  const selectCard = () => {
-    console.log('Selecting card');
-    if (deck.cards.length === 0) return;
-
-    const randomCard = deck.cards[Math.floor(Math.random() * deck.cards.length)];
-    navigate(`/card/${randomCard.id}`);
-  };
+  
 
 
   useEffect(() => {
@@ -100,6 +93,32 @@ const DeckPage = () => {
 
     getDeck();
   }, [id]);
+
+
+  // Handler to start a session
+  const handleStartSession = async () => {
+    try {
+      await startSession(id, -1, 'Random'); // Start session with count=-1 and method='Random'
+      const nextCardId = await getNextCard(id); // Get the next card ID
+      if (nextCardId) {
+        navigate(`/card/${nextCardId}`); // Navigate to the card page
+      } else {
+        setSnackbar({
+          open: true,
+          message: 'No cards available in this deck.',
+          severity: 'info',
+        });
+      }
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: 'Failed to start session. Please try again.',
+        severity: 'error',
+      });
+      console.error(err);
+    }
+  };
+
 
   // Handler to toggle the visibility of the cards list
   const handleToggleCards = () => {
@@ -254,10 +273,9 @@ const DeckPage = () => {
         <Button
           variant="contained"
           color="primary"
-          onClick={selectCard}
-
+          onClick={handleStartSession}
         >
-          View Random Card
+          Start Session
         </Button>
 
 
@@ -363,9 +381,6 @@ const DeckPage = () => {
         deckId={deck.id}
         onImportSuccess={handleImportSuccess}
       />
-
-      
-
 
       
       {/* Delete Card Confirmation Dialog */}

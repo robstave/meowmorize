@@ -112,14 +112,55 @@ export const deleteCard = async (cardId) => {
   }
 };
 
-export const updateCardStats = async (cardId, action) => {
+export const updateCardStats = async (cardId, action, deckId) => {
   try {
-    const response = await api.post('/cards/stats', { card_id: cardId, action });
+    const response = await api.post('/cards/stats', { card_id: cardId, action, deck_id: deckId, });
     return response.data;
   } catch (error) {
     throw error;
   }
 };
+
+
+
+// Start a new session
+export const startSession = async (deckId, count = -1, method = 'Random') => {
+  try {
+    const response = await api.post('/sessions/start', {
+      deck_id: deckId,
+      count,
+      method,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Get the next card in the session
+export const getNextCard = async (deckId) => {
+  try {
+    const response = await api.get('/sessions/next', {
+      params: { deck_id: deckId },
+    });
+    return response.data.card_id;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Get session statistics
+export const getSessionStats = async (deckId) => {
+  try {
+    const response = await api.get('/sessions/stats', {
+      params: { deck_id: deckId },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 
 
 

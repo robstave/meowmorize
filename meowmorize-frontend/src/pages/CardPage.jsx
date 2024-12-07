@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchCardById, fetchDeckById, deleteCard } from '../services/api';
-import { updateCardStats } from '../services/api';
+import { updateCardStats, getSessionStats, getNextCard } from '../services/api';
 
 import {
   Container,
@@ -20,13 +20,14 @@ import {
 
 } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
-import seedrandom from 'seedrandom';
+
 import { Link as RouterLink } from 'react-router-dom';
 
 import DeleteIcon from '@mui/icons-material/Delete'; // Import DeleteIcon
 import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
 
-import HorizontalStatusBar from '../components/HorizontalStatusBar';
+import HorizontalProgressBar from '../components/HorizontalProgressBar';
+import PieStatusChart from '../components/CatStatusChart';
 
 
 
@@ -34,11 +35,6 @@ const AlertSnackbar = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-
-
-
-
-const rng = seedrandom(Date.now().toString()); // Use a seed for predictable results
 
 const CardPage = () => {
   const { id } = useParams(); // Get card ID from URL
@@ -48,11 +44,19 @@ const CardPage = () => {
   const [showFront, setShowFront] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [history, setHistory] = useState([]); // History of recently used indices
+  // const [history, setHistory] = useState([]); // History of recently used indices
 
   const [passCount, setPassCount] = useState(0);
-const [skipCount, setSkipCount] = useState(0);
-const [failCount, setFailCount] = useState(0);
+  const [skipCount, setSkipCount] = useState(0);
+  const [failCount, setFailCount] = useState(0);
+
+  const [sessionStats, setSessionStats] = useState({
+    total_cards: 0,
+    viewed_count: 0,
+    remaining: 0,
+    current_index: 0,
+  });
+
 
 
 
@@ -73,10 +77,16 @@ const [failCount, setFailCount] = useState(0);
         const data = await fetchCardById(id);
         setCard(data);
         setDeckId(data.deck_id); // Set the deckId for future fetches
+        // set card stats
         setPassCount(data.pass_count);
         setSkipCount(data.skip_count);
         setFailCount(data.fail_count);
-        
+
+        // set session stats
+        const stats = await getSessionStats(data.deck_id);
+        setSessionStats(stats);
+
+
 
       } catch (err) {
         setError('Failed to fetch card details. Please try again later.');
@@ -89,71 +99,54 @@ const [failCount, setFailCount] = useState(0);
     getCard();
   }, [id]);
 
-  // Utility function to get a unique random index
-  const getUniqueRandomIndex = (deckLength) => {
-    if (deckLength <= history.length) {
-      console.warn('Deck does not have enough unique cards to avoid repeats.');
-      return Math.floor(rng() * deckLength); // Fallback: pick any random index
-    }
 
-    let randomIndex;
-    do {
-      randomIndex = Math.floor(rng() * deckLength);
-    } while (history.includes(randomIndex));
 
-    // Update history
-    setHistory((prevHistory) => {
-      const updatedHistory = [...prevHistory, randomIndex];
-      if (updatedHistory.length > 2) {
-        updatedHistory.shift(); // Keep only the last two indices
-      }
-      return updatedHistory;
-    });
-
-    return randomIndex;
-  };
-
-// Function to handle card actions: pass, fail, skip
+  // Function to handle card actions: pass, fail, skip
   const handleCardAction = async (action) => {
     if (!card) return;
 
     try {
       // Send the action to the backend
 
-      switch(action) {
+      switch (action) {
         case 'pass':
-          await updateCardStats(card.id, 'IncrementPass');
+          await updateCardStats(card.id, 'IncrementPass', deckId);
           break;
         case 'skip':
-          await updateCardStats(card.id, 'IncrementSkip');
-
+          await updateCardStats(card.id, 'IncrementSkip', deckId);
           break;
-          case 'fail':
-            await updateCardStats(card.id, 'IncrementFail');
-
-            break;
+        case 'fail':
+          await updateCardStats(card.id, 'IncrementFail', deckId);
+          break;
         default:
           // code block
           console.log('other click')
-      } 
-     
-
-      // Fetch the deck to get all cards
-      const deck = await fetchDeckById(deckId);
-
-      if (deck.cards.length === 0) {
-        setError('No cards available in the deck.');
-        return;
       }
 
-      // Select a new random card
-      const randomIndex = getUniqueRandomIndex(deck.cards.length);
-      const randomCard = deck.cards[randomIndex];
 
-      setShowFront(true); // Reset to show the front of the new card
+      // Fetch the next card
+      const nextCardId = await getNextCard(deckId);
 
-      // Navigate to the new card
-      navigate(`/card/${randomCard.id}`);
+      if (nextCardId) {
+        setShowFront(true); // Reset to show the front of the new card
+
+        navigate(`/card/${nextCardId}`);
+      } else {
+        setSnackbar({
+          open: true,
+          message: 'No more cards in the session.',
+          severity: 'info',
+        });
+      }
+
+      // Optionally, refresh session stats
+      const stats = await getSessionStats(deckId);
+      setSessionStats(stats);
+
+
+
+
+
     } catch (err) {
       console.error('Failed to process the card action:', err);
       setSnackbar({
@@ -161,40 +154,6 @@ const [failCount, setFailCount] = useState(0);
         message: 'Failed to process the action. Please try again.',
         severity: 'error',
       });
-    }
-  };
-
-
-  // Function to select a random card from the current deck
-  const selectCard = async (action) => {
-
-    if (!deckId) {
-      console.log('Deck ID is not available');
-      setError('Deck ID is not available.');
-      return;
-    }
-
-    //if (action == 'pass') {
-    // when I call this I get an endless looping
-    // of next cards.
-    //  await updateCardStats(card.id, 'IncrementPass');
-    //};
-    //
-    // I would like a switch with
-    // pass -> IncrementPass
-    //fail => incrementFail
-    //skip -> incrementSkip
-    
-
-    try {
-      const deck = await fetchDeckById(deckId);
-      const randomIndex = getUniqueRandomIndex(deck.cards.length);
-      const randomCard = deck.cards[randomIndex];
-      setShowFront(true); // Reset to show the front of the new card
-      navigate(`/card/${randomCard.id}`);
-    } catch (err) {
-      setError('Failed to fetch a random card.');
-      console.error(err);
     }
   };
 
@@ -262,12 +221,33 @@ const [failCount, setFailCount] = useState(0);
   return (
     <Container sx={{ mt: 4 }}>
       {/* Render card text as Markdown */}
-      <Box sx={{ mt: 2, p: 2, border: '1px solid #ddd', borderRadius: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          {showFront ? 'Front' : 'Back'}
-        </Typography>
-        <ReactMarkdown>{showFront ? card.front.text : card.back.text}</ReactMarkdown>
+      {/* Card Header with Front/Back Label and Pie Chart */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          mt: 2,
+          p: 2,
+          border: '1px solid #ddd',
+          borderRadius: 2,
+          flexWrap: 'wrap', // To handle smaller screens
+        }}
+      >
+        {/* Front/Back Label and Content */}
+        <Box sx={{ flex: '1 1 80%', minWidth: '250px' }}>
+          <Typography variant="h6" gutterBottom>
+            {showFront ? 'Front' : 'Back'}
+          </Typography>
+          <ReactMarkdown>{showFront ? card.front.text : card.back.text}</ReactMarkdown>
+        </Box>
+
+        {/* Pie Status Chart */}
+        <Box sx={{ flex: '1 1 20%', minWidth: '80px', display: 'flex', justifyContent: 'center', alignItems: 'center', mt: { xs: 2, sm: 0 } }}>
+          <PieStatusChart pass={passCount} skip={skipCount} fail={failCount} />
+        </Box>
       </Box>
+
 
       <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
         <Button variant="contained" color="primary" onClick={() => setShowFront(!showFront)}>
@@ -276,13 +256,13 @@ const [failCount, setFailCount] = useState(0);
         <Button variant="contained" color="success" onClick={() => handleCardAction('pass')}>
           Pass
         </Button>
-        <Button variant="contained" color="warning" onClick={() => handleCardAction('pass')}>
+        <Button variant="contained" color="warning" onClick={() => handleCardAction('skip')}>
           Skip
         </Button>
-        <Button variant="contained" color="error" onClick={() => handleCardAction('pass')}>
+        <Button variant="contained" color="error" onClick={() => handleCardAction('fail')}>
           Fail
         </Button>
-        
+
         <Button
           variant="outlined"
           color="secondary"
@@ -311,10 +291,39 @@ const [failCount, setFailCount] = useState(0);
         </IconButton>
       </Box>
 
-    {/* Horizontal Status Bar */}
+      {/*
     <Box sx={{ mt: 4 }}>
-      <HorizontalStatusBar pass={passCount} skip={skipCount} fail={failCount} />
+      <PieStatusChart pass={passCount} skip={skipCount} fail={failCount} />
     </Box>
+ */}
+      {/* Horizontal Status Bar */}
+      <Box sx={{ mt: 4 }}>
+        <HorizontalProgressBar index={sessionStats.viewed_count} total={sessionStats.total_cards} />
+      </Box>
+
+
+
+
+
+
+      {/* Session Statistics at the Bottom */}
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="h6" gutterBottom>
+          Session Statistics
+        </Typography>
+        <Typography variant="body1">
+          <strong>Total Cards:</strong> {sessionStats.total_cards}
+        </Typography>
+        <Typography variant="body1">
+          <strong>Viewed Count:</strong> {sessionStats.viewed_count}
+        </Typography>
+        <Typography variant="body1">
+          <strong>Remaining:</strong> {sessionStats.remaining}
+        </Typography>
+        <Typography variant="body1">
+          <strong>Current Index:</strong> {sessionStats.current_index}
+        </Typography>
+      </Box>
 
       <Box sx={{ mt: 4 }}>
         <Typography variant="h6" gutterBottom>

@@ -21,6 +21,8 @@ definitions:
         type: string
       card_id:
         type: string
+      deck_id:
+        type: string
       value:
         description: Used only for SetStars
         type: integer
@@ -42,6 +44,45 @@ definitions:
     - back
     - deck_id
     - front
+    type: object
+  controller.CreateDeckRequest:
+    properties:
+      defaultData:
+        type: boolean
+    type: object
+  controller.GetNextCardResponse:
+    properties:
+      card_id:
+        type: string
+    type: object
+  controller.GetSessionStatsResponse:
+    properties:
+      current_index:
+        type: integer
+      remaining:
+        type: integer
+      total_cards:
+        type: integer
+      viewed_count:
+        type: integer
+    type: object
+  controller.StartSessionRequest:
+    properties:
+      count:
+        minimum: 1
+        type: integer
+      deck_id:
+        type: string
+      method:
+        enum:
+        - Random
+        - Fails
+        - Skips
+        - Worst
+        type: string
+    required:
+    - deck_id
+    - method
     type: object
   controller.UpdateCardRequest:
     properties:
@@ -324,21 +365,23 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a new deck with provided details
+      description: Create a new deck with or without default data
       parameters:
-      - description: Deck to create
+      - description: Deck creation parameters
         in: body
         name: deck
         required: true
         schema:
-          $ref: '#/definitions/types.Deck'
+          $ref: '#/definitions/controller.CreateDeckRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/types.Deck'
+            additionalProperties:
+              type: string
+            type: object
         "400":
           description: Bad Request
           schema:
@@ -471,40 +514,6 @@ paths:
       summary: Update a deck
       tags:
       - Decks
-  /decks/default:
-    post:
-      consumes:
-      - application/json
-      description: Create a new deck with provided details
-      parameters:
-      - description: Deck to create
-        in: body
-        name: deck
-        required: true
-        schema:
-          $ref: '#/definitions/types.Deck'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/types.Deck'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Create a default deck
-      tags:
-      - Decks
   /decks/export/{id}:
     get:
       description: Export a deck as a JSON file
@@ -565,4 +574,161 @@ paths:
       summary: Import a deck from a JSON file
       tags:
       - Decks
+  /sessions/clear:
+    delete:
+      description: Terminate and clear the current review session for a specific deck
+      parameters:
+      - description: Deck ID
+        in: query
+        name: deck_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Clear a review session
+      tags:
+      - Sessions
+  /sessions/next:
+    get:
+      description: Retrieve the ID of the next card to review in the current session
+      parameters:
+      - description: Deck ID
+        in: query
+        name: deck_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.GetNextCardResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get the next card in the session
+      tags:
+      - Sessions
+  /sessions/start:
+    post:
+      consumes:
+      - application/json
+      description: Initiate a new review session for a specific deck with the given
+        parameters
+      parameters:
+      - description: Session Parameters
+        in: body
+        name: session
+        required: true
+        schema:
+          $ref: '#/definitions/controller.StartSessionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Start a new review session
+      tags:
+      - Sessions
+  /sessions/stats:
+    get:
+      description: Retrieve the statistics of the current review session for a specific
+        deck
+      parameters:
+      - description: Deck ID
+        in: query
+        name: deck_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.GetSessionStatsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get session statistics
+      tags:
+      - Sessions
 swagger: "2.0"

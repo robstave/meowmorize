@@ -1,51 +1,36 @@
-// src/components/HorizontalStatusBar.jsx
-
-// src/components/HorizontalStatusBar.jsx
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
-import PropTypes from 'prop-types';
 
-const HorizontalStatusBar = ({ pass, skip, fail, retire = false }) => {
+const HorizontalProgressBar = ({ index, total }) => {
   const svgRef = useRef();
-  const tooltipRef = useRef(); // Reference to the tooltip
+  const tooltipRef = useRef();
 
   useEffect(() => {
-    // Ensure pass, skip, fail are numbers
-    const passNum = Number(pass) || 0;
-    const skipNum = Number(skip) || 0;
-    const failNum = Number(fail) || 0;
+    const currentIndex = Number(index) || 0;
+    const totalCount = Number(total) || 0;
 
-    // Clear any existing SVG content
     d3.select(svgRef.current).selectAll("*").remove();
 
-    // Set up dimensions
     const width = 300;
     const height = 40;
     const margin = { top: 10, right: 10, bottom: 10, left: 0 };
+    const cornerRadius = 6; // Added corner radius
 
-    // Calculate total for percentages
-    const total = passNum + skipNum + failNum;
+    const progress = totalCount > 0 ? currentIndex / totalCount : 0;
+    
+    const data = [
+      { value: progress, color: '#2e7d32', label: 'Progress', count: currentIndex },
+      { value: 1 - progress, color: '#f5f5f5', label: 'Remaining', count: totalCount - currentIndex }
+    ];
 
-    // Handle retire case
-    const data = retire
-      ? [{ value: 1, color: '#808080', label: 'Retired', count: total }]
-      : [
-        { value: passNum / total, color: '#2e7d32', label: 'Pass', count: passNum },
-        { value: skipNum / total, color: '#ed6c02 ', label: 'Skip', count: skipNum },
-        { value: failNum / total, color: '#d32f2f', label: 'Fail', count: failNum }
-        ];
-
-    // Create SVG
     const svg = d3.select(svgRef.current)
       .attr('width', width)
       .attr('height', height);
 
-    // Create scales
     const xScale = d3.scaleLinear()
       .domain([0, 1])
       .range([margin.left, width - margin.right]);
 
-    // Calculate cumulative values for x positions
     let cumulative = 0;
     data.forEach(d => {
       d.start = cumulative;
@@ -53,11 +38,9 @@ const HorizontalStatusBar = ({ pass, skip, fail, retire = false }) => {
       d.end = cumulative;
     });
 
-    // Create Tooltip if it doesn't exist
     if (!tooltipRef.current) {
       tooltipRef.current = d3.select('body')
         .append('div')
-        .attr('class', 'tooltip') // Optional: for additional styling
         .style('position', 'absolute')
         .style('pointer-events', 'none')
         .style('background-color', '#333')
@@ -67,12 +50,11 @@ const HorizontalStatusBar = ({ pass, skip, fail, retire = false }) => {
         .style('font-size', '12px')
         .style('z-index', '1000')
         .style('white-space', 'nowrap')
-        .style('display', 'none'); // Hidden by default
+        .style('display', 'none');
     }
 
     const tooltip = tooltipRef.current;
 
-    // Draw bars
     svg.selectAll('rect')
       .data(data)
       .enter()
@@ -81,13 +63,15 @@ const HorizontalStatusBar = ({ pass, skip, fail, retire = false }) => {
       .attr('y', margin.top)
       .attr('width', d => xScale(d.end) - xScale(d.start))
       .attr('height', height - margin.top - margin.bottom)
+      .attr('rx', cornerRadius) // Added corner radius
+      .attr('ry', cornerRadius) // Added corner radius
       .attr('fill', d => d.color)
       .on('mouseover', (event, d) => {
         tooltip
           .style('left', `${event.clientX + 10}px`)
           .style('top', `${event.clientY - 28}px`)
           .html(`${d.label}: ${d.count}`)
-          .style('display', 'block'); // Show tooltip
+          .style('display', 'block');
       })
       .on('mousemove', (event) => {
         tooltip
@@ -95,17 +79,16 @@ const HorizontalStatusBar = ({ pass, skip, fail, retire = false }) => {
           .style('top', `${event.clientY - 28}px`);
       })
       .on('mouseout', () => {
-        tooltip.style('display', 'none'); // Hide tooltip
+        tooltip.style('display', 'none');
       });
 
-    // Cleanup function to remove tooltip on unmount
     return () => {
       if (tooltipRef.current) {
         tooltipRef.current.remove();
         tooltipRef.current = null;
       }
     };
-  }, [pass, skip, fail, retire]); // Dependencies array
+  }, [index, total]);
 
   return (
     <div className="relative">
@@ -114,14 +97,4 @@ const HorizontalStatusBar = ({ pass, skip, fail, retire = false }) => {
   );
 };
 
-// Define prop types to enforce required props
-HorizontalStatusBar.propTypes = {
-  pass: PropTypes.number.isRequired,
-  skip: PropTypes.number.isRequired,
-  fail: PropTypes.number.isRequired,
-  retire: PropTypes.bool,
-};
-
-export default HorizontalStatusBar;
-
- 
+export default HorizontalProgressBar;

@@ -12,6 +12,7 @@ import (
 // CardStatsRequest represents the expected payload for updating card stats
 type CardStatsRequest struct {
 	CardID string           `json:"card_id" validate:"required"`
+	DeckID string           `json:"deck_id,omitempty"`
 	Action types.CardAction `json:"action" validate:"required,oneof=IncrementFail IncrementPass IncrementSkip SetStars Retire Unretire ResetStats"`
 	Value  *int             `json:"value,omitempty"` // Used only for SetStars
 }
@@ -38,7 +39,8 @@ func (c *MeowController) UpdateCardStats(ctx echo.Context) error {
 	// e.g., if err := ctx.Validate(req); err != nil { ... }
 
 	// Update the card stats
-	if err := c.service.UpdateCardStats(req.CardID, req.Action, req.Value); err != nil {
+	// WE are passing the deckID in case we want to update the session too
+	if err := c.service.UpdateCardStats(req.CardID, req.Action, req.Value, req.DeckID); err != nil {
 		if err.Error() == "card not found" {
 			c.logger.Warn("Card not found", "card_id", req.CardID)
 			return ctx.JSON(http.StatusNotFound, echo.Map{

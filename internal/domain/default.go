@@ -7,7 +7,7 @@ import (
 )
 
 // CreateDefaultDeck creates a default deck with a sample card
-func (s *Service) CreateDefaultDeck() error {
+func (s *Service) CreateDefaultDeck(defaultData bool) error {
 	// Generate a UUID for the default deck
 	deckID := uuid.New().String()
 

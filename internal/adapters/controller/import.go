@@ -4,6 +4,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -91,4 +92,44 @@ func (hc *MeowController) ImportDeck(c echo.Context) error {
 	hc.logger.Info("Deck imported successfully", "id", deckData.Deck.ID)
 
 	return c.JSON(http.StatusCreated, deckData.Deck)
+}
+
+// ExportDeck handles the export of a deck as a JSON file
+// @Summary Export a deck
+// @Description Export a deck as a JSON file
+// @Tags decks
+// @Produce application/json
+// @Param id path string true "Deck ID"
+// @Success 200 {object} types.Deck
+// @Failure 400 {object} echo.HTTPError
+// @Failure 500 {object} echo.HTTPError
+// @Router /decks/export/{id} [get]
+func (c *MeowController) ExportDeck(ctx echo.Context) error {
+	deckID := ctx.Param("id")
+	if deckID == "" {
+		return ctx.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Deck ID is required",
+		})
+	}
+
+	deck, err := c.service.ExportDeck(deckID)
+	if err != nil {
+		c.logger.Error("Failed to export deck", "deck_id", deckID, "error", err)
+		return ctx.JSON(http.StatusInternalServerError, echo.Map{
+			"message": "Failed to export deck",
+		})
+	}
+
+	// Marshal the deck into pretty JSON
+	deckJSON, err := json.MarshalIndent(deck, "", "  ") // Indent with two spaces
+	if err != nil {
+		c.logger.Error("Failed to marshal deck", "deck_id", deckID, "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to export deck")
+	}
+
+	// Set headers to prompt file download
+	ctx.Response().Header().Set("Content-Type", "application/json")
+	ctx.Response().Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"deck-%s.json\"", deckID))
+
+	return ctx.JSONBlob(http.StatusOK, deckJSON)
 }

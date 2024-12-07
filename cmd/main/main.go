@@ -80,6 +80,8 @@ func main() {
 	api := e.Group("/api")
 	deckGroup := api.Group("/decks")
 
+	sessionGroup := api.Group("/sessions")
+
 	deckGroup.GET("", meowController.GetAllDecks)
 	deckGroup.GET("/default", meowController.CreateDefaultDeck)
 	deckGroup.GET("/:id", meowController.GetDeckByID)
@@ -96,6 +98,12 @@ func main() {
 	cardGroup.POST("", meowController.CreateCard)
 	cardGroup.PUT("/:id", meowController.UpdateCard)
 	cardGroup.DELETE("/:id", meowController.DeleteCard)
+
+	// Session Routes
+	sessionGroup.POST("/start", meowController.StartSession)
+	sessionGroup.GET("/next", meowController.GetNextCard)
+	sessionGroup.DELETE("/clear", meowController.ClearSession)
+	sessionGroup.GET("/stats", meowController.GetSessionStats)
 
 	// Swagger endpoint
 	e.GET("/swagger/*", httpSwagger.WrapHandler)
