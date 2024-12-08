@@ -1,30 +1,24 @@
 #readme.md
 #observations.md
 #directives.md
- 
-file-1:
+  
+meow-repo:
   - prompts/instructions.md
-  - meowmorize-frontend/package.json
-  - meowmorize-frontend/src/App.css
-  - meowmorize-frontend/src/App.js
-  - meowmorize-frontend/src/index.css
-  - meowmorize-frontend/src/index.js  
-  - meowmorize-frontend/src/services/api.js
-  - meowmorize-frontend/src/components/DecksDashboard.jsx  
-  - meowmorize-frontend/src/components/DecksDashboard.css
-  - meowmorize-frontend/src/components/Navbar.jsx  
-  - meowmorize-frontend/src/pages/DeckPage.jsx
+  - internal/adapters/repositories/card.go
+  - internal/adapters/repositories/deck.go
 
-file-2:
+meow-domain:
   - prompts/instructions.md
-  - internal/adapters/controller/deck.go
-  - internal/adapters/controller/controller.go
-  - internal/adapters/controller/card-stats.go
   - cmd/main/main.go
   - internal/domain/types/card.go
   - internal/domain/types/deck.go
   - internal/domain/types/session.go
+  - internal/domain/cards.go
+  - internal/domain/create.go
+  - internal/domain/decks.go
+  - internal/domain/default.go
   - internal/domain/service.go
   - internal/domain/session.go
-
  
+
+# Add more groups as needed

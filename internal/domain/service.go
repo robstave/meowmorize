@@ -38,6 +38,9 @@ type MeowDomain interface {
 	GetNextCard(deckID string) (string, error)
 	ClearSession(deckID string) error
 	GetSessionStats(deckID string) (types.SessionStats, error)
+
+	// Clear Deck Statistics
+	ClearDeckStats(deckID string, clearSession bool, clearStats bool) error
 }
 
 func NewService(logger *slog.Logger, deckRepo repositories.DeckRepository, cardRepo repositories.CardRepository) MeowDomain {

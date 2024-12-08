@@ -92,6 +92,8 @@ func main() {
 	deckGroup.POST("/import", meowController.ImportDeck)
 	deckGroup.GET("/export/:id", meowController.ExportDeck)
 
+	deckGroup.POST("/stats/:id", meowController.ClearDeckStats)
+
 	cardGroup := api.Group("/cards")
 	cardGroup.POST("/stats", meowController.UpdateCardStats)
 	cardGroup.GET("/:id", meowController.GetCardByID)

@@ -30,6 +30,16 @@ definitions:
     - action
     - card_id
     type: object
+  controller.ClearDeckStatsRequest:
+    properties:
+      clearSession:
+        type: boolean
+      clearStats:
+        type: boolean
+    required:
+    - clearSession
+    - clearStats
+    type: object
   controller.CreateCardRequest:
     properties:
       back:
@@ -572,6 +582,48 @@ paths:
               type: string
             type: object
       summary: Import a deck from a JSON file
+      tags:
+      - Decks
+  /decks/stats/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Clears the statistics for a specific deck. Can optionally clear
+        session data and/or card statistics.
+      parameters:
+      - description: Deck ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Clear Deck Statistics
+        in: body
+        name: stats
+        required: true
+        schema:
+          $ref: '#/definitions/controller.ClearDeckStatsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Clear deck statistics
       tags:
       - Decks
   /sessions/clear:

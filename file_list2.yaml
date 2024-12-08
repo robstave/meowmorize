@@ -9,16 +9,21 @@ meow-front:
   - meowmorize-frontend/src/App.js
   - meowmorize-frontend/src/index.css
   - meowmorize-frontend/src/index.js  
-  - meowmorize-frontend/src/services/api.js
   - meowmorize-frontend/src/components/DecksDashboard.jsx  
   - meowmorize-frontend/src/components/DecksDashboard.css
-  - meowmorize-frontend/src/components/HorizontalStatusBar.jsx
   - meowmorize-frontend/src/components/ImportDeck.jsx  
   - meowmorize-frontend/src/components/ImportMarkdownDialog.jsx  
   - meowmorize-frontend/src/components/Navbar.jsx  
 
+meow-charts:
+  - prompts/instructions.md
+  - meowmorize-frontend/src/components/HorizontalStatusBar.jsx
+  - meowmorize-frontend/src/components/CatStatusChart.jsx
+  - meowmorize-frontend/src/components/StatusSparkline.jsx
+
 meow-front2:
   - prompts/instructions.md
+  - meowmorize-frontend/src/services/api.js
   - meowmorize-frontend/src/pages/CardForm.jsx  
   - meowmorize-frontend/src/pages/CardPage.jsx
   - meowmorize-frontend/src/pages/Dashboard.jsx 
@@ -33,7 +38,8 @@ meow-controllers:
   - internal/adapters/controller/import.go
   - internal/adapters/controller/card.go
   - internal/adapters/controller/card-stats.go
-
+  - internal/adapters/controller/session.go
+  
 meow-repo:
   - prompts/instructions.md
   - internal/adapters/repositories/card.go

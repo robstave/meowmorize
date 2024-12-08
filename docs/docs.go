@@ -469,6 +469,68 @@ const docTemplate = `{
                 }
             }
         },
+        "/decks/stats/{id}": {
+            "post": {
+                "description": "Clears the statistics for a specific deck. Can optionally clear session data and/or card statistics.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Decks"
+                ],
+                "summary": "Clear deck statistics",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Deck ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Clear Deck Statistics",
+                        "name": "stats",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.ClearDeckStatsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/decks/{id}": {
             "get": {
                 "description": "Retrieve a single deck by its ID",
@@ -921,6 +983,21 @@ const docTemplate = `{
                 "value": {
                     "description": "Used only for SetStars",
                     "type": "integer"
+                }
+            }
+        },
+        "controller.ClearDeckStatsRequest": {
+            "type": "object",
+            "required": [
+                "clearSession",
+                "clearStats"
+            ],
+            "properties": {
+                "clearSession": {
+                    "type": "boolean"
+                },
+                "clearStats": {
+                    "type": "boolean"
                 }
             }
         },

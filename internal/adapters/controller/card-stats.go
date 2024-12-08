@@ -3,6 +3,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -63,4 +64,58 @@ func (c *MeowController) UpdateCardStats(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, updatedCard)
+}
+
+// ClearDeckStatsRequest represents the expected payload for clearing deck statistics
+type ClearDeckStatsRequest struct {
+	ClearSession bool `json:"clearSession" validate:"required"`
+	ClearStats   bool `json:"clearStats" validate:"required"`
+}
+
+// @Summary Clear deck statistics
+// @Description Clears the statistics for a specific deck. Can optionally clear session data and/or card statistics.
+// @Tags Decks
+// @Accept json
+// @Produce json
+// @Param id path string true "Deck ID"
+// @Param stats body ClearDeckStatsRequest true "Clear Deck Statistics"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} echo.HTTPError
+// @Failure 404 {object} echo.HTTPError
+// @Failure 500 {object} echo.HTTPError
+// @Router /decks/stats/{id} [post]
+func (c *MeowController) ClearDeckStats(ctx echo.Context) error {
+	deckID := ctx.Param("id")
+	if deckID == "" {
+		c.logger.Warn("ClearDeckStats called without deck ID")
+		return echo.NewHTTPError(http.StatusBadRequest, "Deck ID is required")
+	}
+
+	var req ClearDeckStatsRequest
+	if err := ctx.Bind(&req); err != nil {
+		c.logger.Error("Failed to bind ClearDeckStatsRequest", "error", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request payload")
+	}
+
+	// Optional: Add validation here if using a validation library
+	// e.g., if err := ctx.Validate(req); err != nil { ... }
+
+	// Call the service to clear deck statistics
+	if err := c.service.ClearDeckStats(deckID, req.ClearSession, req.ClearStats); err != nil {
+		// Determine the type of error to return appropriate HTTP status codes
+		if err.Error() == fmt.Sprintf("deck with ID %s not found", deckID) {
+			c.logger.Warn("Deck not found", "deckID", deckID)
+			return ctx.JSON(http.StatusNotFound, echo.Map{
+				"message": "Deck not found",
+			})
+		}
+
+		c.logger.Error("Failed to clear deck statistics", "deckID", deckID, "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to clear deck statistics")
+	}
+
+	c.logger.Info("Deck statistics cleared successfully", "deckID", deckID)
+	return ctx.JSON(http.StatusOK, echo.Map{
+		"message": "Deck statistics cleared successfully",
+	})
 }

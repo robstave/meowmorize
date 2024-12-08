@@ -26,6 +26,20 @@ func (_m *MeowDomain) AdjustSession(deckID string, cardID string, action types.C
 	return r0
 }
 
+// ClearDeckStats provides a mock function with given fields: deckID, clearSession, clearStats
+func (_m *MeowDomain) ClearDeckStats(deckID string, clearSession bool, clearStats bool) error {
+	ret := _m.Called(deckID, clearSession, clearStats)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, bool, bool) error); ok {
+		r0 = rf(deckID, clearSession, clearStats)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // ClearSession provides a mock function with given fields: deckID
 func (_m *MeowDomain) ClearSession(deckID string) error {
 	ret := _m.Called(deckID)
