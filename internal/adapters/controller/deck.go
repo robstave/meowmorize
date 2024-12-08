@@ -127,14 +127,20 @@ func (hc *MeowController) GetDeckByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, deck)
 }
 
+// UpdateDeckRequest represents the expected payload for updating a deck
+type UpdateDeckRequest struct {
+	Name        string `json:"name" validate:"required"`
+	Description string `json:"description" validate:"required"`
+}
+
 // UpdateDeck handles updating an existing deck
 // @Summary Update a deck
-// @Description Update an existing deck by its ID
+// @Description Update the name (and optionally the ID) of an existing deck by its ID
 // @Tags Decks
 // @Accept  json
 // @Produce  json
 // @Param id path string true "Deck ID"
-// @Param deck body types.Deck true "Updated Deck"
+// @Param deck body UpdateDeckRequest true "Updated Deck"
 // @Success 200 {object} types.Deck
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
@@ -142,40 +148,46 @@ func (hc *MeowController) GetDeckByID(c echo.Context) error {
 // @Router /decks/{id} [put]
 func (hc *MeowController) UpdateDeck(c echo.Context) error {
 	deckID := c.Param("id")
+
 	if deckID == "" {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": "Deck ID is required",
+		hc.logger.Warn("UpdateDeck called without deck ID")
+		return echo.NewHTTPError(http.StatusBadRequest, "Deck ID is required")
+	}
+
+	var req UpdateDeckRequest
+	if err := c.Bind(&req); err != nil {
+		hc.logger.Error("Failed to bind UpdateDeckRequest", "error", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid deck data")
+	}
+
+	// Optional: Add validation here if using a validation library
+	// e.g., if err := c.Validate(req); err != nil { ... }
+
+	// Fetch the existing deck
+	existingDeck, err := hc.service.GetDeckByID(deckID)
+	if err != nil {
+		hc.logger.Error("Failed to retrieve deck", "deckID", deckID, "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to retrieve deck")
+	}
+
+	// Check if the deck exists
+	if existingDeck.ID == "" {
+		hc.logger.Warn("Deck not found", "deckID", deckID)
+		return c.JSON(http.StatusNotFound, echo.Map{
+			"message": "Deck not found",
 		})
 	}
 
-	var updatedDeck types.Deck
+	// Update only the Name field
+	existingDeck.Name = req.Name
+	existingDeck.Description = req.Description
 
-	if err := c.Bind(&updatedDeck); err != nil {
-		hc.logger.Error("Failed to bind deck data", "error", err)
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": "Invalid deck data",
-		})
+	// Call the service to update the deck
+	if err := hc.service.UpdateDeck(existingDeck); err != nil {
+		hc.logger.Error("Failed to update deck", "deckID", deckID, "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update deck")
 	}
 
-	if updatedDeck.Name == "" {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": "Invalid deck data",
-		})
-	}
-
-	// Ensure the ID in the path matches the ID in the payload
-	if updatedDeck.ID != deckID {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": "Deck ID mismatch",
-		})
-	}
-
-	if err := hc.service.UpdateDeck(updatedDeck); err != nil {
-		hc.logger.Error("Failed to update deck", "error", err)
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"message": "Failed to update deck",
-		})
-	}
-
-	return c.JSON(http.StatusOK, updatedDeck)
+	hc.logger.Info("Deck updated successfully", "deckID", deckID)
+	return c.JSON(http.StatusOK, existingDeck)
 }

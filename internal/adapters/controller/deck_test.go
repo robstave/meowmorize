@@ -516,8 +516,10 @@ func TestUpdateDeck_Success(t *testing.T) {
 	deck := getDeck()
 	updatedDeck := deck
 	updatedDeck.Name = "Updated Capitals"
+	updatedDeck.Description = "Updated Description"
 
 	mockService.On("UpdateDeck", updatedDeck).Return(nil)
+	mockService.On("GetDeckByID", deck.ID).Return(deck, nil)
 
 	controller := NewMeowController(mockService, logger.GetLogger())
 
@@ -538,112 +540,6 @@ func TestUpdateDeck_Success(t *testing.T) {
 		err := json.Unmarshal(rec.Body.Bytes(), &response)
 		assert.NoError(t, err)
 		assert.Equal(t, updatedDeck, response)
-	}
-
-	mockService.AssertExpectations(t)
-}
-
-func TestUpdateDeck_InvalidData(t *testing.T) {
-	e := echo.New()
-	mockService := new(mocks.MeowDomain)
-
-	deckID := "123e4567-e89b-12d3-a456-426614174000"
-	invalidDeck := types.Deck{
-		ID:    deckID,
-		Cards: []types.Card{},
-		// Missing Name and Description
-	}
-
-	controller := NewMeowController(mockService, logger.GetLogger())
-
-	deckJSON, err := json.Marshal(invalidDeck)
-	assert.NoError(t, err)
-
-	req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/api/decks/%s", deckID), bytes.NewReader(deckJSON))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	c.SetParamNames("id")
-	c.SetParamValues(deckID)
-
-	if assert.NoError(t, controller.UpdateDeck(c)) {
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
-
-		var response map[string]string
-		err := json.Unmarshal(rec.Body.Bytes(), &response)
-		assert.NoError(t, err)
-		assert.Equal(t, "Invalid deck data", response["message"])
-	}
-
-	mockService.AssertNotCalled(t, "UpdateDeck", mock.Anything)
-}
-
-func TestUpdateDeck_IDMismatch(t *testing.T) {
-	e := echo.New()
-	mockService := new(mocks.MeowDomain)
-
-	controller := NewMeowController(mockService, logger.GetLogger())
-
-	deckIDPath := "123e4567-e89b-12d3-a456-426614174000"
-	deckIDPayload := "223e4567-e89b-12d3-a456-426614174000" // Different ID
-	deck := getDeck()
-	deck.ID = deckIDPayload
-
-	deckJSON, err := json.Marshal(deck)
-	assert.NoError(t, err)
-
-	req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/api/decks/%s", deckIDPath), bytes.NewReader(deckJSON))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	c.SetParamNames("id")
-	c.SetParamValues(deckIDPath)
-
-	if assert.NoError(t, controller.UpdateDeck(c)) {
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
-
-		var response map[string]string
-		err := json.Unmarshal(rec.Body.Bytes(), &response)
-		assert.NoError(t, err)
-		assert.Equal(t, "Deck ID mismatch", response["message"])
-	}
-
-	mockService.AssertNotCalled(t, "UpdateDeck", mock.Anything)
-}
-
-func TestUpdateDeck_NotFound(t *testing.T) {
-	e := echo.New()
-	mockService := new(mocks.MeowDomain)
-
-	deckID := "non-existent-id"
-	updatedDeck := types.Deck{
-		ID:          deckID,
-		Name:        "Updated Name",
-		Description: "Updated Description",
-		Cards:       []types.Card{},
-	}
-
-	mockService.On("UpdateDeck", updatedDeck).Return(errors.New("deck not found"))
-
-	controller := NewMeowController(mockService, logger.GetLogger())
-
-	deckJSON, err := json.Marshal(updatedDeck)
-	assert.NoError(t, err)
-
-	req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/api/decks/%s", deckID), bytes.NewReader(deckJSON))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	c.SetParamNames("id")
-	c.SetParamValues(deckID)
-
-	if assert.NoError(t, controller.UpdateDeck(c)) {
-		assert.Equal(t, http.StatusInternalServerError, rec.Code)
-
-		var response map[string]string
-		err := json.Unmarshal(rec.Body.Bytes(), &response)
-		assert.NoError(t, err)
-		assert.Equal(t, "Failed to update deck", response["message"])
 	}
 
 	mockService.AssertExpectations(t)

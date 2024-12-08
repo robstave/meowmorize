@@ -1,6 +1,6 @@
 // src/pages/Dashboard.jsx
 import React, { useEffect, useState } from 'react';
-import { fetchDecks, deleteDeck } from '../services/api';
+import { fetchDecks, deleteDeck, updateDeck } from '../services/api';
 import {
   Container,
   Typography,
@@ -21,8 +21,10 @@ import {
   DialogTitle,
   Button,
   Snackbar,
+  TextField,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit'; // Import EditIcon
 import { Link as RouterLink } from 'react-router-dom'; // **Import RouterLink**
 
 const Dashboard = () => {
@@ -30,10 +32,16 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // State for Edit Dialog
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [selectedDeck, setSelectedDeck] = useState(null);
+  const [editName, setEditName] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+
+
   // **State for Delete Confirmation Dialog**
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedDeck, setSelectedDeck] = useState(null);
-
+  const [deckToDelete, setDeckToDelete] = useState(null);
   // **State for Snackbar Notifications**
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -57,30 +65,95 @@ const Dashboard = () => {
     getDecks();
   }, []);
 
+  // Function to open the edit dialog
+  const handleOpenEditDialog = (deck) => {
+    setSelectedDeck(deck);
+    setEditName(deck.name);
+    setEditDescription(deck.description || '');
+    setOpenEditDialog(true);
+  };
+
+  // Function to close the edit dialog
+  const handleCloseEditDialog = () => {
+    setSelectedDeck(null);
+    setEditName('');
+    setEditDescription('');
+    setOpenEditDialog(false);
+  };
+
+  const handleEditDeck = async () => {
+    if (!selectedDeck) return;
+
+    // Basic validation
+    if (editName.trim() === '') {
+      setSnackbar({
+        open: true,
+        message: 'Deck name cannot be empty.',
+        severity: 'error',
+      });
+      return;
+    }
+
+    try {
+      const updatedDeck = {
+        name: editName,
+        description: editDescription,
+      };
+
+      // Call the API to update the deck
+      const response = await updateDeck(selectedDeck.id, updatedDeck);
+
+      // Update the decks state
+      setDecks((prevDecks) =>
+        prevDecks.map((deck) =>
+          deck.id === selectedDeck.id ? response : deck
+        )
+      );
+
+      // Show success notification
+      setSnackbar({
+        open: true,
+        message: 'Deck updated successfully!',
+        severity: 'success',
+      });
+
+      // Close the dialog
+      handleCloseEditDialog();
+    } catch (err) {
+      console.error(err);
+      setSnackbar({
+        open: true,
+        message: 'Failed to update deck. Please try again.',
+        severity: 'error',
+      });
+    }
+  };
+
+
   // **Handle Open Delete Confirmation Dialog**
   const handleOpenDialog = (deck) => {
-    setSelectedDeck(deck);
+    setDeckToDelete(deck);
     setOpenDialog(true);
   };
 
   // **Handle Close Delete Confirmation Dialog**
   const handleCloseDialog = () => {
-    setSelectedDeck(null);
+    setDeckToDelete(null);
     setOpenDialog(false);
   };
 
   // **Handle Delete Deck**
   const handleDeleteDeck = async () => {
-    if (!selectedDeck) return;
+    if (!deckToDelete) return;
 
     try {
-      await deleteDeck(selectedDeck.id);
+      await deleteDeck(deckToDelete.id);
       // Remove the deleted deck from the state
-      setDecks((prevDecks) => prevDecks.filter((deck) => deck.id !== selectedDeck.id));
+      setDecks((prevDecks) => prevDecks.filter((deck) => deck.id !== deckToDelete.id));
       // Show success notification
       setSnackbar({
         open: true,
-        message: `Deck "${selectedDeck.name}" deleted successfully.`,
+        message: `Deck "${deckToDelete.name}" deleted successfully.`,
         severity: 'success',
       });
     } catch (err) {
@@ -162,6 +235,16 @@ const Dashboard = () => {
                 <TableCell>{deck.description || 'No description provided.'}</TableCell>
                 <TableCell align="right">{deck.cards.length}</TableCell>
                 <TableCell align="center">
+
+                  <IconButton
+                    aria-label="edit"
+                    color="primary"
+                    onClick={() => handleOpenEditDialog(deck)}
+                  >
+                    <EditIcon />
+                  </IconButton>
+
+
                   {/* **Delete Button** */}
                   <IconButton
                     aria-label="delete"
@@ -177,6 +260,50 @@ const Dashboard = () => {
         </Table>
       </TableContainer>
 
+
+      {/* Edit Deck Dialog */}
+      <Dialog
+        open={openEditDialog}
+        onClose={handleCloseEditDialog}
+        aria-labelledby="edit-deck-dialog-title"
+        aria-describedby="edit-deck-dialog-description"
+      >
+        <DialogTitle id="edit-deck-dialog-title">Edit Deck</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="edit-deck-dialog-description">
+            Update the name and description of the deck.
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Deck Name"
+            type="text"
+            fullWidth
+            variant="standard"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+          />
+          <TextField
+            margin="dense"
+            label="Description"
+            type="text"
+            fullWidth
+            variant="standard"
+            value={editDescription}
+            onChange={(e) => setEditDescription(e.target.value)}
+            multiline
+            rows={4}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseEditDialog}>Cancel</Button>
+          <Button onClick={handleEditDeck} color="primary">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+
       {/* **Delete Confirmation Dialog** */}
       <Dialog
         open={openDialog}
@@ -187,7 +314,7 @@ const Dashboard = () => {
         <DialogTitle id="delete-dialog-title">Delete Deck</DialogTitle>
         <DialogContent>
           <DialogContentText id="delete-dialog-description">
-            Are you sure you want to delete the deck "{selectedDeck?.name}"? This action cannot be undone.
+            Are you sure you want to delete the deck "{deckToDelete?.name}"? This action cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

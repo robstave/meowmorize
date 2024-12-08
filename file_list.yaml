@@ -1,6 +1,44 @@
 #readme.md
 #observations.md
 #directives.md
+ 
+meow-front:
+  - prompts/instructions.md
+  - meowmorize-frontend/package.json
+  - meowmorize-frontend/src/App.css
+  - meowmorize-frontend/src/App.js
+  - meowmorize-frontend/src/index.css
+  - meowmorize-frontend/src/index.js  
+  - meowmorize-frontend/src/components/DecksDashboard.jsx  
+  - meowmorize-frontend/src/components/DecksDashboard.css
+  - meowmorize-frontend/src/components/ImportDeck.jsx  
+  - meowmorize-frontend/src/components/ImportMarkdownDialog.jsx  
+  - meowmorize-frontend/src/components/Navbar.jsx  
+
+meow-charts:
+  - prompts/instructions.md
+  - meowmorize-frontend/src/components/HorizontalStatusBar.jsx
+  - meowmorize-frontend/src/components/CatStatusChart.jsx
+  - meowmorize-frontend/src/components/StatusSparkline.jsx
+
+meow-front2:
+  - prompts/instructions.md
+  - meowmorize-frontend/src/services/api.js
+  - meowmorize-frontend/src/pages/CardForm.jsx  
+  - meowmorize-frontend/src/pages/CardPage.jsx
+  - meowmorize-frontend/src/pages/Dashboard.jsx 
+  - meowmorize-frontend/src/pages/DeckPage.jsx
+  - meowmorize-frontend/src/pages/ImportPage.jsx 
+  - meowmorize-frontend/src/utils/markdownParser.js
+
+meow-controllers:
+  - prompts/instructions.md
+  - internal/adapters/controller/deck.go
+  - internal/adapters/controller/controller.go
+  - internal/adapters/controller/import.go
+  - internal/adapters/controller/card.go
+  - internal/adapters/controller/card-stats.go
+  - internal/adapters/controller/session.go
   
 meow-repo:
   - prompts/instructions.md
@@ -19,6 +57,18 @@ meow-domain:
   - internal/domain/default.go
   - internal/domain/service.go
   - internal/domain/session.go
- 
+
+meow-example:
+  - prompts/instructions.md
+  - capitols.json
+  - prompts/markdown.md
+
+meow-docker:
+  - overview.md
+  - helper
+  - docker-compose.yml
+  - Dockerfile.backend
+  - meowmorize-frontend/Dockerfile
+  - meowmorize-frontend/.env
 
 # Add more groups as needed

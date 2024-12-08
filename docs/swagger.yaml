@@ -103,6 +103,16 @@ definitions:
       link:
         type: string
     type: object
+  controller.UpdateDeckRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    required:
+    - description
+    - name
+    type: object
   echo.HTTPError:
     properties:
       message: {}
@@ -483,7 +493,8 @@ paths:
     put:
       consumes:
       - application/json
-      description: Update an existing deck by its ID
+      description: Update the name (and optionally the ID) of an existing deck by
+        its ID
       parameters:
       - description: Deck ID
         in: path
@@ -495,7 +506,7 @@ paths:
         name: deck
         required: true
         schema:
-          $ref: '#/definitions/types.Deck'
+          $ref: '#/definitions/controller.UpdateDeckRequest'
       produces:
       - application/json
       responses:

@@ -162,7 +162,15 @@ export const getSessionStats = async (deckId) => {
 };
 
 
-
+// Update an existing deck
+export const updateDeck = async (deckId, deckData) => {
+  try {
+    const response = await api.put(`/decks/${deckId}`, deckData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 
 
 export default api;

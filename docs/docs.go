@@ -587,7 +587,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Update an existing deck by its ID",
+                "description": "Update the name (and optionally the ID) of an existing deck by its ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -612,7 +612,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/types.Deck"
+                            "$ref": "#/definitions/controller.UpdateDeckRequest"
                         }
                     }
                 ],
@@ -1091,6 +1091,21 @@ const docTemplate = `{
                     "$ref": "#/definitions/controller.CardContentReq"
                 },
                 "link": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.UpdateDeckRequest": {
+            "type": "object",
+            "required": [
+                "description",
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }
