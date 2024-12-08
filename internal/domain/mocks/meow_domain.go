@@ -115,17 +115,24 @@ func (_m *MeowDomain) CreateDeck(_a0 types.Deck) error {
 }
 
 // CreateDefaultDeck provides a mock function with given fields: defaultDeck
-func (_m *MeowDomain) CreateDefaultDeck(defaultDeck bool) error {
+func (_m *MeowDomain) CreateDefaultDeck(defaultDeck bool) (types.Deck, error) {
 	ret := _m.Called(defaultDeck)
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(bool) error); ok {
+	var r0 types.Deck
+	if rf, ok := ret.Get(0).(func(bool) types.Deck); ok {
 		r0 = rf(defaultDeck)
 	} else {
-		r0 = ret.Error(0)
+		r0 = ret.Get(0).(types.Deck)
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func(bool) error); ok {
+		r1 = rf(defaultDeck)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // DeleteCardByID provides a mock function with given fields: cardID

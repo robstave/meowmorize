@@ -19,7 +19,7 @@ type Service struct {
 
 type MeowDomain interface {
 	GetAllDecks() ([]types.Deck, error)
-	CreateDefaultDeck(defaultDeck bool) error
+	CreateDefaultDeck(defaultDeck bool) (types.Deck, error)
 	CreateDeck(types.Deck) error
 	GetDeckByID(deckID string) (types.Deck, error)
 	DeleteDeck(deckID string) error

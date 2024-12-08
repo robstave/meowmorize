@@ -7,7 +7,7 @@ import (
 )
 
 // CreateDefaultDeck creates a default deck with a sample card
-func (s *Service) CreateDefaultDeck(defaultData bool) error {
+func (s *Service) CreateDefaultDeck(defaultData bool) (types.Deck, error) {
 	// Generate a UUID for the default deck
 	deckID := uuid.New().String()
 
@@ -17,8 +17,11 @@ func (s *Service) CreateDefaultDeck(defaultData bool) error {
 		ID:          deckID,
 		Name:        "Default Deck",
 		Description: "This is the default deck containing basic cards.",
+	}
 
-		Cards: []types.Card{
+	if defaultData {
+
+		defaultDeck.Cards = []types.Card{
 			{
 				ID:     uuid.New().String(), // Generate a UUID for the card
 				DeckID: deckID,
@@ -49,16 +52,18 @@ func (s *Service) CreateDefaultDeck(defaultData bool) error {
 					Text: "Oslo",
 				},
 			},
-		},
+		}
+	} else {
+		defaultDeck.Cards = []types.Card{}
 	}
 
 	// Save the default deck to the database
 	err := s.deckRepo.CreateDeck(defaultDeck)
 	if err != nil {
 		s.logger.Error("Failed to create default deck", "error", err)
-		return err
+		return defaultDeck, err
 	}
 
 	s.logger.Info("Default deck created successfully")
-	return nil
+	return defaultDeck, nil
 }

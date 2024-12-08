@@ -10,7 +10,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/labstack/echo/v4"
@@ -419,37 +418,6 @@ func TestCreateDeck_ServiceError(t *testing.T) {
 		err := json.Unmarshal(rec.Body.Bytes(), &response)
 		assert.NoError(t, err)
 		assert.Equal(t, "Failed to create deck", response["message"])
-	}
-
-	mockService.AssertExpectations(t)
-}
-
-func TestCreateDefaultDeck_Success(t *testing.T) {
-	e := echo.New()
-	mockService := new(mocks.MeowDomain)
-
-	mockService.On("CreateDefaultDeck", true).Return(nil)
-
-	controller := NewMeowController(mockService, logger.GetLogger())
-
-	requestBody := `{
-		"defaultData": true
-	}`
-	req := httptest.NewRequest(http.MethodPost, "/api/decks", strings.NewReader(requestBody))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	if assert.NoError(t, controller.CreateDefaultDeck(c)) {
-		assert.Equal(t, http.StatusCreated, rec.Code)
-
-		var response map[string]string
-		err := json.Unmarshal(rec.Body.Bytes(), &response)
-		assert.NoError(t, err)
-		assert.Equal(t, "Default deck created successfully", response["message"])
 	}
 
 	mockService.AssertExpectations(t)

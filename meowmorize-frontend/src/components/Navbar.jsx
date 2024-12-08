@@ -39,7 +39,7 @@ const Navbar = ({ mode, toggleTheme }) => {
         severity: 'success',
       });
       // Optional: Navigate to the new deck's page
-      // For example:
+      navigate(`/decks/${newDeck.id}`);
     } catch (error) {
       console.error('Failed to create empty deck:', error);
       setSnackbar({

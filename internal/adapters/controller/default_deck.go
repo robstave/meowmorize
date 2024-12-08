@@ -18,7 +18,7 @@ type CreateDeckRequest struct {
 // @Accept  json
 // @Produce  json
 // @Param deck body CreateDeckRequest true "Deck creation parameters"
-// @Success 201 {object} map[string]string
+// @Success 200 {object} types.Deck
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /decks/default [post]
@@ -33,20 +33,14 @@ func (hc *MeowController) CreateDefaultDeck(c echo.Context) error {
 		})
 	}
 
-	if err := hc.service.CreateDefaultDeck(req.DefaultData); err != nil {
+	deck, err := hc.service.CreateDefaultDeck(req.DefaultData)
+	if err != nil {
 		hc.logger.Error("Failed to create deck", "error", err)
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"message": "Failed to create deck",
 		})
 	}
 
-	if req.DefaultData {
-		return c.JSON(http.StatusCreated, echo.Map{
-			"message": "Default deck created successfully",
-		})
-	} else {
-		return c.JSON(http.StatusCreated, echo.Map{
-			"message": "Empty deck created successfully",
-		})
-	}
+	return c.JSON(http.StatusOK, deck)
+
 }
