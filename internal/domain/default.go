@@ -11,6 +11,8 @@ func (s *Service) CreateDefaultDeck(defaultData bool) error {
 	// Generate a UUID for the default deck
 	deckID := uuid.New().String()
 
+	s.logger.Info("CreateDefaultDeck")
+
 	defaultDeck := types.Deck{
 		ID:          deckID,
 		Name:        "Default Deck",

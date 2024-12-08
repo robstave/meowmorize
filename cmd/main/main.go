@@ -83,7 +83,7 @@ func main() {
 	sessionGroup := api.Group("/sessions")
 
 	deckGroup.GET("", meowController.GetAllDecks)
-	deckGroup.GET("/default", meowController.CreateDefaultDeck)
+	deckGroup.POST("/default", meowController.CreateDefaultDeck)
 	deckGroup.GET("/:id", meowController.GetDeckByID)
 	deckGroup.POST("", meowController.CreateDeck)
 	deckGroup.PUT("/:id", meowController.UpdateDeck)

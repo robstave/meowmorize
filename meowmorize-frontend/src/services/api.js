@@ -173,4 +173,17 @@ export const updateDeck = async (deckId, deckData) => {
 };
 
 
+// Create an empty deck
+export const createEmptyDeck = async () => {
+  try {
+    const response = await api.post('/decks/default', { defaultData: false });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+
+
 export default api;
