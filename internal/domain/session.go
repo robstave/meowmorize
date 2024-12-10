@@ -64,7 +64,7 @@ func (s *Service) StartSession(deckID string, count int, method types.SessionMet
 
 	// Add or reset the session in the map
 	s.sessions[deckID] = session
-	s.logger.Info("Session started", "deck_id", deckID) //, "method", method, "card_count", len(selectedCards))
+	s.logger.Info("Session started", "deck_id", deckID, "method", method, "card_count", len(selectedCards))
 	return nil
 }
 
@@ -74,9 +74,9 @@ func selectCards(cards []types.Card, count int, method types.SessionMethod) ([]t
 	case types.RandomMethod:
 		return selectRandomCards(cards, count), nil
 	case types.FailsMethod:
-		return selectTopCards(cards, count, func(c types.Card) int { return c.FailCount }), nil
+		return selectFailsCards(cards, count), nil
 	case types.SkipsMethod:
-		return selectTopCards(cards, count, func(c types.Card) int { return c.SkipCount }), nil
+		return selectSkipsCards(cards, count), nil
 	case types.WorstMethod:
 		return selectWorstCards(cards, count), nil
 	default:
@@ -91,10 +91,11 @@ func selectRandomCards(cards []types.Card, count int) []types.Card {
 	return cards[:count]
 }
 
-// selectTopCards selects top N cards based on a scoring function
-func selectTopCards(cards []types.Card, count int, scoreFunc func(types.Card) int) []types.Card {
+// selectFailsCards selects top N cards based on fail rate (percentage)
+func selectFailsCards(cards []types.Card, count int) []types.Card {
+	// Calculate fail rates
 	sort.Slice(cards, func(i, j int) bool {
-		return scoreFunc(cards[i]) > scoreFunc(cards[j])
+		return calculateFailRate(cards[i]) > calculateFailRate(cards[j])
 	})
 	if count > len(cards) {
 		count = len(cards)
@@ -102,31 +103,69 @@ func selectTopCards(cards []types.Card, count int, scoreFunc func(types.Card) in
 	return cards[:count]
 }
 
-// selectWorstCards selects top N cards based on combined fail and skip counts
-func selectWorstCards(cards []types.Card, count int) []types.Card {
+// selectSkipsCards selects top N cards based on skip rate (percentage)
+func selectSkipsCards(cards []types.Card, count int) []types.Card {
+
+	// Calculate skip rates
 	sort.Slice(cards, func(i, j int) bool {
-		return (cards[i].FailCount + cards[i].SkipCount) > (cards[j].FailCount + cards[j].SkipCount)
+		return calculateSkipRate(cards[i]) > calculateSkipRate(cards[j])
 	})
 	if count > len(cards) {
 		count = len(cards)
 	}
 	return cards[:count]
+}
+
+// selectWorstCards selects top N cards based on combined fail and skip rates
+func selectWorstCards(cards []types.Card, count int) []types.Card {
+
+	// Calculate combined fail and skip rates
+	sort.Slice(cards, func(i, j int) bool {
+		return calculateCombinedRate(cards[i]) > calculateCombinedRate(cards[j])
+	})
+	if count > len(cards) {
+		count = len(cards)
+	}
+	return cards[:count]
+}
+
+// calculateFailRate computes the fail rate percentage for a card
+func calculateFailRate(card types.Card) float64 {
+	if card.PassCount == 0 {
+		return 100.0 // If no successes, highest priority
+	}
+	return (float64(card.FailCount) / float64(card.PassCount)) * 100.0
+}
+
+// calculateSkipRate computes the skip rate percentage for a card
+func calculateSkipRate(card types.Card) float64 {
+	if card.PassCount == 0 {
+		return 100.0 // If no successes, highest priority
+	}
+	return (float64(card.SkipCount) / float64(card.PassCount)) * 100.0
+}
+
+// calculateCombinedRate computes the combined fail and skip rate percentage for a card
+func calculateCombinedRate(card types.Card) float64 {
+	if card.PassCount == 0 {
+		return 100.0 // If no successes, highest priority
+	}
+	return ((float64(card.FailCount) + float64(card.SkipCount)) / float64(card.PassCount)) * 100.0
 }
 
 // AdjustSession updates the session based on card actions
-// Current, we increment the index when we set the stats.
 func (s *Service) AdjustSession(deckID string, cardID string, action types.CardAction) error {
 	s.sessionsMu.RLock()
 	session, exists := s.sessions[deckID]
 	s.sessionsMu.RUnlock()
 
-	// its a best effort for now
+	// Best effort: if session doesn't exist, do nothing
 	if !exists {
 		return nil
 	}
 
 	s.sessionsMu.Lock()
-	s.sessionsMu.Unlock()
+	defer s.sessionsMu.Unlock()
 
 	// Find the card in the session
 	var cardStat *types.CardStats
@@ -146,39 +185,34 @@ func (s *Service) AdjustSession(deckID string, cardID string, action types.CardA
 	case types.IncrementFail:
 		cardStat.Viewed = true
 		cardStat.Skipped = false
-		// Optionally, update the card's fail count in the repository
+
 	case types.IncrementPass:
 		cardStat.Viewed = true
 		cardStat.Skipped = false
-		// Optionally, update the card's pass count in the repository
+
 	case types.IncrementSkip:
 		cardStat.Viewed = false
 		cardStat.Skipped = true
+
 	case types.SetStars:
-		// none
+		// Implement if necessary
 	case types.Retire:
 		cardStat.Viewed = true
 		cardStat.Skipped = false
-		// Optionally, retire the card in the repository
+		// Implement retire logic in the repository
 	case types.Unretire:
 		cardStat.Viewed = false
 		cardStat.Skipped = false
-		// Optionally, unretire the card in the repository
+		// Implement unretire logic in the repository
 	case types.ResetStats:
 		cardStat.Viewed = false
 		cardStat.Skipped = false
-		// Optionally, reset stats in the repository
+
 	default:
 		return errors.New("invalid card action")
 	}
 
-	// Increment the session index
-	//session.Index++
-	//if session.Index >= len(session.CardStats) {
-	//	session.Index = 0 // Restart the session
-	//}
-
-	// recalculate stats
+	// Recalculate session stats
 	session.Stats.TotalCards = len(session.CardStats)
 
 	var viewed = 0
@@ -187,7 +221,6 @@ func (s *Service) AdjustSession(deckID string, cardID string, action types.CardA
 		if session.CardStats[i].Viewed {
 			viewed++
 		}
-
 	}
 
 	session.Stats.ViewedCount = viewed
@@ -199,9 +232,6 @@ func (s *Service) AdjustSession(deckID string, cardID string, action types.CardA
 }
 
 // GetNextCard retrieves the next card ID in the session
-// Technically, the index should already have been incremented
-// so this just gets the card the index has, but perhaps I can
-// add an option bool to increment too
 func (s *Service) GetNextCard(deckID string) (string, error) {
 	s.sessionsMu.RLock()
 	session, exists := s.sessions[deckID]

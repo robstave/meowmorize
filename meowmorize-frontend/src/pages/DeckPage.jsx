@@ -24,19 +24,25 @@ import {
   DialogContentText,
   DialogTitle,
   Collapse,
+     
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  FormLabel,
+  TextField,
+  Select,
+  MenuItem,
 
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-
 import DeleteIcon from '@mui/icons-material/Delete'; // Import DeleteIcon
-
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
-
 import GetAppIcon from '@mui/icons-material/GetApp'; // Icon for export button
 import { saveAs } from 'file-saver'; // To save files on client-side
 import ImportMarkdownDialog from '../components/ImportMarkdownDialog'; // Import the dialog
-
 import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
+
 
 const AlertSnackbar = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -68,6 +74,11 @@ const DeckPage = () => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [cardToDelete, setCardToDelete] = useState(null);
 
+  const [openStartSessionDialog, setOpenStartSessionDialog] = useState(false);
+const [sessionCountOption, setSessionCountOption] = useState('all'); // 'all' or 'count'
+const [sessionCount, setSessionCount] = useState(20); // Default value
+const [sessionMethod, setSessionMethod] = useState('Random'); // Default method
+
   // State for Snackbar Notifications
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -94,7 +105,7 @@ const DeckPage = () => {
     getDeck();
   }, [id]);
 
-
+/*
   // Handler to start a session
   const handleStartSession = async () => {
     try {
@@ -118,6 +129,22 @@ const DeckPage = () => {
       console.error(err);
     }
   };
+  */
+
+  const handleOpenStartSessionDialog = () => {
+    setOpenStartSessionDialog(true);
+    // Set default session count based on deck size
+    if (deck.cards.length <= 20) {
+      setSessionCount(deck.cards.length);
+    } else {
+      setSessionCount(20);
+    }
+  };
+  
+  const handleCloseStartSessionDialog = () => {
+    setOpenStartSessionDialog(false);
+  };
+  
 
 
   // Handler to toggle the visibility of the cards list
@@ -224,6 +251,50 @@ const DeckPage = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
+  const handleStartSessionSubmit = async () => {
+    const count = sessionCountOption === 'all' ? -1 : sessionCount;
+  
+    try {
+      await startSession(id, count, sessionMethod);
+      const nextCardId = await getNextCard(id);
+      if (nextCardId) {
+        navigate(`/card/${nextCardId}`);
+      } else {
+        setSnackbar({
+          open: true,
+          message: 'No cards available in this deck.',
+          severity: 'info',
+        });
+      }
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: 'Failed to start session. Please try again.',
+        severity: 'error',
+      });
+      console.error(err);
+    } finally {
+      handleCloseStartSessionDialog();
+    }
+  };
+
+  
+  const handleSessionCountOptionChange = (event) => {
+    setSessionCountOption(event.target.value);
+  };
+
+  const handleSessionCountChange = (event) => {
+    const value = parseInt(event.target.value, 10);
+    if (!isNaN(value) && value > 0 && value <= deck.cards.length) {
+      setSessionCount(value);
+    }
+  };
+
+  const handleSessionMethodChange = (event) => {
+    setSessionMethod(event.target.value);
+  };
+  
+
   if (loading) {
     return (
       <Container sx={{ mt: 4, textAlign: 'center' }}>
@@ -270,13 +341,13 @@ const DeckPage = () => {
 
       <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
 
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleStartSession}
-        >
-          Start Session
-        </Button>
+      <Button
+  variant="contained"
+  color="primary"
+  onClick={handleOpenStartSessionDialog}
+>
+  Start Session
+</Button>
 
 
         {/* Preview Button to Toggle Cards List */}
@@ -405,6 +476,77 @@ const DeckPage = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Start Session Dialog */}
+<Dialog
+  open={openStartSessionDialog}
+  onClose={handleCloseStartSessionDialog}
+  aria-labelledby="start-session-dialog-title"
+  aria-describedby="start-session-dialog-description"
+>
+  <DialogTitle id="start-session-dialog-title">Start a New Session</DialogTitle>
+  <DialogContent>
+    <DialogContentText id="start-session-dialog-description">
+      Configure the parameters for your new review session.
+    </DialogContentText>
+
+    {/* Session Count Option */}
+    <FormControl component="fieldset" sx={{ mt: 2 }}>
+      <FormLabel component="legend">Number of Cards</FormLabel>
+      <RadioGroup
+        aria-label="session-count"
+        name="session-count"
+        value={sessionCountOption}
+        onChange={handleSessionCountOptionChange}
+      >
+        <FormControlLabel value="all" control={<Radio />} label="All Cards" />
+        <FormControlLabel value="count" control={<Radio />} label="Specify Count" />
+      </RadioGroup>
+    </FormControl>
+
+    {/* Session Count Input (Visible only if 'Specify Count' is selected) */}
+    {sessionCountOption === 'count' && (
+      <TextField
+        autoFocus
+        margin="dense"
+        label="Number of Cards"
+        type="number"
+        fullWidth
+        variant="standard"
+        value={sessionCount}
+        onChange={handleSessionCountChange}
+        inputProps={{
+          min: 1,
+          max: deck.cards.length,
+        }}
+        helperText={`Enter a number between 1 and ${deck.cards.length}`}
+      />
+    )}
+
+    {/* Session Method Selection */}
+    <FormControl fullWidth sx={{ mt: 2 }}>
+      <FormLabel>Session Method</FormLabel>
+      <Select
+        value={sessionMethod}
+        onChange={handleSessionMethodChange}
+        variant="standard"
+      >
+        <MenuItem value="Random">Random</MenuItem>
+        {/* Add more methods here as needed */}
+        <MenuItem value="Fails">Fails</MenuItem>
+        <MenuItem value="Skips">Skips</MenuItem>
+        <MenuItem value="Worst">Worst</MenuItem>
+      </Select>
+    </FormControl>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={handleCloseStartSessionDialog} disabled={exporting}>Cancel</Button>
+    <Button onClick={handleStartSessionSubmit} variant="contained" color="primary">
+      Start Session
+    </Button>
+  </DialogActions>
+</Dialog>
+
 
       {/* Snackbar for Notifications */}
       <Snackbar
