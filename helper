@@ -47,6 +47,12 @@ run_npm_start() {
     cd meowmorize-frontend && npm run start && cd ..
 }
 
+# Function to run npm test in meowmorize directory
+run_npm_test() {
+    echo "Running npm test in meowmorize directory..."
+    cd meowmorize-frontend && npm test && cd ..
+}
+
 # Function to run tests
 run_tests() {
     echo "Running tests..."
@@ -65,6 +71,7 @@ usage() {
     echo "  mocks       Generate mock files"
     echo "  npm-start   Run npm in meowmorize directory"
     echo "  npm-build   Run build npm in meowmorize directory"
+    echo "  npm-test    javascript test"
     echo "  test        Run tests"
     echo "  help        Display this help message"
 }
@@ -97,6 +104,9 @@ case "$1" in
         ;;
     npm-start)
         run_npm_start
+        ;;
+    npm-test)
+        run_npm_test
         ;;
     test)
         run_tests

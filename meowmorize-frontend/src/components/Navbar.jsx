@@ -1,13 +1,22 @@
 // src/components/Navbar.jsx
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Switch, FormControlLabel, Snackbar } from '@mui/material';
+import {
+  AppBar, Toolbar, Typography,
+  Button, Switch, FormControlLabel,
+  Menu,
+  MenuItem,  
+  Snackbar,
+  IconButton,
+} from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import Logo from '../logo512.png'; // Adjust the path if necessary
+import MenuIcon from '@mui/icons-material/Menu';
 
 import { useNavigate } from 'react-router-dom';
 import { createEmptyDeck } from '../services/api'; // Import the API function
 import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
 
+ 
 
 // Inside your Navbar component
 const Navbar = ({ mode, toggleTheme }) => {
@@ -19,6 +28,21 @@ const Navbar = ({ mode, toggleTheme }) => {
 
   // Inside the Navbar component
   const navigate = useNavigate();
+
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+ 
+  // Handler to open the dropdown menu
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  // Handler to close the dropdown menu
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
 
   // Handler to close the Snackbar
   const handleCloseSnackbar = (event, reason) => {
@@ -64,14 +88,33 @@ const Navbar = ({ mode, toggleTheme }) => {
         <Button color="inherit" component={RouterLink} to="/">
           Dashboard
         </Button>
-        <Button color="inherit" component={RouterLink} to="/import">
-          Import Deck
-        </Button>
-
-        {/* Create Empty Deck Button */}
-        <Button color="inherit" onClick={handleCreateEmptyDeck}>
-          Create Empty Deck
-        </Button>
+       
+        {/* Dropdown Menu for Deck Actions */}
+        <div>
+          <IconButton
+            color="inherit"
+            onClick={handleMenuOpen}
+            aria-controls={open ? 'deck-menu' : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? 'true' : undefined}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Menu
+            id="deck-menu"
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleMenuClose}
+            MenuListProps={{
+              'aria-labelledby': 'deck-menu-button',
+            }}
+          >
+            <MenuItem component={RouterLink} to="/import" onClick={handleMenuClose}>
+              Import Deck
+            </MenuItem>
+            <MenuItem onClick={handleCreateEmptyDeck}>Create Empty Deck</MenuItem>
+          </Menu>
+        </div>
 
 
         {/* Theme Toggle Switch */}
@@ -88,8 +131,8 @@ const Navbar = ({ mode, toggleTheme }) => {
 
         {/* Add more navigation links here as needed */}
       </Toolbar>
-        {/* Snackbar for Notifications */}
-        <Snackbar
+      {/* Snackbar for Notifications */}
+      <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
@@ -99,7 +142,7 @@ const Navbar = ({ mode, toggleTheme }) => {
           {snackbar.message}
         </MuiAlert>
       </Snackbar>
-      
+
     </AppBar>
   );
 };
