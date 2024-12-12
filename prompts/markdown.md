@@ -18,9 +18,7 @@ For each card:
 
 1. Front side begins with "### Front" 
 
-   If it makes sense, add 4-5 title words in the same line as front
-
-  For example
+   
 
  ### Front AWS Lightsail features
 
@@ -48,4 +46,4 @@ Please create the flashcards directly in this format, without any explanations o
 
 Focus on AWS Cloud certifaction questions or topics that relate to AWS Lambda and AWS Step functions.   You can have a few questions that compare.
 
-and create 25 cards.
+and create 10 cards.
