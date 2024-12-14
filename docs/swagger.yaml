@@ -67,6 +67,10 @@ definitions:
     type: object
   controller.GetSessionStatsResponse:
     properties:
+      card_stats:
+        items:
+          $ref: '#/definitions/types.CardStats'
+        type: array
       current_index:
         type: integer
       remaining:
@@ -170,6 +174,19 @@ definitions:
     properties:
       text:
         type: string
+    type: object
+  types.CardStats:
+    properties:
+      card_id:
+        type: string
+      failed:
+        type: boolean
+      passed:
+        type: boolean
+      skipped:
+        type: boolean
+      viewed:
+        type: boolean
     type: object
   types.Deck:
     properties:

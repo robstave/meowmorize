@@ -142,10 +142,11 @@ func (hc *MeowController) ClearSession(c echo.Context) error {
 
 // GetSessionStatsResponse represents the session statistics
 type GetSessionStatsResponse struct {
-	TotalCards   int `json:"total_cards"`
-	ViewedCount  int `json:"viewed_count"`
-	Remaining    int `json:"remaining"`
-	CurrentIndex int `json:"current_index"`
+	TotalCards   int               `json:"total_cards"`
+	ViewedCount  int               `json:"viewed_count"`
+	Remaining    int               `json:"remaining"`
+	CurrentIndex int               `json:"current_index"`
+	CardStats    []types.CardStats `json:"card_stats"`
 }
 
 // GetSessionStats retrieves the statistics of the current session for a deck
@@ -186,5 +187,6 @@ func (hc *MeowController) GetSessionStats(c echo.Context) error {
 		ViewedCount:  stats.ViewedCount,
 		Remaining:    stats.Remaining,
 		CurrentIndex: stats.CurrentIndex,
+		CardStats:    stats.CardStats,
 	})
 }

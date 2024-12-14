@@ -1152,6 +1152,12 @@ const docTemplate = `{
         "controller.GetSessionStatsResponse": {
             "type": "object",
             "properties": {
+                "card_stats": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.CardStats"
+                    }
+                },
                 "current_index": {
                     "type": "integer"
                 },
@@ -1306,6 +1312,26 @@ const docTemplate = `{
             "properties": {
                 "text": {
                     "type": "string"
+                }
+            }
+        },
+        "types.CardStats": {
+            "type": "object",
+            "properties": {
+                "card_id": {
+                    "type": "string"
+                },
+                "failed": {
+                    "type": "boolean"
+                },
+                "passed": {
+                    "type": "boolean"
+                },
+                "skipped": {
+                    "type": "boolean"
+                },
+                "viewed": {
+                    "type": "boolean"
                 }
             }
         },

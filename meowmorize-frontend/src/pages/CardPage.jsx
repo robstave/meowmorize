@@ -28,6 +28,7 @@ import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
 
 import HorizontalProgressBar from '../components/HorizontalProgressBar';
 import PieStatusChart from '../components/CatStatusChart';
+import CardStatsBar from '../components/CardStatsBar';
 
 
 
@@ -55,6 +56,7 @@ const CardPage = () => {
     viewed_count: 0,
     remaining: 0,
     current_index: 0,
+    
   });
 
 
@@ -298,7 +300,9 @@ const CardPage = () => {
  */}
       {/* Horizontal Status Bar */}
       <Box sx={{ mt: 4 }}>
-        <HorizontalProgressBar index={sessionStats.viewed_count} total={sessionStats.total_cards} />
+       {/* <HorizontalProgressBar index={sessionStats.viewed_count} total={sessionStats.total_cards} />  */}
+        <CardStatsBar cards={sessionStats.card_stats}   />
+
       </Box>
 
 

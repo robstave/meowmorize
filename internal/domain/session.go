@@ -43,6 +43,8 @@ func (s *Service) StartSession(deckID string, count int, method types.SessionMet
 			CardID:  card.ID,
 			Viewed:  false,
 			Skipped: false,
+			Passed:  false,
+			Failed:  false,
 		}
 	}
 
@@ -185,28 +187,40 @@ func (s *Service) AdjustSession(deckID string, cardID string, action types.CardA
 	case types.IncrementFail:
 		cardStat.Viewed = true
 		cardStat.Skipped = false
+		cardStat.Failed = true
+		cardStat.Passed = false
 
 	case types.IncrementPass:
 		cardStat.Viewed = true
 		cardStat.Skipped = false
+		cardStat.Failed = false
+		cardStat.Passed = true
 
 	case types.IncrementSkip:
-		cardStat.Viewed = false
+		cardStat.Viewed = true
 		cardStat.Skipped = true
+		cardStat.Failed = false
+		cardStat.Passed = false
 
 	case types.SetStars:
 		// Implement if necessary
 	case types.Retire:
 		cardStat.Viewed = true
 		cardStat.Skipped = false
+		cardStat.Failed = false
+		cardStat.Passed = false
 		// Implement retire logic in the repository
 	case types.Unretire:
 		cardStat.Viewed = false
 		cardStat.Skipped = false
+		cardStat.Failed = false
+		cardStat.Passed = false
 		// Implement unretire logic in the repository
 	case types.ResetStats:
 		cardStat.Viewed = false
 		cardStat.Skipped = false
+		cardStat.Failed = false
+		cardStat.Passed = false
 
 	default:
 		return errors.New("invalid card action")

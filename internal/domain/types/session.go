@@ -15,9 +15,11 @@ const (
 
 // CardStats represents the state of a card within a session
 type CardStats struct {
-	CardID  string
-	Viewed  bool
-	Skipped bool
+	CardID  string `json:"card_id"`
+	Viewed  bool   `json:"viewed"`
+	Skipped bool   `json:"skipped"`
+	Failed  bool   `json:"failed"`
+	Passed  bool   `json:"passed"`
 }
 
 // Session represents a review session for a specific deck
@@ -33,10 +35,11 @@ type Session struct {
 
 // SessionStats holds statistics for a session
 type SessionStats struct {
-	TotalCards   int `json:"totalCards"`
-	ViewedCount  int `json:"viewedCount"`
-	Remaining    int `json:"remaining"`
-	CurrentIndex int `json:"currentIndex"`
+	TotalCards   int         `json:"totalCards"`
+	ViewedCount  int         `json:"viewedCount"`
+	Remaining    int         `json:"remaining"`
+	CurrentIndex int         `json:"currentIndex"`
+	CardStats    []CardStats `json:"cardStats"`
 }
 
 // GetNextCard returns the ID of the next card in the session
@@ -49,6 +52,7 @@ func (s *Session) GetNextCard() string {
 	}
 	if s.Index >= len(s.CardStats) {
 		s.Index = 0 // Restart the session
+		resortCards(s)
 	}
 
 	cardID := s.CardStats[s.Index].CardID
@@ -78,7 +82,28 @@ func (s *Session) GetSessionStats() SessionStats {
 		ViewedCount:  viewedCount,
 		Remaining:    len(s.CardStats) - viewedCount,
 		CurrentIndex: s.Index,
+		CardStats:    s.CardStats,
 	}
 
 	return stats
+}
+
+// resortCards reorders cards so that skipped cards appear at the top,
+// followed by failed cards, and then all remaining cards.
+func resortCards(s *Session) {
+	skippedCards := []CardStats{}
+	failedCards := []CardStats{}
+	remainingCards := []CardStats{}
+
+	for _, cs := range s.CardStats {
+		if cs.Skipped {
+			skippedCards = append(skippedCards, cs)
+		} else if cs.Failed {
+			failedCards = append(failedCards, cs)
+		} else {
+			remainingCards = append(remainingCards, cs)
+		}
+	}
+
+	s.CardStats = append(skippedCards, append(failedCards, remainingCards...)...)
 }
