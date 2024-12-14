@@ -9,10 +9,10 @@ import (
 )
 
 type Service struct {
-	logger   *slog.Logger
-	deckRepo repositories.DeckRepository
-	cardRepo repositories.CardRepository
-
+	logger     *slog.Logger
+	deckRepo   repositories.DeckRepository
+	cardRepo   repositories.CardRepository
+	userRepo   repositories.UserRepository
 	sessions   map[string]*types.Session // Key: DeckID
 	sessionsMu sync.RWMutex
 }
@@ -41,14 +41,29 @@ type MeowDomain interface {
 
 	// Clear Deck Statistics
 	ClearDeckStats(deckID string, clearSession bool, clearStats bool) error
+
+	// User-related methods
+	GetUserByUsername(username string) (*types.User, error)
+	CreateUser(user types.User) error
+	SeedUser() error
 }
 
-func NewService(logger *slog.Logger, deckRepo repositories.DeckRepository, cardRepo repositories.CardRepository) MeowDomain {
-	return &Service{
+// internal/domain/service.go
+// ...
+func NewService(logger *slog.Logger, deckRepo repositories.DeckRepository, cardRepo repositories.CardRepository, userRepo repositories.UserRepository) MeowDomain {
+	service := &Service{
 		logger:     logger,
 		deckRepo:   deckRepo,
 		cardRepo:   cardRepo,
+		userRepo:   userRepo,
 		sessions:   make(map[string]*types.Session),
 		sessionsMu: sync.RWMutex{},
 	}
+
+	// Seed the initial user
+	if err := service.SeedUser(); err != nil {
+		logger.Error("Failed to seed initial user", "error", err)
+	}
+
+	return service
 }

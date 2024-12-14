@@ -41,7 +41,7 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	err = db.AutoMigrate(&types.Deck{}, &types.Card{})
+	err = db.AutoMigrate(&types.Deck{}, &types.Card{}, &types.User{})
 	if err != nil {
 		slogger.Error("Failed to migrate database", "error", err)
 		log.Fatalf("Failed to migrate database: %v", err)
@@ -50,9 +50,10 @@ func main() {
 	// Initialize Repositories
 	deckRepo := repositories.NewDeckRepositorySQLite(db)
 	cardRepo := repositories.NewCardRepositorySQLite(db)
+	userRepo := repositories.NewUserRepositorySQLite(db) // Initialize User Repository
 
 	// Initialize Service
-	service := domain.NewService(slogger, deckRepo, cardRepo)
+	service := domain.NewService(slogger, deckRepo, cardRepo, userRepo)
 
 	// Initialize Controller
 	meowController := controller.NewMeowController(service, slogger)
@@ -79,33 +80,43 @@ func main() {
 	// Routes
 	api := e.Group("/api")
 	deckGroup := api.Group("/decks")
-
 	sessionGroup := api.Group("/sessions")
-
-	deckGroup.GET("", meowController.GetAllDecks)
-	deckGroup.POST("/default", meowController.CreateDefaultDeck)
-	deckGroup.GET("/:id", meowController.GetDeckByID)
-	deckGroup.POST("", meowController.CreateDeck)
-	deckGroup.PUT("/:id", meowController.UpdateDeck)
-	deckGroup.DELETE("/:id", meowController.DeleteDeck)
-
-	deckGroup.POST("/import", meowController.ImportDeck)
-	deckGroup.GET("/export/:id", meowController.ExportDeck)
-
-	deckGroup.POST("/stats/:id", meowController.ClearDeckStats)
-
 	cardGroup := api.Group("/cards")
-	cardGroup.POST("/stats", meowController.UpdateCardStats)
-	cardGroup.GET("/:id", meowController.GetCardByID)
-	cardGroup.POST("", meowController.CreateCard)
-	cardGroup.PUT("/:id", meowController.UpdateCard)
-	cardGroup.DELETE("/:id", meowController.DeleteCard)
 
-	// Session Routes
-	sessionGroup.POST("/start", meowController.StartSession)
-	sessionGroup.GET("/next", meowController.GetNextCard)
-	sessionGroup.DELETE("/clear", meowController.ClearSession)
-	sessionGroup.GET("/stats", meowController.GetSessionStats)
+	// Authentication Route
+	api.POST("/login", meowController.Login)
+
+	// Protected Routes
+	// Define a JWT middleware
+	JWTSecret := controller.JWTSecret
+	jwtMiddleware := middleware.JWTWithConfig(middleware.JWTConfig{
+		SigningKey: JWTSecret,
+	})
+
+	// Protect deck, card, and session routes
+	protectedDeckGroup := deckGroup.Group("", jwtMiddleware)
+	protectedDeckGroup.GET("", meowController.GetAllDecks)
+	protectedDeckGroup.POST("/default", meowController.CreateDefaultDeck)
+	protectedDeckGroup.GET("/:id", meowController.GetDeckByID)
+	protectedDeckGroup.POST("", meowController.CreateDeck)
+	protectedDeckGroup.PUT("/:id", meowController.UpdateDeck)
+	protectedDeckGroup.DELETE("/:id", meowController.DeleteDeck)
+	protectedDeckGroup.POST("/import", meowController.ImportDeck)
+	protectedDeckGroup.GET("/export/:id", meowController.ExportDeck)
+	protectedDeckGroup.POST("/stats/:id", meowController.ClearDeckStats)
+
+	protectedCardGroup := cardGroup.Group("", jwtMiddleware)
+	protectedCardGroup.POST("/stats", meowController.UpdateCardStats)
+	protectedCardGroup.GET("/:id", meowController.GetCardByID)
+	protectedCardGroup.POST("", meowController.CreateCard)
+	protectedCardGroup.PUT("/:id", meowController.UpdateCard)
+	protectedCardGroup.DELETE("/:id", meowController.DeleteCard)
+
+	protectedSessionGroup := sessionGroup.Group("", jwtMiddleware)
+	protectedSessionGroup.POST("/start", meowController.StartSession)
+	protectedSessionGroup.GET("/next", meowController.GetNextCard)
+	protectedSessionGroup.DELETE("/clear", meowController.ClearSession)
+	protectedSessionGroup.GET("/stats", meowController.GetSessionStats)
 
 	// Swagger endpoint
 	e.GET("/swagger/*", httpSwagger.WrapHandler)

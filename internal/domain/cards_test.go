@@ -9,10 +9,12 @@ import (
 	"github.com/robstave/meowmorize/internal/logger"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestCardService_GetCardDetails_Success(t *testing.T) {
 	cardRepo := new(mocks.CardRepository)
+	userRepo := new(mocks.UserRepository)
 	dr := new(mocks.DeckRepository)
 
 	// Define the expected card, including the new Links field
@@ -28,11 +30,17 @@ func TestCardService_GetCardDetails_Success(t *testing.T) {
 		Link: "https://example.com/resource1",
 	}
 
+	//user := types.User{}
+
 	// Setup expectations
 	cardRepo.On("GetCardByID", "card1").Return(expectedCard, nil)
+	userRepo.On("GetUserByUsername", "meow").Return(nil, nil)
+	userRepo.On("CreateUser", mock.MatchedBy(func(u types.User) bool {
+		return u.Username != "" // or any other basic validation
+	})).Return(nil, nil)
 
 	// Initialize the service with the mock repositories
-	dm := NewService(logger.InitializeLogger(), dr, cardRepo)
+	dm := NewService(logger.InitializeLogger(), dr, cardRepo, userRepo)
 
 	// Call the method
 	card, err := dm.GetCardByID("card1")

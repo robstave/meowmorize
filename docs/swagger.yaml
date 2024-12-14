@@ -76,6 +76,21 @@ definitions:
       viewed_count:
         type: integer
     type: object
+  controller.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  controller.LoginResponse:
+    properties:
+      token:
+        type: string
+    type: object
   controller.StartSessionRequest:
     properties:
       count:
@@ -669,6 +684,46 @@ paths:
       summary: Clear deck statistics
       tags:
       - Decks
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return a JWT token
+      parameters:
+      - description: User Credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/controller.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: User Login
+      tags:
+      - Authentication
   /sessions/clear:
     delete:
       description: Terminate and clear the current review session for a specific deck

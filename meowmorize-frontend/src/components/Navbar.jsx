@@ -1,5 +1,5 @@
 // src/components/Navbar.jsx
-import React from 'react';
+import React, { useContext }  from 'react';
 import {
   AppBar, Toolbar, Typography,
   Button, Switch, FormControlLabel,
@@ -17,6 +17,9 @@ import { createEmptyDeck } from '../services/api'; // Import the API function
 import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
 
  
+  import { AuthContext } from '../context/AuthContext'; // Import AuthContext
+  
+
 
 // Inside your Navbar component
 const Navbar = ({ mode, toggleTheme }) => {
@@ -42,6 +45,12 @@ const Navbar = ({ mode, toggleTheme }) => {
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
+
+    // Handler for logout
+    const handleLogout = () => {
+      logout();
+      navigate('/login');
+    };
 
 
   // Handler to close the Snackbar
@@ -74,7 +83,7 @@ const Navbar = ({ mode, toggleTheme }) => {
     }
   };
 
-
+  const { auth, logout } = useContext(AuthContext);
   return (
     <AppBar position="static">
       <Toolbar>
@@ -85,12 +94,16 @@ const Navbar = ({ mode, toggleTheme }) => {
           MeowMorize
         </Typography>
         {/* Navigation Links */}
-        <Button color="inherit" component={RouterLink} to="/">
-          Dashboard
-        </Button>
+   {auth.token && (
+          <Button color="inherit" component={RouterLink} to="/">
+            Dashboard
+          </Button>
+        )}
        
         {/* Dropdown Menu for Deck Actions */}
+        {auth.token && (
         <div>
+   
           <IconButton
             color="inherit"
             onClick={handleMenuOpen}
@@ -115,6 +128,7 @@ const Navbar = ({ mode, toggleTheme }) => {
             <MenuItem onClick={handleCreateEmptyDeck}>Create Empty Deck</MenuItem>
           </Menu>
         </div>
+        )}
 
 
         {/* Theme Toggle Switch */}
@@ -129,6 +143,16 @@ const Navbar = ({ mode, toggleTheme }) => {
           label="Dark Mode"
         />
 
+   {/* Authentication Buttons */}
+   {!auth.token ? (
+          <Button color="inherit" component={RouterLink} to="/login">
+            Login
+          </Button>
+        ) : (
+          <Button color="inherit" onClick={handleLogout}>
+            Logout
+          </Button>
+        )}
         {/* Add more navigation links here as needed */}
       </Toolbar>
       {/* Snackbar for Notifications */}

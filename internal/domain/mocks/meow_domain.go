@@ -135,6 +135,20 @@ func (_m *MeowDomain) CreateDefaultDeck(defaultDeck bool) (types.Deck, error) {
 	return r0, r1
 }
 
+// CreateUser provides a mock function with given fields: user
+func (_m *MeowDomain) CreateUser(user types.User) error {
+	ret := _m.Called(user)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(types.User) error); ok {
+		r0 = rf(user)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // DeleteCardByID provides a mock function with given fields: cardID
 func (_m *MeowDomain) DeleteCardByID(cardID string) error {
 	ret := _m.Called(cardID)
@@ -291,6 +305,43 @@ func (_m *MeowDomain) GetSessionStats(deckID string) (types.SessionStats, error)
 	}
 
 	return r0, r1
+}
+
+// GetUserByUsername provides a mock function with given fields: username
+func (_m *MeowDomain) GetUserByUsername(username string) (*types.User, error) {
+	ret := _m.Called(username)
+
+	var r0 *types.User
+	if rf, ok := ret.Get(0).(func(string) *types.User); ok {
+		r0 = rf(username)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*types.User)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(username)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// SeedUser provides a mock function with given fields:
+func (_m *MeowDomain) SeedUser() error {
+	ret := _m.Called()
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func() error); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // StartSession provides a mock function with given fields: deckID, count, method
