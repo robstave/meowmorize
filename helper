@@ -21,6 +21,19 @@ init_swagger() {
     swag init --dir ./cmd/main --parseDependency --parseInternal --output ./docs --verbose
 }
 
+ 
+# Function to push to docker
+# docker login  first 
+push_docker() {
+    echo "pushing to docker..."
+docker build -t rstave/meowmorize-backend:latest -f Dockerfile.backend .
+docker build -t rstave/meowmorize-frontend:latest ./meowmorize-frontend
+docker push rstave/meowmorize-backend:latest
+docker push rstave/meowmorize-frontend:latest
+}
+
+
+
 # Function to redo swagger from project root
 redo_swagger() {
     echo "Redoing swagger documentation from cmd/main..."
@@ -74,6 +87,9 @@ usage() {
     echo "  npm-start   Run npm in meowmorize directory"
     echo "  npm-build   Run build npm in meowmorize directory"
     echo "  npm-test    javascript test"
+    echo "  push-docker push to docker "
+
+
     echo "  test        Run tests"
     echo "  help        Display this help message"
 }
@@ -109,6 +125,9 @@ case "$1" in
         ;;
     npm-test)
         run_npm_test
+        ;;
+    push-docker)
+        push_docker 
         ;;
     test)
         run_tests
