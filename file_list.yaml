@@ -14,10 +14,12 @@ meow-front:
   - meowmorize-frontend/src/components/ImportDeck.jsx  
   - meowmorize-frontend/src/components/ImportMarkdownDialog.jsx  
   - meowmorize-frontend/src/components/Navbar.jsx  
+  - meowmorize-frontend/src/context/AuthContext.js
 
 meow-charts:
   - prompts/instructions.md
-  - meowmorize-frontend/src/components/HorizontalStatusBar.jsx
+  - meowmorize-frontend/src/components/CardStatsBar.jsx
+  - meowmorize-frontend/src/components/HorizontalProgressBar.jsx
   - meowmorize-frontend/src/components/CatStatusChart.jsx
   - meowmorize-frontend/src/components/StatusSparkline.jsx
 
@@ -29,6 +31,7 @@ meow-front2:
   - meowmorize-frontend/src/pages/Dashboard.jsx 
   - meowmorize-frontend/src/pages/DeckPage.jsx
   - meowmorize-frontend/src/pages/ImportPage.jsx 
+  - meowmorize-frontend/src/pages/LoginPage.jsx 
   - meowmorize-frontend/src/utils/markdownParser.js
 
 meow-controllers:
@@ -44,6 +47,7 @@ meow-repo:
   - prompts/instructions.md
   - internal/adapters/repositories/card.go
   - internal/adapters/repositories/deck.go
+  - internal/adapters/repositories/user.go
 
 meow-domain:
   - prompts/instructions.md
@@ -51,17 +55,24 @@ meow-domain:
   - internal/domain/types/card.go
   - internal/domain/types/deck.go
   - internal/domain/types/session.go
+  - internal/domain/types/user.go
   - internal/domain/cards.go
   - internal/domain/create.go
   - internal/domain/decks.go
   - internal/domain/default.go
+  - internal/domain/seeder.go
   - internal/domain/service.go
   - internal/domain/session.go
+  - internal/domain/stats.go
+  - internal/domain/user.go
 
 meow-example:
   - prompts/instructions.md
   - capitols.json
   - prompts/markdown.md
+  - prompts/demoimport.md
+  - prompts/demoimport.md
+  - overview.md
 
 meow-docker:
   - overview.md
