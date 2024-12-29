@@ -14,9 +14,89 @@ MeowMorize is composed of two main components:
 
 The application leverages a SQLite database (`meowmorize.db`) located at the root directory for data persistence. To reset the application data, simply delete this database file.
 
+
+## Project Status
+This is still a work in progress and has a few things I would like to do, but its workable
+
+
+
+
+
 ## Getting Started
 
-### Prerequisites
+### Docker Deployment
+
+MeowMorize is containerized using Docker, allowing for easy deployment and scalability. Below are the steps to deploy using Docker Compose.
+
+#### Prerequisites
+
+- **Docker**: [Install Docker](https://docs.docker.com/get-docker/)
+- **Docker Compose**: [Install Docker Compose](https://docs.docker.com/compose/install/)
+
+#### Steps to Deploy
+
+1. **Build and Run Containers**
+
+   From the project's root directory, execute:
+
+   ```bash
+   docker-compose up --build
+   ```
+
+   This command will build Docker images for both the backend and frontend services and start the containers.
+
+2. **Accessing the Services**
+
+   - **Backend**: Accessible at `http://localhost:8789`
+   - **Frontend**: Accessible at `http://localhost:8999`
+
+3. **Docker Compose Services**
+
+   - **backend**
+     - **Build Context**: Current directory (`.`)
+     - **Dockerfile**: `Dockerfile.backend`
+     - **Ports**: Maps host port `8789` to container port `8789`
+     - **Environment Variables**:
+       - `DB_PATH`: `/app/data/db.sqlite3`
+     - **Volumes**:
+       - `db-data`: Persists database data at `/app/data` inside the container
+     - **Restart Policy**: `unless-stopped`
+
+   - **frontend**
+     - **Build Context**: `./meowmorize-frontend`
+     - **Dockerfile**: `Dockerfile`
+     - **Ports**: Maps host port `8999` to container port `80`
+     - **Environment Variables**:
+       - `REACT_APP_BACKEND_URL`: `http://backend:8789`
+     - **Depends On**: `backend`
+     - **Restart Policy**: `unless-stopped`
+
+4. **Managing the Containers**
+
+   - **Stop Containers**
+     ```bash
+     docker compose down
+     ```
+
+   - **Rebuild Containers**
+     ```bash
+     docker compose up --build
+     ```
+
+5. **Pushing Docker Images**
+
+   Utilize the helper script to build and push Docker images to Docker Hub:
+
+   ```bash
+   ./helper push-docker
+   ```
+
+   **Note**: Ensure you are logged in to Docker Hub before executing this command.
+
+
+### Building locally
+
+#### Prerequisites
 
 - **Go**: Ensure Go is installed on your machine. [Download Go](https://golang.org/dl/)
 - **Node.js & npm**: Required for the React frontend. [Download Node.js](https://nodejs.org/)
@@ -30,13 +110,15 @@ The application leverages a SQLite database (`meowmorize.db`) located at the roo
   go install github.com/vektra/mockery/v2@latest
   ```
 
-### Installation
+#### Installation
 
 1. **Clone the Repository**
    ```bash
    git clone https://github.com/yourusername/meowmorize.git
    cd meowmorize
    ```
+
+( Skip to docker compose if your not interested in actually putting this together)
 
 2. **Set Up the Backend**
    
@@ -68,6 +150,12 @@ The application leverages a SQLite database (`meowmorize.db`) located at the roo
    ```
    The frontend will be accessible at `http://localhost:8999`.
 
+  **Run the Frontend Application from helper**
+   ```bash
+   ./helper npm-start
+   ```
+   The frontend will be accessible at `http://localhost:8999`.
+
 ### Building the Application
 
 MeowMorize utilizes a helper script to streamline various build and deployment tasks. Below are the available commands and their descriptions:
@@ -76,7 +164,7 @@ MeowMorize utilizes a helper script to streamline various build and deployment t
 ./helper {run|concat|swagger|redoswagger|mocks|npm-start|npm-build|npm-test|push-docker|test|help}
 ```
 
-#### Commands:
+##### Commands:
 
 - **run**: Start the main backend application.
   ```bash
@@ -203,74 +291,7 @@ MeowMorize supports importing flashcards using a special Markdown format tailore
    - Upload your Markdown file containing the flashcards.
    - The application will parse the file and add the flashcards to the selected deck.
 
-### Docker Deployment
 
-MeowMorize is containerized using Docker, allowing for easy deployment and scalability. Below are the steps to deploy using Docker Compose.
-
-#### Prerequisites
-
-- **Docker**: [Install Docker](https://docs.docker.com/get-docker/)
-- **Docker Compose**: [Install Docker Compose](https://docs.docker.com/compose/install/)
-
-#### Steps to Deploy
-
-1. **Build and Run Containers**
-
-   From the project's root directory, execute:
-
-   ```bash
-   docker-compose up --build
-   ```
-
-   This command will build Docker images for both the backend and frontend services and start the containers.
-
-2. **Accessing the Services**
-
-   - **Backend**: Accessible at `http://localhost:8789`
-   - **Frontend**: Accessible at `http://localhost:8999`
-
-3. **Docker Compose Services**
-
-   - **backend**
-     - **Build Context**: Current directory (`.`)
-     - **Dockerfile**: `Dockerfile.backend`
-     - **Ports**: Maps host port `8789` to container port `8789`
-     - **Environment Variables**:
-       - `DB_PATH`: `/app/data/db.sqlite3`
-     - **Volumes**:
-       - `db-data`: Persists database data at `/app/data` inside the container
-     - **Restart Policy**: `unless-stopped`
-
-   - **frontend**
-     - **Build Context**: `./meowmorize-frontend`
-     - **Dockerfile**: `Dockerfile`
-     - **Ports**: Maps host port `8999` to container port `80`
-     - **Environment Variables**:
-       - `REACT_APP_BACKEND_URL`: `http://backend:8789`
-     - **Depends On**: `backend`
-     - **Restart Policy**: `unless-stopped`
-
-4. **Managing the Containers**
-
-   - **Stop Containers**
-     ```bash
-     docker-compose down
-     ```
-
-   - **Rebuild Containers**
-     ```bash
-     docker-compose up --build
-     ```
-
-5. **Pushing Docker Images**
-
-   Utilize the helper script to build and push Docker images to Docker Hub:
-
-   ```bash
-   ./helper push-docker
-   ```
-
-   **Note**: Ensure you are logged in to Docker Hub before executing this command.
 
 ## API Documentation
 
@@ -299,4 +320,3 @@ Ensure all dependencies are installed and run the following commands using the h
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-```

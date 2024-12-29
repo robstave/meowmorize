@@ -71,8 +71,7 @@ meow-example:
   - capitols.json
   - prompts/markdown.md
   - prompts/demoimport.md
-  - prompts/demoimport.md
-  - overview.md
+  - README.md
 
 meow-docker:
   - overview.md
