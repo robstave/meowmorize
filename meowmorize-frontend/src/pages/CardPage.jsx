@@ -26,7 +26,6 @@ import { Link as RouterLink } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete'; // Import DeleteIcon
 import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
 
-import HorizontalProgressBar from '../components/HorizontalProgressBar';
 import PieStatusChart from '../components/CatStatusChart';
 import CardStatsBar from '../components/CardStatsBar';
 
@@ -293,22 +292,10 @@ const CardPage = () => {
         </IconButton>
       </Box>
 
-      {/*
-    <Box sx={{ mt: 4 }}>
-      <PieStatusChart pass={passCount} skip={skipCount} fail={failCount} />
-    </Box>
- */}
       {/* Horizontal Status Bar */}
       <Box sx={{ mt: 4 }}>
-       {/* <HorizontalProgressBar index={sessionStats.viewed_count} total={sessionStats.total_cards} />  */}
         <CardStatsBar cards={sessionStats.card_stats}   />
-
       </Box>
-
-
-
-
-
 
       {/* Session Statistics at the Bottom */}
       <Box sx={{ mt: 4 }}>

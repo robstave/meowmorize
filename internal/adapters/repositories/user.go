@@ -1,4 +1,4 @@
-// internal/adapters/repositories/user_repository.go
+// internal/adapters/repositories/user.go
 package repositories
 
 import (

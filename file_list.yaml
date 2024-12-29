@@ -16,12 +16,7 @@ meow-front:
   - meowmorize-frontend/src/components/Navbar.jsx  
   - meowmorize-frontend/src/context/AuthContext.js
 
-meow-charts:
-  - prompts/instructions.md
-  - meowmorize-frontend/src/components/CardStatsBar.jsx
-  - meowmorize-frontend/src/components/HorizontalProgressBar.jsx
-  - meowmorize-frontend/src/components/CatStatusChart.jsx
-  - meowmorize-frontend/src/components/StatusSparkline.jsx
+
 
 meow-front2:
   - prompts/instructions.md
@@ -34,7 +29,13 @@ meow-front2:
   - meowmorize-frontend/src/pages/LoginPage.jsx 
   - meowmorize-frontend/src/utils/markdownParser.js
 
-meow-controllers:
+meow-front-charts:
+  - prompts/instructions.md
+  - meowmorize-frontend/src/components/CardStatsBar.jsx
+  - meowmorize-frontend/src/components/CatStatusChart.jsx
+  - meowmorize-frontend/src/components/StatusSparkline.jsx
+
+meow-bk-controllers:
   - prompts/instructions.md
   - internal/adapters/controller/deck.go
   - internal/adapters/controller/controller.go
@@ -43,13 +44,13 @@ meow-controllers:
   - internal/adapters/controller/card-stats.go
   - internal/adapters/controller/session.go
   
-meow-repo:
+meow-bk-repo:
   - prompts/instructions.md
   - internal/adapters/repositories/card.go
   - internal/adapters/repositories/deck.go
   - internal/adapters/repositories/user.go
 
-meow-domain:
+meow-bk-domain:
   - prompts/instructions.md
   - cmd/main/main.go
   - internal/domain/types/card.go

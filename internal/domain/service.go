@@ -46,6 +46,7 @@ type MeowDomain interface {
 	GetUserByUsername(username string) (*types.User, error)
 	CreateUser(user types.User) error
 	SeedUser() error
+	CollapseDecks(targetDeckID string, sourceDeckID string) error
 }
 
 // internal/domain/service.go

@@ -18,6 +18,7 @@ import (
 // @Accept multipart/form-data
 // @Produce json
 // @Param deck_file formData file true "Deck JSON File"
+// @Security BearerAuth
 // @Success 201 {object} types.Deck
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -100,6 +101,7 @@ func (hc *MeowController) ImportDeck(c echo.Context) error {
 // @Tags decks
 // @Produce application/json
 // @Param id path string true "Deck ID"
+// @Security BearerAuth
 // @Success 200 {object} types.Deck
 // @Failure 400 {object} echo.HTTPError
 // @Failure 500 {object} echo.HTTPError

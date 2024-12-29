@@ -22,6 +22,7 @@ type StartSessionRequest struct {
 // @Accept  json
 // @Produce  json
 // @Param session body StartSessionRequest true "Session Parameters"
+// @Security BearerAuth
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
@@ -65,6 +66,7 @@ type GetNextCardResponse struct {
 // @Produce  json
 // @Param deck_id query string true "Deck ID"
 // @Success 200 {object} GetNextCardResponse
+// @Security BearerAuth
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -108,6 +110,7 @@ func (hc *MeowController) GetNextCard(c echo.Context) error {
 // @Tags Sessions
 // @Produce  json
 // @Param deck_id query string true "Deck ID"
+// @Security BearerAuth
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
@@ -155,6 +158,7 @@ type GetSessionStatsResponse struct {
 // @Tags Sessions
 // @Produce  json
 // @Param deck_id query string true "Deck ID"
+// @Security BearerAuth
 // @Success 200 {object} GetSessionStatsResponse
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string

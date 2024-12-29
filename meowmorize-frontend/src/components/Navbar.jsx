@@ -1,5 +1,6 @@
 // src/components/Navbar.jsx
 import React, { useContext }  from 'react';
+import   { useEffect, useState } from 'react';
 import {
   AppBar, Toolbar, Typography,
   Button, Switch, FormControlLabel,
@@ -13,8 +14,10 @@ import Logo from '../logo512.png'; // Adjust the path if necessary
 import MenuIcon from '@mui/icons-material/Menu';
 
 import { useNavigate } from 'react-router-dom';
-import { createEmptyDeck } from '../services/api'; // Import the API function
+import { createEmptyDeck, fetchDecks } from '../services/api';
+
 import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
+import CollapseDecksDialog from './CollapseDecksDialog'; // Import the new dialog component
 
  
   import { AuthContext } from '../context/AuthContext'; // Import AuthContext
@@ -32,9 +35,33 @@ const Navbar = ({ mode, toggleTheme }) => {
   // Inside the Navbar component
   const navigate = useNavigate();
 
-
+  const { auth, logout } = useContext(AuthContext);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
+
+  const [decks, setDecks] = useState([]);
+  const [collapseDialogOpen, setCollapseDialogOpen] = useState(false);
+
+  useEffect(() => {
+    const getDecks = async () => {
+      try {
+        const data = await fetchDecks();
+        setDecks(data);
+      } catch (err) {
+        console.error('Failed to fetch decks:', err);
+      }
+    };
+
+    if (auth.token) {
+      getDecks();
+    }
+  }, [auth.token]);
+
+
+
+
+ 
+
  
   // Handler to open the dropdown menu
   const handleMenuOpen = (event) => {
@@ -83,7 +110,37 @@ const Navbar = ({ mode, toggleTheme }) => {
     }
   };
 
-  const { auth, logout } = useContext(AuthContext);
+
+  const handleOpenCollapseDialog = () => {
+    setCollapseDialogOpen(true);
+    handleMenuClose();
+  };
+
+  const handleCloseCollapseDialog = () => {
+    setCollapseDialogOpen(false);
+  };
+
+  const handleCollapseSuccess = (message) => {
+    setSnackbar({
+      open: true,
+      message,
+      severity: 'success',
+    });
+    // Refresh decks after collapse
+    fetchDecks()
+      .then((data) => setDecks(data))
+      .catch((err) => console.error('Failed to fetch decks:', err));
+  };
+
+  const handleCollapseError = (message) => {
+    setSnackbar({
+      open: true,
+      message,
+      severity: 'error',
+    });
+  };
+
+
   return (
     <AppBar position="static">
       <Toolbar>
@@ -126,6 +183,8 @@ const Navbar = ({ mode, toggleTheme }) => {
               Import Deck
             </MenuItem>
             <MenuItem onClick={handleCreateEmptyDeck}>Create Empty Deck</MenuItem>
+            <MenuItem onClick={handleOpenCollapseDialog}>Collapse Decks</MenuItem>
+
           </Menu>
         </div>
         )}
@@ -155,6 +214,16 @@ const Navbar = ({ mode, toggleTheme }) => {
         )}
         {/* Add more navigation links here as needed */}
       </Toolbar>
+
+         {/* Collapse Decks Dialog */}
+         <CollapseDecksDialog
+        open={collapseDialogOpen}
+        handleClose={handleCloseCollapseDialog}
+        decks={decks}
+        onSuccess={handleCollapseSuccess}
+        onError={handleCollapseError}
+      />
+
       {/* Snackbar for Notifications */}
       <Snackbar
         open={snackbar.open}

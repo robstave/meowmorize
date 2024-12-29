@@ -23,6 +23,9 @@ import (
 // @description API documentation for the MeowMorize Flashcard App.
 // @host 192.168.86.176:8789
 // @BasePath /api
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	// Initialize Logger
 	slogger := logger.InitializeLogger()
@@ -104,6 +107,7 @@ func main() {
 	protectedDeckGroup.POST("/import", meowController.ImportDeck)
 	protectedDeckGroup.GET("/export/:id", meowController.ExportDeck)
 	protectedDeckGroup.POST("/stats/:id", meowController.ClearDeckStats)
+	protectedDeckGroup.POST("/collapse", meowController.CollapseDecks) // Add this line
 
 	protectedCardGroup := cardGroup.Group("", jwtMiddleware)
 	protectedCardGroup.POST("/stats", meowController.UpdateCardStats)

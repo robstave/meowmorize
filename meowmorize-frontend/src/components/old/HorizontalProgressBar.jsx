@@ -19,8 +19,8 @@ const HorizontalProgressBar = ({ index, total }) => {
     const progress = totalCount > 0 ? currentIndex / totalCount : 0;
     
     const data = [
-      { value: progress, color: '#2e7d32', label: 'Progress', count: currentIndex },
-      { value: 1 - progress, color: '#f5f5f5', label: 'Remaining', count: totalCount - currentIndex }
+      { value: progress, color: '#1976d2', label: 'Progress', count: currentIndex },
+      { value: 1 - progress, color: '#eeeeee', label: 'Remaining', count: totalCount - currentIndex }
     ];
 
     const svg = d3.select(svgRef.current)

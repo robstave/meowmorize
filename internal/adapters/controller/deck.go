@@ -13,6 +13,7 @@ import (
 // @Tags Decks
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param deck body types.Deck true "Deck to create"
 // @Success 201 {object} types.Deck
 // @Failure 400 {object} map[string]string
@@ -48,6 +49,7 @@ func (hc *MeowController) CreateDeck(c echo.Context) error {
 // @Description Delete a deck by its ID
 // @Tags Decks
 // @Param id path string true "Deck ID"
+// @Security BearerAuth
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
@@ -81,6 +83,7 @@ func (hc *MeowController) DeleteDeck(c echo.Context) error {
 // @Description Retrieve a list of all decks
 // @Tags Decks
 // @Produce  json
+// @Security BearerAuth
 // @Success 200 {array} types.Deck
 // @Failure 500 {object} map[string]string
 // @Router /decks [get]
@@ -102,6 +105,7 @@ func (hc *MeowController) GetAllDecks(c echo.Context) error {
 // @Tags Decks
 // @Produce  json
 // @Param id path string true "Deck ID"
+// @Security BearerAuth
 // @Success 200 {object} types.Deck
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
@@ -140,6 +144,7 @@ type UpdateDeckRequest struct {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "Deck ID"
+// @Security BearerAuth
 // @Param deck body UpdateDeckRequest true "Updated Deck"
 // @Success 200 {object} types.Deck
 // @Failure 400 {object} map[string]string
@@ -190,4 +195,54 @@ func (hc *MeowController) UpdateDeck(c echo.Context) error {
 
 	hc.logger.Info("Deck updated successfully", "deckID", deckID)
 	return c.JSON(http.StatusOK, existingDeck)
+}
+
+// CollapseDecksRequest represents the expected payload for collapsing decks
+type CollapseDecksRequest struct {
+	TargetDeckID string `json:"target_deck_id" validate:"required,uuid"`
+	SourceDeckID string `json:"source_deck_id" validate:"required,uuid"`
+}
+
+// @Summary Collapse two decks
+// @Description Merge all cards from the source deck into the target deck by removing each card from the source deck, deleting it, and adding it to the target deck.
+// @Tags Decks
+// @Accept  json
+// @Produce  json
+// @Param collapse body CollapseDecksRequest true "Deck IDs to collapse"
+// @Security BearerAuth
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /decks/collapse [post]
+func (hc *MeowController) CollapseDecks(c echo.Context) error {
+	var req CollapseDecksRequest
+	if err := c.Bind(&req); err != nil {
+		hc.logger.Error("Failed to bind collapse decks request", "error", err)
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "Invalid request payload",
+		})
+	}
+
+	// Optional: Add validation here if using a validation library
+	// e.g., if err := c.Validate(req); err != nil { ... }
+
+	// Call the service to collapse decks
+	if err := hc.service.CollapseDecks(req.TargetDeckID, req.SourceDeckID); err != nil {
+		hc.logger.Error("Failed to collapse decks", "targetDeckID", req.TargetDeckID, "sourceDeckID", req.SourceDeckID, "error", err)
+		// Determine the type of error to return appropriate HTTP status codes
+		if err.Error() == "deck with ID "+req.SourceDeckID+" not found" || err.Error() == "deck with ID "+req.TargetDeckID+" not found" {
+			return c.JSON(http.StatusNotFound, echo.Map{
+				"message": "One or both decks not found",
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"message": "Failed to collapse decks",
+		})
+	}
+
+	hc.logger.Info("Decks collapsed successfully", "targetDeckID", req.TargetDeckID, "sourceDeckID", req.SourceDeckID)
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "Decks collapsed successfully",
+	})
 }

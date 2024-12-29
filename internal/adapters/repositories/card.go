@@ -1,3 +1,4 @@
+// internal/adapters/repositories/card.go
 package repositories
 
 import (
@@ -12,7 +13,7 @@ import (
 type CardRepository interface {
 	GetCardsByDeckID(deckID string) ([]types.Card, error)
 	CreateCard(card types.Card) error
-	GetCardByID(cardID string) (*types.Card, error) // New method added
+	GetCardByID(cardID string) (*types.Card, error)
 	UpdateCard(card types.Card) error
 	DeleteCardByID(cardID string) error
 	CloneCardToDeck(cardID string, targetDeckID string) (*types.Card, error)

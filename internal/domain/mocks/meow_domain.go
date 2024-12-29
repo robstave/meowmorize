@@ -77,6 +77,20 @@ func (_m *MeowDomain) CloneCardToDeck(cardID string, targetDeckID string) (*type
 	return r0, r1
 }
 
+// CollapseDecks provides a mock function with given fields: targetDeckID, sourceDeckID
+func (_m *MeowDomain) CollapseDecks(targetDeckID string, sourceDeckID string) error {
+	ret := _m.Called(targetDeckID, sourceDeckID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, string) error); ok {
+		r0 = rf(targetDeckID, sourceDeckID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // CreateCard provides a mock function with given fields: card
 func (_m *MeowDomain) CreateCard(card types.Card) (*types.Card, error) {
 	ret := _m.Called(card)

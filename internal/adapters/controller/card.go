@@ -14,6 +14,7 @@ import (
 // @Tags Cards
 // @Produce  json
 // @Param id path string true "Card ID"
+// @Security BearerAuth
 // @Success 200 {object} types.Card
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
@@ -66,6 +67,7 @@ type UpdateCardRequest struct {
 // @Accept json
 // @Produce json
 // @Param card body CreateCardRequest true "Create Card"
+// @Security BearerAuth
 // @Success 201 {object} types.Card
 // @Failure 400 {object} echo.HTTPError
 // @Failure 500 {object} echo.HTTPError
@@ -113,6 +115,7 @@ func (c *MeowController) CreateCard(ctx echo.Context) error {
 // @Produce json
 // @Param id path string true "Card ID"
 // @Param card body UpdateCardRequest true "Update Card"
+// @Security BearerAuth
 // @Success 200 {object} types.Card
 // @Failure 400 {object} echo.HTTPError
 // @Failure 404 {object} echo.HTTPError
@@ -164,6 +167,7 @@ func (c *MeowController) UpdateCard(ctx echo.Context) error {
 // @Tags Cards
 // @Produce json
 // @Param id path string true "Card ID"
+// @Security BearerAuth
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string

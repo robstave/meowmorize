@@ -18,6 +18,11 @@ const docTemplate = `{
     "paths": {
         "/cards": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new card and associate it with a deck",
                 "consumes": [
                     "application/json"
@@ -125,6 +130,11 @@ const docTemplate = `{
         },
         "/cards/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve a single card by its ID",
                 "produces": [
                     "application/json"
@@ -179,6 +189,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update the details of an existing card by its ID",
                 "consumes": [
                     "application/json"
@@ -236,6 +251,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Delete a card by its ID",
                 "produces": [
                     "application/json"
@@ -295,6 +315,11 @@ const docTemplate = `{
         },
         "/decks": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve a list of all decks",
                 "produces": [
                     "application/json"
@@ -325,6 +350,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new deck with provided details",
                 "consumes": [
                     "application/json"
@@ -356,6 +386,75 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/decks/collapse": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Merge all cards from the source deck into the target deck by removing each card from the source deck, deleting it, and adding it to the target deck.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Decks"
+                ],
+                "summary": "Collapse two decks",
+                "parameters": [
+                    {
+                        "description": "Deck IDs to collapse",
+                        "name": "collapse",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.CollapseDecksRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -582,6 +681,11 @@ const docTemplate = `{
         },
         "/decks/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve a single deck by its ID",
                 "produces": [
                     "application/json"
@@ -636,6 +740,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update the name (and optionally the ID) of an existing deck by its ID",
                 "consumes": [
                     "application/json"
@@ -702,6 +811,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Delete a deck by its ID",
                 "tags": [
                     "Decks"
@@ -1111,6 +1225,21 @@ const docTemplate = `{
                 }
             }
         },
+        "controller.CollapseDecksRequest": {
+            "type": "object",
+            "required": [
+                "source_deck_id",
+                "target_deck_id"
+            ],
+            "properties": {
+                "source_deck_id": {
+                    "type": "string"
+                },
+                "target_deck_id": {
+                    "type": "string"
+                }
+            }
+        },
         "controller.CreateCardRequest": {
             "type": "object",
             "required": [
@@ -1356,6 +1485,13 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

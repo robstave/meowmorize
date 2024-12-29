@@ -210,4 +210,17 @@ export const loginUser = async (credentials) => {
   }
 };
 
+// Collapse Decks API Function
+export const collapseDecks = async (targetDeckId, sourceDeckId) => {
+  try {
+    const response = await api.post('/decks/collapse', {
+      target_deck_id: targetDeckId,
+      source_deck_id: sourceDeckId,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export default api;

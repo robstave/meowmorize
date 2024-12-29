@@ -40,6 +40,16 @@ definitions:
     - clearSession
     - clearStats
     type: object
+  controller.CollapseDecksRequest:
+    properties:
+      source_deck_id:
+        type: string
+      target_deck_id:
+        type: string
+    required:
+    - source_deck_id
+    - target_deck_id
+    type: object
   controller.CreateCardRequest:
     properties:
       back:
@@ -237,6 +247,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - BearerAuth: []
       summary: Create a new card
       tags:
       - cards
@@ -276,6 +288,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Delete a card
       tags:
       - Cards
@@ -312,6 +326,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get a card by ID
       tags:
       - Cards
@@ -350,6 +366,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - BearerAuth: []
       summary: Update an existing card
       tags:
       - cards
@@ -411,6 +429,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get all decks
       tags:
       - Decks
@@ -444,6 +464,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Create a new deck
       tags:
       - Decks
@@ -481,6 +503,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Delete a deck
       tags:
       - Decks
@@ -517,6 +541,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get a deck by ID
       tags:
       - Decks
@@ -562,7 +588,54 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Update a deck
+      tags:
+      - Decks
+  /decks/collapse:
+    post:
+      consumes:
+      - application/json
+      description: Merge all cards from the source deck into the target deck by removing
+        each card from the source deck, deleting it, and adding it to the target deck.
+      parameters:
+      - description: Deck IDs to collapse
+        in: body
+        name: collapse
+        required: true
+        schema:
+          $ref: '#/definitions/controller.CollapseDecksRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Collapse two decks
       tags:
       - Decks
   /decks/default:
@@ -898,4 +971,9 @@ paths:
       summary: Get session statistics
       tags:
       - Sessions
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
