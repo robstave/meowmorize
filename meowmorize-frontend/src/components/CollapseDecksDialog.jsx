@@ -1,6 +1,6 @@
 // src/components/CollapseDecksDialog.jsx
 
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -15,6 +15,7 @@ import {
   Alert,
 } from '@mui/material';
 import { collapseDecks } from '../services/api'; // We'll create this API function
+import { DeckContext } from '../context/DeckContext'; // Import DeckContext
 
 const CollapseDecksDialog = ({ open, handleClose, decks, onSuccess, onError }) => {
   const [sourceDeck, setSourceDeck] = useState('');
@@ -22,6 +23,9 @@ const CollapseDecksDialog = ({ open, handleClose, decks, onSuccess, onError }) =
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const { loadDecks } = useContext(DeckContext); // Access loadDecks from DeckContext
+
+  
   const handleCollapse = async () => {
     // Validation
     if (!sourceDeck || !targetDeck) {

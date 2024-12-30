@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
+import './CardStatsBar.css';
 
 const CardStatsBar = ({ cards }) => {
   const svgRef = useRef();
@@ -26,7 +27,11 @@ const CardStatsBar = ({ cards }) => {
       return '#808080';
     };
 
-   
+    // Calculate total counts
+    const totalViewed = d3.sum(cards, d => d.viewed ? 1 : 0);
+    const totalPassed = d3.sum(cards, d => d.passed ? 1 : 0);
+    const totalFailed = d3.sum(cards, d => d.failed ? 1 : 0);
+    const totalSkipped = d3.sum(cards, d => d.skipped ? 1 : 0);
 
     // Create SVG
     const svg = d3.select(svgRef.current)
@@ -34,10 +39,9 @@ const CardStatsBar = ({ cards }) => {
       .attr('height', height);
 
     // Create tooltip
-    const body = d3.select('body');
-    const tooltip = body.append('div')
-      .attr('class', 'absolute hidden bg-gray-800 text-white p-2 rounded text-xs')
-      .style('pointer-events', 'none');
+    const tooltip = d3.select('body').append('div')
+      .attr('class', 'card-stats-tooltip')
+      .style('opacity', 0);
 
     // Scales
     const xScale = d3.scaleLinear()
@@ -59,21 +63,21 @@ const CardStatsBar = ({ cards }) => {
       .attr('fill', d => getColor(d))
       .on('mouseover', (event, d) => {
         const tooltipContent = `
-          CardID: ${d.CardID}<br/>
-          Viewed: ${d.Viewed}<br/>
-          Passed: ${d.Passed}<br/>
-          Failed: ${d.Failed}<br/>
-          Skipped: ${d.Skipped}
+          <br/>
+          <strong>Total Viewed:</strong> ${totalViewed}<br/>
+          <strong>Total Passed:</strong> ${totalPassed}<br/>
+          <strong>Total Failed:</strong> ${totalFailed}<br/>
+          <strong>Total Skipped:</strong> ${totalSkipped}
         `;
         
         tooltip
+          .html(tooltipContent)
           .style('left', `${event.pageX + 10}px`)
           .style('top', `${event.pageY - 10}px`)
-          .html(tooltipContent)
-          .classed('hidden', false);
+          .style('opacity', 1);
       })
       .on('mouseout', () => {
-        tooltip.classed('hidden', true);
+        tooltip.style('opacity', 0);
       });
 
     // Cleanup on unmount

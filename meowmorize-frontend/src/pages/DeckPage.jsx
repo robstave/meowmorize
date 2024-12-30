@@ -1,6 +1,6 @@
 // src/pages/DeckPage.jsx
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState, useContext } from 'react';
+import { useParams, useNavigate  } from 'react-router-dom';
 import { fetchDeckById, exportDeck, deleteCard, startSession, getNextCard  } from '../services/api';
 import {
   Container,
@@ -37,11 +37,12 @@ import {
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete'; // Import DeleteIcon
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+//import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import GetAppIcon from '@mui/icons-material/GetApp'; // Icon for export button
 import { saveAs } from 'file-saver'; // To save files on client-side
 import ImportMarkdownDialog from '../components/ImportMarkdownDialog'; // Import the dialog
 import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
+import { DeckContext } from '../context/DeckContext'; // Import DeckContext
 
 
 const AlertSnackbar = React.forwardRef(function Alert(props, ref) {
@@ -52,6 +53,8 @@ const AlertSnackbar = React.forwardRef(function Alert(props, ref) {
 
 const DeckPage = () => {
   const { id } = useParams(); // Extract the deck ID from the URL
+  const { decks, setDecks, loadDecks } = useContext(DeckContext); // Access DeckContext
+
   const [deck, setDeck] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -173,6 +176,11 @@ const [sessionMethod, setSessionMethod] = useState('Random'); // Default method
       const deckNameSanitized = deck.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
       saveAs(blob, `${deckNameSanitized}.json`);
       setOpenExportDialog(false);
+      setSnackbar({
+        open: true,
+        message: 'Deck exported successfully!',
+        severity: 'success',
+      });
     } catch (err) {
       setExportError('Failed to export deck. Please try again.');
       console.error(err);
@@ -194,15 +202,13 @@ const [sessionMethod, setSessionMethod] = useState('Random'); // Default method
   const handleImportSuccess = (count) => {
     setImportSuccessCount(count);
     // Refresh the deck to include new cards
-    const refreshDeck = async () => {
-      try {
-        const data = await fetchDeckById(id);
-        setDeck(data);
-      } catch (err) {
-        console.error('Failed to refresh deck after import', err);
-      }
-    };
-    refreshDeck();
+    // Refresh the deck to include new cards
+    loadDecks();
+    setSnackbar({
+      open: true,
+      message: `${count} card(s) imported successfully!`,
+      severity: 'success',
+    });
   };
 
   // Handlers for Delete Card Dialog
@@ -231,6 +237,11 @@ const [sessionMethod, setSessionMethod] = useState('Random'); // Default method
         message: `Card "${cardToDelete.front.text}" deleted successfully.`,
         severity: 'success',
       });
+      setDecks((prevDecks) =>
+      prevDecks.map((d) =>
+        d.id === deck.id ? { ...d, cards: d.cards.filter((c) => c.id !== cardToDelete.id) } : d
+      )
+    );
     } catch (err) {
       console.error(err);
       setSnackbar({

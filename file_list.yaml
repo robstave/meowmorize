@@ -9,6 +9,7 @@ meow-front:
   - meowmorize-frontend/src/App.js
   - meowmorize-frontend/src/index.css
   - meowmorize-frontend/src/index.js  
+  - meowmorize-frontend/src/components/CollapseDecksDialog.jsx  
   - meowmorize-frontend/src/components/DecksDashboard.jsx  
   - meowmorize-frontend/src/components/DecksDashboard.css
   - meowmorize-frontend/src/components/ImportDeck.jsx  

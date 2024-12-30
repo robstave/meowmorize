@@ -20,12 +20,24 @@ import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
 import CollapseDecksDialog from './CollapseDecksDialog'; // Import the new dialog component
 
  
-  import { AuthContext } from '../context/AuthContext'; // Import AuthContext
-  
+import { AuthContext } from '../context/AuthContext'; // Import AuthContext
+  import { DeckContext } from '../context/DeckContext'; // Import DeckContext
+
 
 
 // Inside your Navbar component
 const Navbar = ({ mode, toggleTheme }) => {
+
+  const { decks, setDecks, loadDecks, loading, error } = useContext(DeckContext);
+
+
+  const { auth, logout } = useContext(AuthContext);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+
+  //const [decks, setDecks] = useState([]);
+  const [collapseDialogOpen, setCollapseDialogOpen] = useState(false);
+
   const [snackbar, setSnackbar] = React.useState({
     open: false,
     message: '',
@@ -35,12 +47,6 @@ const Navbar = ({ mode, toggleTheme }) => {
   // Inside the Navbar component
   const navigate = useNavigate();
 
-  const { auth, logout } = useContext(AuthContext);
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
-
-  const [decks, setDecks] = useState([]);
-  const [collapseDialogOpen, setCollapseDialogOpen] = useState(false);
 
   useEffect(() => {
     const getDecks = async () => {
@@ -89,26 +95,33 @@ const Navbar = ({ mode, toggleTheme }) => {
   };
 
 
-  // Handler to create an empty deck
-  const handleCreateEmptyDeck = async () => {
-    try {
-      const newDeck = await createEmptyDeck();
-      setSnackbar({
-        open: true,
-        message: `Empty deck "${newDeck.name}" created successfully!`,
-        severity: 'success',
-      });
-      // Optional: Navigate to the new deck's page
-      navigate(`/decks/${newDeck.id}`);
-    } catch (error) {
-      console.error('Failed to create empty deck:', error);
-      setSnackbar({
-        open: true,
-        message: 'Failed to create empty deck. Please try again.',
-        severity: 'error',
-      });
-    }
-  };
+   
+
+    // Handler to create an empty deck
+    const handleCreateEmptyDeck = async () => {
+      try {
+        const newDeck = await createEmptyDeck();
+        setSnackbar({
+          open: true,
+          message: `Empty deck "${newDeck.name}" created successfully!`,
+          severity: 'success',
+        });
+        // Refresh decks after creation
+        loadDecks();
+        // Navigate to the new deck's page
+        navigate(`/decks/${newDeck.id}`);
+      } catch (error) {
+        console.error('Failed to create empty deck:', error);
+        setSnackbar({
+          open: true,
+          message: 'Failed to create empty deck. Please try again.',
+          severity: 'error',
+        });
+      }
+    };
+
+    
+
 
 
   const handleOpenCollapseDialog = () => {
@@ -120,6 +133,8 @@ const Navbar = ({ mode, toggleTheme }) => {
     setCollapseDialogOpen(false);
   };
 
+  
+
   const handleCollapseSuccess = (message) => {
     setSnackbar({
       open: true,
@@ -127,10 +142,11 @@ const Navbar = ({ mode, toggleTheme }) => {
       severity: 'success',
     });
     // Refresh decks after collapse
-    fetchDecks()
-      .then((data) => setDecks(data))
-      .catch((err) => console.error('Failed to fetch decks:', err));
+    loadDecks();
   };
+
+
+ 
 
   const handleCollapseError = (message) => {
     setSnackbar({
@@ -223,6 +239,7 @@ const Navbar = ({ mode, toggleTheme }) => {
         onSuccess={handleCollapseSuccess}
         onError={handleCollapseError}
       />
+
 
       {/* Snackbar for Notifications */}
       <Snackbar

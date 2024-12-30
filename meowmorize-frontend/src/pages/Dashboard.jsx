@@ -1,6 +1,6 @@
 // src/pages/Dashboard.jsx
-import React, { useEffect, useState } from 'react';
-import { fetchDecks, deleteDeck, updateDeck } from '../services/api';
+import React, { useEffect, useState, useContext } from 'react';
+import { fetchDecks, deleteDeck, updateDeck, createEmptyDeck } from '../services/api';
 import {
   Container,
   Typography,
@@ -25,13 +25,21 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit'; // Import EditIcon
-import { Link as RouterLink } from 'react-router-dom'; // **Import RouterLink**
+import { Link as RouterLink, useNavigate } from 'react-router-dom'; // **Import RouterLink**
+ 
+import { DeckContext } from '../context/DeckContext'; // Import DeckContext
+import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
+
+const AlertSnackbar = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 
 const Dashboard = () => {
-  const [decks, setDecks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
+  const { decks, setDecks, loadDecks, loading, error } = useContext(DeckContext);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+   
   // State for Edit Dialog
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedDeck, setSelectedDeck] = useState(null);
@@ -48,7 +56,9 @@ const Dashboard = () => {
     message: '',
     severity: 'success', // 'success' | 'error' | 'warning' | 'info'
   });
+  const navigate = useNavigate();
 
+  /*
   useEffect(() => {
     const getDecks = async () => {
       try {
@@ -64,6 +74,7 @@ const Dashboard = () => {
 
     getDecks();
   }, []);
+  */
 
   // Function to open the edit dialog
   const handleOpenEditDialog = (deck) => {
@@ -130,17 +141,17 @@ const Dashboard = () => {
   };
 
 
-  // **Handle Open Delete Confirmation Dialog**
-  const handleOpenDialog = (deck) => {
-    setDeckToDelete(deck);
-    setOpenDialog(true);
-  };
+ // Handler to open delete confirmation dialog
+ const handleOpenDeleteDialog = (deck) => {
+  setDeckToDelete(deck);
+  setOpenDeleteDialog(true);
+};
 
-  // **Handle Close Delete Confirmation Dialog**
-  const handleCloseDialog = () => {
-    setDeckToDelete(null);
-    setOpenDialog(false);
-  };
+// Handler to close delete confirmation dialog
+const handleCloseDeleteDialog = () => {
+  setDeckToDelete(null);
+  setOpenDeleteDialog(false);
+};
 
   // **Handle Delete Deck**
   const handleDeleteDeck = async () => {
@@ -165,7 +176,7 @@ const Dashboard = () => {
       });
       console.error(err);
     } finally {
-      handleCloseDialog();
+      handleCloseDeleteDialog();
     }
   };
 
@@ -249,7 +260,7 @@ const Dashboard = () => {
                   <IconButton
                     aria-label="delete"
                     color="error"
-                    onClick={() => handleOpenDialog(deck)}
+                    onClick={() => handleOpenDeleteDialog(deck)}
                   >
                     <DeleteIcon />
                   </IconButton>
@@ -307,7 +318,7 @@ const Dashboard = () => {
       {/* **Delete Confirmation Dialog** */}
       <Dialog
         open={openDialog}
-        onClose={handleCloseDialog}
+        onClose={handleCloseDeleteDialog}
         aria-labelledby="delete-dialog-title"
         aria-describedby="delete-dialog-description"
       >
@@ -318,7 +329,7 @@ const Dashboard = () => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
+          <Button onClick={handleCloseDeleteDialog} color="primary">
             Cancel
           </Button>
           <Button onClick={handleDeleteDeck} color="error" variant="contained" autoFocus>
