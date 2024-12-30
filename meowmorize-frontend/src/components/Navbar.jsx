@@ -1,41 +1,39 @@
 // src/components/Navbar.jsx
-import React, { useContext }  from 'react';
-import   { useEffect, useState } from 'react';
+import React, { useContext } from 'react';
+import { useEffect, useState } from 'react';
 import {
   AppBar, Toolbar, Typography,
   Button, Switch, FormControlLabel,
   Menu,
-  MenuItem,  
+  MenuItem,
   Snackbar,
   IconButton,
 } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import Logo from '../logo512.png'; // Adjust the path if necessary
 import MenuIcon from '@mui/icons-material/Menu';
 
-import { useNavigate } from 'react-router-dom';
 import { createEmptyDeck, fetchDecks } from '../services/api';
 
 import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
 import CollapseDecksDialog from './CollapseDecksDialog'; // Import the new dialog component
 
- 
+
 import { AuthContext } from '../context/AuthContext'; // Import AuthContext
-  import { DeckContext } from '../context/DeckContext'; // Import DeckContext
+import { DeckContext } from '../context/DeckContext'; // Import DeckContext
+import { ThemeContext } from '../context/ThemeContext'; // Import ThemeContext
 
 
 
 // Inside your Navbar component
-const Navbar = ({ mode, toggleTheme }) => {
+const Navbar = () => {
+  const { isDarkMode, toggleTheme } = useContext(ThemeContext); // Access ThemeContext
 
   const { decks, setDecks, loadDecks, loading, error } = useContext(DeckContext);
-
-
   const { auth, logout } = useContext(AuthContext);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
-  //const [decks, setDecks] = useState([]);
   const [collapseDialogOpen, setCollapseDialogOpen] = useState(false);
 
   const [snackbar, setSnackbar] = React.useState({
@@ -66,9 +64,9 @@ const Navbar = ({ mode, toggleTheme }) => {
 
 
 
- 
 
- 
+
+
   // Handler to open the dropdown menu
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -79,11 +77,11 @@ const Navbar = ({ mode, toggleTheme }) => {
     setAnchorEl(null);
   };
 
-    // Handler for logout
-    const handleLogout = () => {
-      logout();
-      navigate('/login');
-    };
+  // Handler for logout
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
 
   // Handler to close the Snackbar
@@ -95,32 +93,32 @@ const Navbar = ({ mode, toggleTheme }) => {
   };
 
 
-   
 
-    // Handler to create an empty deck
-    const handleCreateEmptyDeck = async () => {
-      try {
-        const newDeck = await createEmptyDeck();
-        setSnackbar({
-          open: true,
-          message: `Empty deck "${newDeck.name}" created successfully!`,
-          severity: 'success',
-        });
-        // Refresh decks after creation
-        loadDecks();
-        // Navigate to the new deck's page
-        navigate(`/decks/${newDeck.id}`);
-      } catch (error) {
-        console.error('Failed to create empty deck:', error);
-        setSnackbar({
-          open: true,
-          message: 'Failed to create empty deck. Please try again.',
-          severity: 'error',
-        });
-      }
-    };
 
-    
+  // Handler to create an empty deck
+  const handleCreateEmptyDeck = async () => {
+    try {
+      const newDeck = await createEmptyDeck();
+      setSnackbar({
+        open: true,
+        message: `Empty deck "${newDeck.name}" created successfully!`,
+        severity: 'success',
+      });
+      // Refresh decks after creation
+      loadDecks();
+      // Navigate to the new deck's page
+      navigate(`/decks/${newDeck.id}`);
+    } catch (error) {
+      console.error('Failed to create empty deck:', error);
+      setSnackbar({
+        open: true,
+        message: 'Failed to create empty deck. Please try again.',
+        severity: 'error',
+      });
+    }
+  };
+
+
 
 
 
@@ -133,7 +131,7 @@ const Navbar = ({ mode, toggleTheme }) => {
     setCollapseDialogOpen(false);
   };
 
-  
+
 
   const handleCollapseSuccess = (message) => {
     setSnackbar({
@@ -146,7 +144,7 @@ const Navbar = ({ mode, toggleTheme }) => {
   };
 
 
- 
+
 
   const handleCollapseError = (message) => {
     setSnackbar({
@@ -167,42 +165,42 @@ const Navbar = ({ mode, toggleTheme }) => {
           MeowMorize
         </Typography>
         {/* Navigation Links */}
-   {auth.token && (
+        {auth.token && (
           <Button color="inherit" component={RouterLink} to="/">
             Dashboard
           </Button>
         )}
-       
+
         {/* Dropdown Menu for Deck Actions */}
         {auth.token && (
-        <div>
-   
-          <IconButton
-            color="inherit"
-            onClick={handleMenuOpen}
-            aria-controls={open ? 'deck-menu' : undefined}
-            aria-haspopup="true"
-            aria-expanded={open ? 'true' : undefined}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Menu
-            id="deck-menu"
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleMenuClose}
-            MenuListProps={{
-              'aria-labelledby': 'deck-menu-button',
-            }}
-          >
-            <MenuItem component={RouterLink} to="/import" onClick={handleMenuClose}>
-              Import Deck
-            </MenuItem>
-            <MenuItem onClick={handleCreateEmptyDeck}>Create Empty Deck</MenuItem>
-            <MenuItem onClick={handleOpenCollapseDialog}>Collapse Decks</MenuItem>
+          <div>
 
-          </Menu>
-        </div>
+            <IconButton
+              color="inherit"
+              onClick={handleMenuOpen}
+              aria-controls={open ? 'deck-menu' : undefined}
+              aria-haspopup="true"
+              aria-expanded={open ? 'true' : undefined}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Menu
+              id="deck-menu"
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleMenuClose}
+              MenuListProps={{
+                'aria-labelledby': 'deck-menu-button',
+              }}
+            >
+              <MenuItem component={RouterLink} to="/import" onClick={handleMenuClose}>
+                Import Deck
+              </MenuItem>
+              <MenuItem onClick={handleCreateEmptyDeck}>Create Empty Deck</MenuItem>
+              <MenuItem onClick={handleOpenCollapseDialog}>Collapse Decks</MenuItem>
+
+            </Menu>
+          </div>
         )}
 
 
@@ -210,7 +208,7 @@ const Navbar = ({ mode, toggleTheme }) => {
         <FormControlLabel
           control={
             <Switch
-              checked={mode === 'dark'}
+              checked={isDarkMode}
               onChange={toggleTheme}
               color="default"
             />
@@ -218,8 +216,8 @@ const Navbar = ({ mode, toggleTheme }) => {
           label="Dark Mode"
         />
 
-   {/* Authentication Buttons */}
-   {!auth.token ? (
+        {/* Authentication Buttons */}
+        {!auth.token ? (
           <Button color="inherit" component={RouterLink} to="/login">
             Login
           </Button>
@@ -231,8 +229,8 @@ const Navbar = ({ mode, toggleTheme }) => {
         {/* Add more navigation links here as needed */}
       </Toolbar>
 
-         {/* Collapse Decks Dialog */}
-         <CollapseDecksDialog
+      {/* Collapse Decks Dialog */}
+      <CollapseDecksDialog
         open={collapseDialogOpen}
         handleClose={handleCloseCollapseDialog}
         decks={decks}

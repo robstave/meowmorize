@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchCardById, fetchDeckById, deleteCard } from '../services/api';
+import { fetchCardById, deleteCard } from '../services/api';
 import { updateCardStats, getSessionStats, getNextCard } from '../services/api';
 
 import {
@@ -28,6 +28,7 @@ import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
 
 import PieStatusChart from '../components/CatStatusChart';
 import CardStatsBar from '../components/CardStatsBar';
+import { ThemeContext } from '../context/ThemeContext';
 
 
 
@@ -70,6 +71,10 @@ const CardPage = () => {
     message: '',
     severity: 'success', // 'success' | 'error' | 'warning' | 'info'
   });
+
+   // Access ThemeContext to get isDarkMode
+   const { isDarkMode } = useContext(ThemeContext); // Ensure ThemeContext is correctly set up
+
 
   // Fetch the card on component mount or when the ID changes
   useEffect(() => {
@@ -245,7 +250,12 @@ const CardPage = () => {
 
         {/* Pie Status Chart */}
         <Box sx={{ flex: '1 1 20%', minWidth: '80px', display: 'flex', justifyContent: 'center', alignItems: 'center', mt: { xs: 2, sm: 0 } }}>
-          <PieStatusChart pass={passCount} skip={skipCount} fail={failCount} />
+          <PieStatusChart 
+             pass={passCount} 
+             skip={skipCount} 
+             fail={failCount} 
+             isDarkMode={isDarkMode} // Pass the dark mode flag
+          />
         </Box>
       </Box>
 

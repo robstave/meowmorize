@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
 
-const CatStatusChart = ({ pass = 0, skip = 0, fail = 0, retire = false }) => {
+const CatStatusChart = ({ pass = 0, skip = 0, fail = 0, retire = false,  isDarkMode = false  }) => {
   const [tooltip, setTooltip] = useState({ show: false, content: '', x: 0, y: 0 });
 
   const width = 80;
   const height = 80;
   const center = { x: width / 2, y: height / 2 };
   const radius = 30; // Radius for the pie chart
+
+    // Define colors based on dark mode
+    const earColor = isDarkMode ? '#FFFFFF' : '#000000'; // White in dark mode, black otherwise
+    const faceColor = isDarkMode ? '#FFFFFF' : '#000000'; // White in dark mode, black otherwise
+    const edgeColor = isDarkMode ? '#FFFFFF' : '#000000'; // White in dark mode, black otherwise
+  
 
   // Calculate total and prepare data
   const total = pass + skip + fail || 1;
@@ -62,7 +68,7 @@ const CatStatusChart = ({ pass = 0, skip = 0, fail = 0, retire = false }) => {
             L ${center.x - 5} ${center.y - 30}
             Z
           `}
-          fill="#000" // Static black color
+          fill={earColor} // Dynamic color based on dark mode
         />
 
         {/* Right Ear */}
@@ -73,7 +79,7 @@ const CatStatusChart = ({ pass = 0, skip = 0, fail = 0, retire = false }) => {
             L ${center.x + 5} ${center.y - 30}
             Z
           `}
-          fill="#000" // Static black color
+          fill={earColor} // Dynamic color based on dark mode
         />
 
         {/* 2. Main Pie Segments or Full Circle */}
@@ -122,27 +128,27 @@ const CatStatusChart = ({ pass = 0, skip = 0, fail = 0, retire = false }) => {
           cy={center.y}
           r={radius}
           fill="none"
-          stroke="#000"
+          stroke={edgeColor} // Dynamic color based on dark mode
           strokeWidth="2" // Adjust thickness as needed
         />
 
         {/* 4. Cat Facial Features (Drawn on Top) */}
         {/* Eyes */}
-        <circle cx={center.x - 12} cy={center.y - 5} r={3} fill="#333" /> {/* Left eye */}
-        <circle cx={center.x + 12} cy={center.y - 5} r={3} fill="#333" /> {/* Right eye */}
+        <circle cx={center.x - 12} cy={center.y - 5} r={3} fill={isDarkMode ? '#FFFFFF' : '#333333'} /> {/* Left eye */}
+        <circle cx={center.x + 12} cy={center.y - 5} r={3} fill={isDarkMode ? '#FFFFFF' : '#333333'} /> {/* Right eye */}
         {/* Nose */}
-        <circle cx={center.x} cy={center.y + 5} r={2} fill="#333" /> {/* Nose */}
+        <circle cx={center.x} cy={center.y + 5} r={2} fill={isDarkMode ? '#FFFFFF' : '#333333'} /> {/* Nose */}
         
         {/* Mouth */}
         <path 
           d={`M ${center.x - 8} ${center.y + 10} Q ${center.x} ${center.y + 15} ${center.x + 8} ${center.y + 10}`}
-          stroke="#333"
+          stroke={isDarkMode ? '#FFFFFF' : '#333333'}
           fill="none"
           strokeWidth="2"
         />
         
         {/* Whiskers */}
-        <g stroke="#333" strokeWidth="1.5">
+        <g stroke={isDarkMode ? '#FFFFFF' : '#333333'} strokeWidth="1.5">
           <line x1={center.x - 20} y1={center.y + 5} x2={center.x - 10} y2={center.y + 8} />
           <line x1={center.x - 20} y1={center.y + 10} x2={center.x - 10} y2={center.y + 10} />
           <line x1={center.x + 20} y1={center.y + 5} x2={center.x + 10} y2={center.y + 8} />

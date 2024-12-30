@@ -1,6 +1,6 @@
 // src/pages/Dashboard.jsx
-import React, { useEffect, useState, useContext } from 'react';
-import { fetchDecks, deleteDeck, updateDeck, createEmptyDeck } from '../services/api';
+import React, {   useState, useContext } from 'react';
+import {   deleteDeck, updateDeck  } from '../services/api';
 import {
   Container,
   Typography,
@@ -25,20 +25,18 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit'; // Import EditIcon
-import { Link as RouterLink, useNavigate } from 'react-router-dom'; // **Import RouterLink**
+import { Link as RouterLink } from 'react-router-dom'; // **Import RouterLink**
  
 import { DeckContext } from '../context/DeckContext'; // Import DeckContext
 import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
 
-const AlertSnackbar = React.forwardRef(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
+
 
 
 const Dashboard = () => {
 
-  const { decks, setDecks, loadDecks, loading, error } = useContext(DeckContext);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const { decks, setDecks, loading, error } = useContext(DeckContext);
+  //const [ setOpenDeleteDialog] = useState(false);
    
   // State for Edit Dialog
   const [openEditDialog, setOpenEditDialog] = useState(false);
@@ -48,7 +46,7 @@ const Dashboard = () => {
 
 
   // **State for Delete Confirmation Dialog**
-  const [openDialog, setOpenDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [deckToDelete, setDeckToDelete] = useState(null);
   // **State for Snackbar Notifications**
   const [snackbar, setSnackbar] = useState({
@@ -56,25 +54,7 @@ const Dashboard = () => {
     message: '',
     severity: 'success', // 'success' | 'error' | 'warning' | 'info'
   });
-  const navigate = useNavigate();
-
-  /*
-  useEffect(() => {
-    const getDecks = async () => {
-      try {
-        const data = await fetchDecks();
-        setDecks(data);
-      } catch (err) {
-        setError('Failed to fetch decks. Please try again later.');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getDecks();
-  }, []);
-  */
+  
 
   // Function to open the edit dialog
   const handleOpenEditDialog = (deck) => {
@@ -317,7 +297,7 @@ const handleCloseDeleteDialog = () => {
 
       {/* **Delete Confirmation Dialog** */}
       <Dialog
-        open={openDialog}
+        open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
         aria-labelledby="delete-dialog-title"
         aria-describedby="delete-dialog-description"

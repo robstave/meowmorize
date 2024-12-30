@@ -25,7 +25,7 @@ const CollapseDecksDialog = ({ open, handleClose, decks, onSuccess, onError }) =
 
   const { loadDecks } = useContext(DeckContext); // Access loadDecks from DeckContext
 
-  
+
   const handleCollapse = async () => {
     // Validation
     if (!sourceDeck || !targetDeck) {
@@ -71,7 +71,7 @@ const CollapseDecksDialog = ({ open, handleClose, decks, onSuccess, onError }) =
       <DialogContent>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         <FormControl fullWidth sx={{ mt: 2 }}>
-          <InputLabel id="source-deck-label">Source Deck</InputLabel>
+          <InputLabel id="source-deck-label">Source Deck - Will be Deleted</InputLabel>
           <Select
             labelId="source-deck-label"
             id="source-deck"

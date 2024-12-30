@@ -5,10 +5,9 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { AuthProvider } from './context/AuthContext'; // Import AuthProvider
-import { DeckProvider } from './context/DeckContext'; // Import DeckProvider
-
- 
+import { AuthProvider } from './context/AuthContext';  
+import { DeckProvider } from './context/DeckContext';  
+import { ThemeProvider } from './context/ThemeContext';
 
 
 
@@ -16,8 +15,10 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <AuthProvider> {/* Wrap with AuthProvider */}
-    <DeckProvider> {/* Wrap with DeckProvider */}
-        <App />
+      <DeckProvider> {/* Wrap with DeckProvider */}
+        <ThemeProvider> {/* Wrap with ThemeProvider */}
+          <App />
+        </ThemeProvider>
       </DeckProvider>
     </AuthProvider>
   </React.StrictMode>

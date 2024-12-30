@@ -10,33 +10,20 @@ import DeckPage from './pages/DeckPage'; //
 import CardPage from './pages/CardPage'; //
 import CardForm from './pages/CardForm'; //
 import { lightTheme, darkTheme } from './theme';
-
- 
- 
 import LoginPage from './pages/LoginPage'; // Import LoginPage
  import { AuthContext } from './context/AuthContext'; // Import AuthContext
+ import { ThemeContext } from './context/ThemeContext'; // Import ThemeContext
 
 
 
 function App() {
 
-  // Check localStorage for theme preference
-  const storedTheme = localStorage.getItem('theme') || 'light';
-  const [mode, setMode] = useState(storedTheme);
+  const { isDarkMode } = useContext(ThemeContext); // Access ThemeContext
 
-  // Update localStorage whenever theme changes
-  useEffect(() => {
-    localStorage.setItem('theme', mode);
-  }, [mode]);
+  // Memoize the MUI theme to optimize performance
+  const theme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
-  // Memoize the theme to optimize performance
-  const theme = useMemo(() => (mode === 'light' ? lightTheme : darkTheme), [mode]);
-
-  // Function to toggle theme
-  const toggleTheme = () => {
-    setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
-  };
-
+   
   const { auth } = useContext(AuthContext);
   
   return (
@@ -44,7 +31,7 @@ function App() {
       {/* CssBaseline to apply global styles */}
       <CssBaseline />
       <Router>
-      <Navbar mode={mode} toggleTheme={toggleTheme} />
+      <Navbar  />
       <Routes>
           {/* Public Route */}
           <Route path="/login" element={!auth.token ? <LoginPage /> : <Navigate to="/" />} />
