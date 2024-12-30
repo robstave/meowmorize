@@ -43,13 +43,11 @@ func (hc *MeowController) ImportDeck(c echo.Context) error {
 	}
 	defer src.Close()
 
-	var deckData struct {
-		Deck types.Deck `json:"deck"`
-	}
+	var deck types.Deck
 
 	hc.logger.Info("Decoding deck JSON")
 
-	if err := json.NewDecoder(src).Decode(&deckData); err != nil {
+	if err := json.NewDecoder(src).Decode(&deck); err != nil {
 		hc.logger.Error("JSON decoding failed", "error", err)
 		return c.JSON(http.StatusBadRequest, echo.Map{
 			"message": "Invalid JSON format",
@@ -57,10 +55,10 @@ func (hc *MeowController) ImportDeck(c echo.Context) error {
 	}
 
 	// Logging for debugging
-	hc.logger.Info("Imported deck", "id", deckData.Deck.ID, "name", deckData.Deck.Name,
-		"number_of_cards", len(deckData.Deck.Cards))
+	hc.logger.Info("Imported deck", "id", deck.ID, "name", deck.Name,
+		"number_of_cards", len(deck.Cards))
 
-	for _, card := range deckData.Deck.Cards {
+	for _, card := range deck.Cards {
 		if card.ID == "" || card.DeckID == "" || card.Front.Text == "" || card.Back.Text == "" {
 			hc.logger.Warn("Incomplete card data", "card", card)
 		} else {
@@ -75,24 +73,24 @@ func (hc *MeowController) ImportDeck(c echo.Context) error {
 	}
 
 	// Assign DeckID to each card if not already set
-	for i := range deckData.Deck.Cards {
-		if deckData.Deck.Cards[i].DeckID == "" {
-			deckData.Deck.Cards[i].DeckID = deckData.Deck.ID
+	for i := range deck.Cards {
+		if deck.Cards[i].DeckID == "" {
+			deck.Cards[i].DeckID = deck.ID
 		}
 
 	}
 
 	// Save the deck to the database
-	if err := hc.service.CreateDeck(deckData.Deck); err != nil {
+	if err := hc.service.CreateDeck(deck); err != nil {
 		hc.logger.Error("Failed to save deck", "error", err)
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"message": "Failed to save deck",
 		})
 	}
 
-	hc.logger.Info("Deck imported successfully", "id", deckData.Deck.ID)
+	hc.logger.Info("Deck imported successfully", "id", deck.ID)
 
-	return c.JSON(http.StatusCreated, deckData.Deck)
+	return c.JSON(http.StatusCreated, deck)
 }
 
 // ExportDeck handles the export of a deck as a JSON file

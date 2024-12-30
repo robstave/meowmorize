@@ -161,6 +161,7 @@ const Navbar = () => {
         {/* App Logo or Icon */}
         <img src={Logo} alt="MeowMorize Logo" style={{ height: '40px', marginRight: '16px' }} />        {/* App Name */}
         <Typography color="inherit" variant="h6" component={RouterLink}
+        onClick={loadDecks} 
           to="/" sx={{ flexGrow: 1 }}>
           MeowMorize
         </Typography>
