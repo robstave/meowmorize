@@ -71,7 +71,7 @@ const DeckPage = () => {
 
   // State for Import Markdown Dialog
   const [openImportDialog, setOpenImportDialog] = useState(false);
-  const [setImportSuccessCount] = useState(0);
+  const [importSuccessCount, setImportSuccessCount] = useState(0);
 
   // State for Delete Card Dialog
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -193,7 +193,11 @@ const DeckPage = () => {
   // Handlers for Import Markdown Dialog
   const handleOpenImportDialog = () => {
     setOpenImportDialog(true);
+    setTimeout(() => setOpenImportDialog(true), 0); // Ensure the state update is rendered
+
   };
+
+ 
 
   const handleCloseImportDialog = () => {
     setOpenImportDialog(false);

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchCardById, deleteCard } from '../services/api';
 import { updateCardStats, getSessionStats, getNextCard } from '../services/api';
+import remarkGfm from 'remark-gfm';
 
 import {
   Container,
@@ -245,7 +246,7 @@ const CardPage = () => {
           <Typography variant="h6" gutterBottom>
             {showFront ? 'Front' : 'Back'}
           </Typography>
-          <ReactMarkdown>{showFront ? card.front.text : card.back.text}</ReactMarkdown>
+          <ReactMarkdown  remarkPlugins={[remarkGfm]}>{showFront ? card.front.text : card.back.text}</ReactMarkdown>
         </Box>
 
         {/* Pie Status Chart */}

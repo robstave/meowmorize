@@ -10,13 +10,16 @@ sparkline to show the total stats of a deck. Average I guess.
 
 Create new deck says default.  it needs a dialog for a name
 
-collapse decks
 
 
 
-
+https://github.com/remarkjs/react-markdown#use
 
 
 done
 -----------------
 added clone, update and delete apis
+
+collapse decks
+
+
