@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchCardById, deleteCard } from '../services/api';
-import { updateCardStats, getSessionStats, getNextCard } from '../services/api';
+import { updateCardStats, getSessionStats, getNextCard, fetchDeckById } from '../services/api';
 import remarkGfm from 'remark-gfm';
-
+import { Fade } from '@mui/material';
 import {
   Container,
   Typography,
@@ -18,8 +18,13 @@ import {
   Snackbar,
   CircularProgress,
   Alert,
+  Rating,
 
 } from '@mui/material';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+
 import ReactMarkdown from 'react-markdown';
 
 import { Link as RouterLink } from 'react-router-dom';
@@ -43,6 +48,7 @@ const CardPage = () => {
   const navigate = useNavigate();
   const [card, setCard] = useState(null);
   const [deckId, setDeckId] = useState(null); // Track the deckId
+  const [deckName, setDeckName] = useState(''); // New state for deck name
   const [showFront, setShowFront] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -52,12 +58,15 @@ const CardPage = () => {
   const [skipCount, setSkipCount] = useState(0);
   const [failCount, setFailCount] = useState(0);
 
+  const [stars, setStars] = useState(0); // New state for stars
+
+
   const [sessionStats, setSessionStats] = useState({
     total_cards: 0,
     viewed_count: 0,
     remaining: 0,
     current_index: 0,
-    
+
   });
 
 
@@ -73,9 +82,21 @@ const CardPage = () => {
     severity: 'success', // 'success' | 'error' | 'warning' | 'info'
   });
 
-   // Access ThemeContext to get isDarkMode
-   const { isDarkMode } = useContext(ThemeContext); // Ensure ThemeContext is correctly set up
+  // Access ThemeContext to get isDarkMode
+  const { isDarkMode } = useContext(ThemeContext); // Ensure ThemeContext is correctly set up
 
+  const [anchorEl, setAnchorEl] = useState(null);
+  const openMenu = Boolean(anchorEl);
+
+ 
+
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
 
   // Fetch the card on component mount or when the ID changes
   useEffect(() => {
@@ -88,11 +109,15 @@ const CardPage = () => {
         setPassCount(data.pass_count);
         setSkipCount(data.skip_count);
         setFailCount(data.fail_count);
-
+        setStars(data.star_rating || 0); // Initialize stars
         // set session stats
         const stats = await getSessionStats(data.deck_id);
         setSessionStats(stats);
 
+
+        // Fetch deck details to get the deck name
+        const deckData = await fetchDeckById(data.deck_id);
+        setDeckName(deckData.name);
 
 
       } catch (err) {
@@ -109,11 +134,19 @@ const CardPage = () => {
 
 
   // Function to handle card actions: pass, fail, skip
-  const handleCardAction = async (action) => {
+  const handleCardAction = async (action, value) => {
     if (!card) return;
 
     try {
       // Send the action to the backend
+ 
+
+      if (action === 'SetStars' && value !== null) {
+        setStars(value); // Update local stars state
+        await updateCardStats(card.id, 'SetStars', deckId, value);
+        return;
+      }
+      setLoading(true);
 
       switch (action) {
         case 'pass':
@@ -127,15 +160,14 @@ const CardPage = () => {
           break;
         default:
           // code block
-          console.log('other click')
-      }
+       }
 
 
       // Fetch the next card
       const nextCardId = await getNextCard(deckId);
 
       if (nextCardId) {
-        setShowFront(true); // Reset to show the front of the new card
+       // setShowFront(true); // Reset to show the front of the new card
 
         navigate(`/card/${nextCardId}`);
       } else {
@@ -161,7 +193,10 @@ const CardPage = () => {
         message: 'Failed to process the action. Please try again.',
         severity: 'error',
       });
-    }
+    }  finally {
+    // Hide loading spinner
+    setLoading(false);
+  }
   };
 
 
@@ -227,8 +262,15 @@ const CardPage = () => {
 
   return (
     <Container sx={{ mt: 4 }}>
+
+      {/* Deck Title */}
+      <Typography variant="h5" gutterBottom>
+        {deckName}
+      </Typography>
+
       {/* Render card text as Markdown */}
       {/* Card Header with Front/Back Label and Pie Chart */}
+      <Fade in={!loading}>
       <Box
         sx={{
           display: 'flex',
@@ -246,19 +288,39 @@ const CardPage = () => {
           <Typography variant="h6" gutterBottom>
             {showFront ? 'Front' : 'Back'}
           </Typography>
-          <ReactMarkdown  remarkPlugins={[remarkGfm]}>{showFront ? card.front.text : card.back.text}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{showFront ? card.front.text : card.back.text}</ReactMarkdown>
         </Box>
 
         {/* Pie Status Chart */}
         <Box sx={{ flex: '1 1 20%', minWidth: '80px', display: 'flex', justifyContent: 'center', alignItems: 'center', mt: { xs: 2, sm: 0 } }}>
-          <PieStatusChart 
-             pass={passCount} 
-             skip={skipCount} 
-             fail={failCount} 
-             isDarkMode={isDarkMode} // Pass the dark mode flag
+          <PieStatusChart
+            pass={passCount}
+            skip={skipCount}
+            fail={failCount}
+            isDarkMode={isDarkMode} // Pass the dark mode flag
           />
         </Box>
       </Box>
+      </Fade>
+
+
+      {/* Star Rating */}
+      <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+        <Typography variant="h6" sx={{ mr: 2 }}>
+          Your Rating:
+        </Typography>
+        <Rating
+          name="card-rating"
+          value={stars}
+          onChange={(event, newValue) => {
+            console.log("beep")
+            if (newValue !== null) {
+              handleCardAction('SetStars', newValue);
+            }
+          }}
+        />
+      </Box>
+
 
 
       <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
@@ -275,37 +337,42 @@ const CardPage = () => {
           Fail
         </Button>
 
-        <Button
-          variant="outlined"
-          color="secondary"
-          component={RouterLink}
-          to={`/card-form/${id}`}
-        >
-          Edit Card
-        </Button>
-        <Button
-          variant="outlined"
-          color="secondary"
-          component={RouterLink}
-          to={`/card-form/`}
-        >
-          Add Card
-        </Button>
+      
 
-        {/* Delete Card Button */}
+        {/* Menu Button for Add, Edit, Delete */}
         <IconButton
-          aria-label="delete"
-          color="error"
-          onClick={handleOpenDeleteDialog}
-          sx={{ ml: 1 }}
+          aria-label="more"
+          aria-controls={openMenu ? 'action-menu' : undefined}
+          aria-haspopup="true"
+          aria-expanded={openMenu ? 'true' : undefined}
+          onClick={handleMenuClick}
         >
-          <DeleteIcon />
+          <MoreVertIcon />
         </IconButton>
+
+        <Menu
+          id="action-menu"
+          anchorEl={anchorEl}
+          open={openMenu}
+          onClose={handleMenuClose}
+          MenuListProps={{
+            'aria-labelledby': 'action-button',
+          }}
+        >
+          <MenuItem component={RouterLink} to={`/card-form/`} onClick={handleMenuClose}>
+            Add Card
+          </MenuItem>
+          <MenuItem component={RouterLink} to={`/card-form/${id}`} onClick={handleMenuClose}>
+            Edit Card
+          </MenuItem>
+          <MenuItem onClick={handleOpenDeleteDialog}>Delete Card</MenuItem>
+        </Menu>
+
       </Box>
 
       {/* Horizontal Status Bar */}
       <Box sx={{ mt: 4 }}>
-        <CardStatsBar cards={sessionStats.card_stats}   />
+        <CardStatsBar cards={sessionStats.card_stats} />
       </Box>
 
       {/* Session Statistics at the Bottom */}

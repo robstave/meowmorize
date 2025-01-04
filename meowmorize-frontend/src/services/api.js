@@ -128,14 +128,20 @@ export const deleteCard = async (cardId) => {
   }
 };
 
-export const updateCardStats = async (cardId, action, deckId) => {
+
+export const updateCardStats = async (cardId, action, deckId, value = null) => {
   try {
-    const response = await api.post('/cards/stats', { card_id: cardId, action, deck_id: deckId, });
+    const payload = { card_id: cardId, action, deck_id: deckId };
+    if (action === 'SetStars' && value !== null) {
+      payload.value = value;
+    }
+    const response = await api.post('/cards/stats', payload);
     return response.data;
   } catch (error) {
     throw error;
   }
 };
+
 
 
 
@@ -222,5 +228,7 @@ export const collapseDecks = async (targetDeckId, sourceDeckId) => {
     throw error;
   }
 };
+
+
 
 export default api;

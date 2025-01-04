@@ -24,6 +24,7 @@ type CardStatsRequest struct {
 // @Accept json
 // @Produce json
 // @Param stats body CardStatsRequest true "Card Stats Update"
+// @Security BearerAuth
 // @Success 200 {object} types.Card
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
@@ -79,6 +80,7 @@ type ClearDeckStatsRequest struct {
 // @Produce json
 // @Param id path string true "Deck ID"
 // @Param stats body ClearDeckStatsRequest true "Clear Deck Statistics"
+// @Security BearerAuth
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} echo.HTTPError
 // @Failure 404 {object} echo.HTTPError

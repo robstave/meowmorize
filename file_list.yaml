@@ -12,12 +12,10 @@ meow-front:
   - meowmorize-frontend/src/components/CollapseDecksDialog.jsx  
   - meowmorize-frontend/src/components/DecksDashboard.jsx  
   - meowmorize-frontend/src/components/DecksDashboard.css
-  - meowmorize-frontend/src/components/ImportDeck.jsx  
-  - meowmorize-frontend/src/components/ImportMarkdownDialog.jsx  
   - meowmorize-frontend/src/components/Navbar.jsx  
   - meowmorize-frontend/src/context/AuthContext.js
-
-
+  - meowmorize-frontend/src/context/DeckContext.js
+  - meowmorize-frontend/src/context/ThemeContext.js
 
 meow-front2:
   - prompts/instructions.md
@@ -26,13 +24,19 @@ meow-front2:
   - meowmorize-frontend/src/pages/CardPage.jsx
   - meowmorize-frontend/src/pages/Dashboard.jsx 
   - meowmorize-frontend/src/pages/DeckPage.jsx
-  - meowmorize-frontend/src/pages/ImportPage.jsx 
   - meowmorize-frontend/src/pages/LoginPage.jsx 
+
+meow-front3:
+  - prompts/instructions.md
+  - meowmorize-frontend/src/components/ImportDeck.jsx  
+  - meowmorize-frontend/src/components/ImportMarkdownDialog.jsx  
+  - meowmorize-frontend/src/pages/ImportPage.jsx 
   - meowmorize-frontend/src/utils/markdownParser.js
 
 meow-front-charts:
   - prompts/instructions.md
   - meowmorize-frontend/src/components/CardStatsBar.jsx
+  - meowmorize-frontend/src/components/CardStatsBar.css
   - meowmorize-frontend/src/components/CatStatusChart.jsx
   - meowmorize-frontend/src/components/StatusSparkline.jsx
 

@@ -22,6 +22,14 @@ func (s *Service) StartSession(deckID string, count int, method types.SessionMet
 		return err
 	}
 
+	// Update LastAccessed
+	deck.LastAccessed = time.Now()
+	if err := s.deckRepo.UpdateDeck(deck); err != nil {
+		s.logger.Error("Failed to update deck's LastAccessed", "deck_id", deckID, "error", err)
+		return err
+	}
+	s.logger.Info("Updated deck's LastAccessed", "deck_id", deckID, "timestamp", deck.LastAccessed)
+
 	// Determine the number of cards
 	totalCards := len(deck.Cards)
 	if count == -1 || count > totalCards {

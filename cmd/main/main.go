@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -124,6 +125,22 @@ func main() {
 
 	// Swagger endpoint
 	e.GET("/swagger/*", httpSwagger.WrapHandler)
+
+	// Serve React Frontend
+	// Define the path to your React build directory
+	reactBuildPath := "./meowmorize-frontend/build"
+
+	// Serve static files
+	e.Static("/", reactBuildPath)
+
+	// Catch-all route to serve index.html for client-side routing
+	e.GET("/*", func(c echo.Context) error {
+		// Prevent Echo from serving API routes with this handler
+		if strings.HasPrefix(c.Request().URL.Path, "/api/") {
+			return c.NoContent(http.StatusNotFound)
+		}
+		return c.File(reactBuildPath + "/index.html")
+	})
 
 	// Start Server
 	port := "8789"

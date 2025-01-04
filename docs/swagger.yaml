@@ -210,6 +210,9 @@ definitions:
       id:
         description: UUID string as the primary key
         type: string
+      last_accessed:
+        description: New LastAccessed field
+        type: string
       name:
         type: string
     type: object
@@ -408,6 +411,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Update card statistics
       tags:
       - Cards
@@ -669,6 +674,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Create a new deck
       tags:
       - Decks
@@ -696,6 +703,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - BearerAuth: []
       summary: Export a deck
       tags:
       - decks
@@ -729,6 +738,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Import a deck from a JSON file
       tags:
       - Decks
@@ -771,6 +782,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/echo.HTTPError'
+      security:
+      - BearerAuth: []
       summary: Clear deck statistics
       tags:
       - Decks
@@ -850,6 +863,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Clear a review session
       tags:
       - Sessions
@@ -887,6 +902,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get the next card in the session
       tags:
       - Sessions
@@ -930,6 +947,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Start a new review session
       tags:
       - Sessions
@@ -968,6 +987,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get session statistics
       tags:
       - Sessions

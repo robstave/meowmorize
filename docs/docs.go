@@ -69,6 +69,11 @@ const docTemplate = `{
         },
         "/cards/stats": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update the statistics of a card based on the specified action",
                 "consumes": [
                     "application/json"
@@ -476,6 +481,11 @@ const docTemplate = `{
         },
         "/decks/default": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new deck with or without default data",
                 "consumes": [
                     "application/json"
@@ -528,6 +538,11 @@ const docTemplate = `{
         },
         "/decks/export/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Export a deck as a JSON file",
                 "produces": [
                     "application/json"
@@ -569,6 +584,11 @@ const docTemplate = `{
         },
         "/decks/import": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Import a new deck by uploading a JSON file",
                 "consumes": [
                     "multipart/form-data"
@@ -619,6 +639,11 @@ const docTemplate = `{
         },
         "/decks/stats/{id}": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Clears the statistics for a specific deck. Can optionally clear session data and/or card statistics.",
                 "consumes": [
                     "application/json"
@@ -933,6 +958,11 @@ const docTemplate = `{
         },
         "/sessions/clear": {
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Terminate and clear the current review session for a specific deck",
                 "produces": [
                     "application/json"
@@ -992,6 +1022,11 @@ const docTemplate = `{
         },
         "/sessions/next": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve the ID of the next card to review in the current session",
                 "produces": [
                     "application/json"
@@ -1048,6 +1083,11 @@ const docTemplate = `{
         },
         "/sessions/start": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Initiate a new review session for a specific deck with the given parameters",
                 "consumes": [
                     "application/json"
@@ -1112,6 +1152,11 @@ const docTemplate = `{
         },
         "/sessions/stats": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve the statistics of the current review session for a specific deck",
                 "produces": [
                     "application/json"
@@ -1479,6 +1524,10 @@ const docTemplate = `{
                 },
                 "id": {
                     "description": "UUID string as the primary key",
+                    "type": "string"
+                },
+                "last_accessed": {
+                    "description": "New LastAccessed field",
                     "type": "string"
                 },
                 "name": {

@@ -18,6 +18,7 @@ type CreateDeckRequest struct {
 // @Accept  json
 // @Produce  json
 // @Param deck body CreateDeckRequest true "Deck creation parameters"
+// @Security BearerAuth
 // @Success 200 {object} types.Deck
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
