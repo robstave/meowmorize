@@ -1,6 +1,6 @@
 // src/components/DecksDashboard.jsx
 import React, { useEffect, useState } from 'react';
-import { fetchDecks } from '../services/api';
+import { fetchDecks } from '../../services/api';
 import './DecksDashboard.css'; // Optional: For styling
  
 const DecksDashboard = () => {
@@ -50,9 +50,9 @@ const DecksDashboard = () => {
       <table>
         <thead>
           <tr>
-            <th>Name</th>
+            <th>Nannnnnme</th>
    
-            <th>Cards</th>
+            <th>Cabbbbbbbrds</th>
           </tr>
         </thead>
         <tbody>

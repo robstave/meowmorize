@@ -1,6 +1,8 @@
 #readme.md
 #observations.md
 #directives.md
+#  - meowmorize-frontend/src/components/DecksDashboard.jsx  
+#  - meowmorize-frontend/src/components/DecksDashboard.css
  
 meow-front:
   - prompts/instructions.md
@@ -10,8 +12,6 @@ meow-front:
   - meowmorize-frontend/src/index.css
   - meowmorize-frontend/src/index.js  
   - meowmorize-frontend/src/components/CollapseDecksDialog.jsx  
-  - meowmorize-frontend/src/components/DecksDashboard.jsx  
-  - meowmorize-frontend/src/components/DecksDashboard.css
   - meowmorize-frontend/src/components/Navbar.jsx  
   - meowmorize-frontend/src/context/AuthContext.js
   - meowmorize-frontend/src/context/DeckContext.js
@@ -24,10 +24,11 @@ meow-front2:
   - meowmorize-frontend/src/pages/CardPage.jsx
   - meowmorize-frontend/src/pages/Dashboard.jsx 
   - meowmorize-frontend/src/pages/DeckPage.jsx
-  - meowmorize-frontend/src/pages/LoginPage.jsx 
+
 
 meow-front3:
   - prompts/instructions.md
+  - meowmorize-frontend/src/pages/LoginPage.jsx 
   - meowmorize-frontend/src/components/ImportDeck.jsx  
   - meowmorize-frontend/src/components/ImportMarkdownDialog.jsx  
   - meowmorize-frontend/src/pages/ImportPage.jsx 
@@ -42,11 +43,12 @@ meow-front-charts:
 
 meow-bk-controllers:
   - prompts/instructions.md
-  - internal/adapters/controller/deck.go
+  - internal/adapters/controller/auth.go
   - internal/adapters/controller/controller.go
-  - internal/adapters/controller/import.go
   - internal/adapters/controller/card.go
   - internal/adapters/controller/card-stats.go
+  - internal/adapters/controller/deck.go
+  - internal/adapters/controller/import.go
   - internal/adapters/controller/session.go
   
 meow-bk-repo:
@@ -80,7 +82,6 @@ meow-example:
   - README.md
 
 meow-docker:
-  - overview.md
   - helper
   - docker-compose.yml
   - Dockerfile.backend

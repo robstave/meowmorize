@@ -104,6 +104,7 @@ const CardPage = () => {
       try {
         const data = await fetchCardById(id);
         setCard(data);
+        setShowFront(true);
         setDeckId(data.deck_id); // Set the deckId for future fetches
         // set card stats
         setPassCount(data.pass_count);
