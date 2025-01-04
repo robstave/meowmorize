@@ -29,9 +29,8 @@ import { Link as RouterLink } from 'react-router-dom'; // **Import RouterLink**
  
 import { DeckContext } from '../context/DeckContext'; // Import DeckContext
 import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
-
-
-
+ 
+import { formatLastAccessed } from '../utils/dateUtils'; // Import the utility functionimport {
 
 const Dashboard = () => {
 
@@ -55,6 +54,8 @@ const Dashboard = () => {
     severity: 'success', // 'success' | 'error' | 'warning' | 'info'
   });
   
+
+ 
 
   // Function to open the edit dialog
   const handleOpenEditDialog = (deck) => {
@@ -203,8 +204,10 @@ const handleCloseDeleteDialog = () => {
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell align="right">Number of Cards</TableCell>
+              <TableCell>Description</TableCell>             
+               <TableCell align="right">Last Session</TableCell>
+
+              <TableCell align="right">Cards</TableCell>
               <TableCell align="center">Actions</TableCell> {/* New Actions Column */}
             </TableRow>
           </TableHead>
@@ -224,6 +227,7 @@ const handleCloseDeleteDialog = () => {
                   </Typography>
                 </TableCell>
                 <TableCell>{deck.description || 'No description provided.'}</TableCell>
+                <TableCell align="right">{formatLastAccessed(deck.last_accessed)}</TableCell>
                 <TableCell align="right">{deck.cards.length}</TableCell>
                 <TableCell align="center">
 

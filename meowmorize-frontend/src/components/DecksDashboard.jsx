@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { fetchDecks } from '../services/api';
 import './DecksDashboard.css'; // Optional: For styling
-
+ 
 const DecksDashboard = () => {
   // State variables
   const [decks, setDecks] = useState([]);
@@ -36,6 +36,8 @@ const DecksDashboard = () => {
     return <div>{error}</div>;
   }
 
+  
+
   // Display message if no decks are available
   if (decks.length === 0) {
     return <div>No decks available. Create a new deck to get started!</div>;
@@ -49,16 +51,15 @@ const DecksDashboard = () => {
         <thead>
           <tr>
             <th>Name</th>
-            <th>Description</th>
-            <th>Number of Cards</th>
+   
+            <th>Cards</th>
           </tr>
         </thead>
         <tbody>
           {decks.map((deck) => (
             <tr key={deck.id}>
               <td>{deck.name}</td>
-              <td>{deck.description || 'No description provided.'}</td>
-              <td>{deck.cards.length}</td>
+               <td>{deck.cards.length}</td>
             </tr>
           ))}
         </tbody>

@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchDeckById, exportDeck, deleteCard, startSession, getNextCard } from '../services/api';
+import { formatLastAccessed } from '../utils/dateUtils'; // Import the utility functionimport {
 import {
   Container,
   Typography,
@@ -82,6 +83,9 @@ const DeckPage = () => {
   const [sessionCount, setSessionCount] = useState(20); // Default value
   const [sessionMethod, setSessionMethod] = useState('Random'); // Default method
 
+
+
+
   // State for Snackbar Notifications
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -108,31 +112,8 @@ const DeckPage = () => {
     getDeck();
   }, [id]);
 
-  /*
-    // Handler to start a session
-    const handleStartSession = async () => {
-      try {
-        await startSession(id, -1, 'Random'); // Start session with count=-1 and method='Random'
-        const nextCardId = await getNextCard(id); // Get the next card ID
-        if (nextCardId) {
-          navigate(`/card/${nextCardId}`); // Navigate to the card page
-        } else {
-          setSnackbar({
-            open: true,
-            message: 'No cards available in this deck.',
-            severity: 'info',
-          });
-        }
-      } catch (err) {
-        setSnackbar({
-          open: true,
-          message: 'Failed to start session. Please try again.',
-          severity: 'error',
-        });
-        console.error(err);
-      }
-    };
-    */
+
+
 
   const handleOpenStartSessionDialog = () => {
     setOpenStartSessionDialog(true);
@@ -197,7 +178,7 @@ const DeckPage = () => {
 
   };
 
- 
+
 
   const handleCloseImportDialog = () => {
     setOpenImportDialog(false);
@@ -339,6 +320,11 @@ const DeckPage = () => {
       {/* Deck Title */}
       <Typography variant="h4" gutterBottom>
         {deck.name}
+      </Typography>
+
+      {/* Last Accessed */}
+      <Typography variant="subtitle1" color="textSecondary" gutterBottom>
+        Last Session: {formatLastAccessed(deck.last_accessed)}
       </Typography>
 
       {/* Number of Cards */}

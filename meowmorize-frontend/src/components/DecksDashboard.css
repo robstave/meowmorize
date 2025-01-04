@@ -1,0 +1,30 @@
+
+.decks-dashboard {
+    padding: 20px;
+  }
+  
+  .decks-dashboard table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .decks-dashboard th,
+  .decks-dashboard td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+  
+  .decks-dashboard th {
+    background-color: #f0f0f0;
+  }
+  
+  .decks-dashboard a {
+    text-decoration: none;
+    color: #1976d2;
+  }
+  
+  .decks-dashboard a:hover {
+    text-decoration: underline;
+  }

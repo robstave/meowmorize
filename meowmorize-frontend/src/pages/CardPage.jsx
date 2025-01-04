@@ -88,7 +88,7 @@ const CardPage = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const openMenu = Boolean(anchorEl);
 
- 
+
 
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -139,7 +139,7 @@ const CardPage = () => {
 
     try {
       // Send the action to the backend
- 
+
 
       if (action === 'SetStars' && value !== null) {
         setStars(value); // Update local stars state
@@ -159,15 +159,15 @@ const CardPage = () => {
           await updateCardStats(card.id, 'IncrementFail', deckId);
           break;
         default:
-          // code block
-       }
+        // code block
+      }
 
 
       // Fetch the next card
       const nextCardId = await getNextCard(deckId);
 
       if (nextCardId) {
-       // setShowFront(true); // Reset to show the front of the new card
+        // setShowFront(true); // Reset to show the front of the new card
 
         navigate(`/card/${nextCardId}`);
       } else {
@@ -193,10 +193,10 @@ const CardPage = () => {
         message: 'Failed to process the action. Please try again.',
         severity: 'error',
       });
-    }  finally {
-    // Hide loading spinner
-    setLoading(false);
-  }
+    } finally {
+      // Hide loading spinner
+      setLoading(false);
+    }
   };
 
 
@@ -271,36 +271,36 @@ const CardPage = () => {
       {/* Render card text as Markdown */}
       {/* Card Header with Front/Back Label and Pie Chart */}
       <Fade in={!loading}>
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          mt: 2,
-          p: 2,
-          border: '1px solid #ddd',
-          borderRadius: 2,
-          flexWrap: 'wrap', // To handle smaller screens
-        }}
-      >
-        {/* Front/Back Label and Content */}
-        <Box sx={{ flex: '1 1 80%', minWidth: '250px' }}>
-          <Typography variant="h6" gutterBottom>
-            {showFront ? 'Front' : 'Back'}
-          </Typography>
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{showFront ? card.front.text : card.back.text}</ReactMarkdown>
-        </Box>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            mt: 2,
+            p: 2,
+            border: '1px solid #ddd',
+            borderRadius: 2,
+            flexWrap: 'wrap', // To handle smaller screens
+          }}
+        >
+          {/* Front/Back Label and Content */}
+          <Box sx={{ flex: '1 1 80%', minWidth: '250px' }}>
+            <Typography variant="h6" gutterBottom>
+              {showFront ? 'Front' : 'Back'}
+            </Typography>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{showFront ? card.front.text : card.back.text}</ReactMarkdown>
+          </Box>
 
-        {/* Pie Status Chart */}
-        <Box sx={{ flex: '1 1 20%', minWidth: '80px', display: 'flex', justifyContent: 'center', alignItems: 'center', mt: { xs: 2, sm: 0 } }}>
-          <PieStatusChart
-            pass={passCount}
-            skip={skipCount}
-            fail={failCount}
-            isDarkMode={isDarkMode} // Pass the dark mode flag
-          />
+          {/* Pie Status Chart */}
+          <Box sx={{ flex: '1 1 20%', minWidth: '80px', display: 'flex', justifyContent: 'center', alignItems: 'center', mt: { xs: 2, sm: 0 } }}>
+            <PieStatusChart
+              pass={passCount}
+              skip={skipCount}
+              fail={failCount}
+              isDarkMode={isDarkMode} // Pass the dark mode flag
+            />
+          </Box>
         </Box>
-      </Box>
       </Fade>
 
 
@@ -337,7 +337,7 @@ const CardPage = () => {
           Fail
         </Button>
 
-      
+
 
         {/* Menu Button for Add, Edit, Delete */}
         <IconButton
