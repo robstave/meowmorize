@@ -1,7 +1,8 @@
 // src/App.js
 
 import React, { useState, useMemo, useEffect, useContext  } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+//import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
