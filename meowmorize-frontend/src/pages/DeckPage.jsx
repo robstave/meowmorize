@@ -1,7 +1,7 @@
 // src/pages/DeckPage.jsx
 import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchDeckById, exportDeck, deleteCard, startSession, getNextCard } from '../services/api';
+import { fetchDeckById, exportDeck, deleteCard, startSession, getNextCard, updateDeck } from '../services/api';
 import { formatLastAccessed } from '../utils/dateUtils'; // Import the utility functionimport {
 import {
   Container,
@@ -84,7 +84,8 @@ const DeckPage = () => {
   const [sessionMethod, setSessionMethod] = useState('Random'); // Default method
 
 
-
+  const [isEditing, setIsEditing] = useState(false);
+  const [newDeckName, setNewDeckName] = useState('');
 
   // State for Snackbar Notifications
   const [snackbar, setSnackbar] = useState({
@@ -135,6 +136,59 @@ const DeckPage = () => {
   const handleToggleCards = () => {
     setShowCards((prev) => !prev);
   };
+
+
+  // Handler to activate edit mode
+  const handleDeckNameClick = () => {
+    setIsEditing(true);
+    setNewDeckName(deck.name);
+  };
+
+  // Handler to update the new deck name as the user types
+  const handleDeckNameChange = (event) => {
+    setNewDeckName(event.target.value);
+  };
+
+  // Handler to save the new deck name
+  const handleDeckNameSave = async () => {
+    if (newDeckName.trim() === '') {
+      setSnackbar({
+        open: true,
+        message: 'Deck name cannot be empty.',
+        severity: 'error',
+      });
+      return;
+    }
+
+    try {
+      const updatedDeck = await updateDeck(id, { name: newDeckName });
+      setDeck(updatedDeck);
+      setDecks((prevDecks) =>
+        prevDecks.map((d) => (d.id === id ? updatedDeck : d))
+      );
+      setSnackbar({
+        open: true,
+        message: 'Deck name updated successfully!',
+        severity: 'success',
+      });
+      setIsEditing(false);
+    } catch (err) {
+      console.error(err);
+      setSnackbar({
+        open: true,
+        message: 'Failed to update deck name. Please try again.',
+        severity: 'error',
+      });
+    }
+  };
+
+  // Handler to cancel editing
+  const handleDeckNameCancel = () => {
+    setIsEditing(false);
+    setNewDeckName('');
+  };
+
+
 
 
   // Handlers for Export Dialog
@@ -318,13 +372,44 @@ const DeckPage = () => {
   return (
     <Container sx={{ mt: 4 }}>
       {/* Deck Title */}
-      <Typography variant="h4" gutterBottom>
-        {deck.name}
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        {!isEditing ? (
+          <Typography
+            variant="h4"
+            gutterBottom
+            onClick={handleDeckNameClick}
+            sx={{
+              cursor: 'pointer',
+              '&:hover': {
+                textDecoration: 'underline',
+              },
+            }}
+          >
+            {deck.name}
+          </Typography>
+        ) : (
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <TextField
+              variant="standard"
+              value={newDeckName}
+              onChange={handleDeckNameChange}
+              label="Deck Name"
+              sx={{ mr: 2 }}
+            />
+            <Button variant="contained" color="primary" onClick={handleDeckNameSave} sx={{ mr: 1 }}>
+              Save
+            </Button>
+            <Button variant="outlined" color="secondary" onClick={handleDeckNameCancel}>
+              Cancel
+            </Button>
+          </Box>
+        )}
+      </Box>
+
 
       {/* Last Accessed */}
       <Typography variant="subtitle1" color="textSecondary" gutterBottom>
-        Last Session: {formatLastAccessed(deck.last_accessed)}
+       Last Session: {formatLastAccessed(deck.last_accessed)}
       </Typography>
 
       {/* Number of Cards */}
@@ -399,6 +484,8 @@ const DeckPage = () => {
               <TableRow>
                 <TableCell>Front</TableCell>
                 <TableCell>Back</TableCell>
+                <TableCell>Stars</TableCell>  
+                <TableCell align="center">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -406,6 +493,7 @@ const DeckPage = () => {
                 <TableRow key={card.id}>
                   <TableCell>{card.front.text}</TableCell>
                   <TableCell>{card.back.text}</TableCell>
+                  <TableCell>{card.star_rating || 0}</TableCell>  
                   <TableCell align="center">
                     {/* Delete Button */}
                     <IconButton
@@ -536,6 +624,8 @@ const DeckPage = () => {
               <MenuItem value="Fails">Fails</MenuItem>
               <MenuItem value="Skips">Skips</MenuItem>
               <MenuItem value="Worst">Worst</MenuItem>
+              <MenuItem value="Stars">Stars</MenuItem>
+              <MenuItem value="Unrated">Unrated</MenuItem>
             </Select>
           </FormControl>
         </DialogContent>

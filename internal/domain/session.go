@@ -3,8 +3,6 @@ package domain
 
 import (
 	"errors"
-	"math/rand"
-	"sort"
 	"time"
 
 	"github.com/robstave/meowmorize/internal/domain/types"
@@ -89,78 +87,13 @@ func selectCards(cards []types.Card, count int, method types.SessionMethod) ([]t
 		return selectSkipsCards(cards, count), nil
 	case types.WorstMethod:
 		return selectWorstCards(cards, count), nil
+	case types.StarsMethod:
+		return selectStarsCards(cards, count), nil // New Stars method
+	case types.UnratedMethod:
+		return selectUnratedCards(cards, count), nil // New Unrated method
 	default:
 		return nil, errors.New("invalid session method")
 	}
-}
-
-// selectRandomCards selects random cards from the deck
-func selectRandomCards(cards []types.Card, count int) []types.Card {
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(cards), func(i, j int) { cards[i], cards[j] = cards[j], cards[i] })
-	return cards[:count]
-}
-
-// selectFailsCards selects top N cards based on fail rate (percentage)
-func selectFailsCards(cards []types.Card, count int) []types.Card {
-	// Calculate fail rates
-	sort.Slice(cards, func(i, j int) bool {
-		return calculateFailRate(cards[i]) > calculateFailRate(cards[j])
-	})
-	if count > len(cards) {
-		count = len(cards)
-	}
-	return cards[:count]
-}
-
-// selectSkipsCards selects top N cards based on skip rate (percentage)
-func selectSkipsCards(cards []types.Card, count int) []types.Card {
-
-	// Calculate skip rates
-	sort.Slice(cards, func(i, j int) bool {
-		return calculateSkipRate(cards[i]) > calculateSkipRate(cards[j])
-	})
-	if count > len(cards) {
-		count = len(cards)
-	}
-	return cards[:count]
-}
-
-// selectWorstCards selects top N cards based on combined fail and skip rates
-func selectWorstCards(cards []types.Card, count int) []types.Card {
-
-	// Calculate combined fail and skip rates
-	sort.Slice(cards, func(i, j int) bool {
-		return calculateCombinedRate(cards[i]) > calculateCombinedRate(cards[j])
-	})
-	if count > len(cards) {
-		count = len(cards)
-	}
-	return cards[:count]
-}
-
-// calculateFailRate computes the fail rate percentage for a card
-func calculateFailRate(card types.Card) float64 {
-	if card.PassCount == 0 {
-		return 100.0 // If no successes, highest priority
-	}
-	return (float64(card.FailCount) / float64(card.PassCount)) * 100.0
-}
-
-// calculateSkipRate computes the skip rate percentage for a card
-func calculateSkipRate(card types.Card) float64 {
-	if card.PassCount == 0 {
-		return 100.0 // If no successes, highest priority
-	}
-	return (float64(card.SkipCount) / float64(card.PassCount)) * 100.0
-}
-
-// calculateCombinedRate computes the combined fail and skip rate percentage for a card
-func calculateCombinedRate(card types.Card) float64 {
-	if card.PassCount == 0 {
-		return 100.0 // If no successes, highest priority
-	}
-	return ((float64(card.FailCount) + float64(card.SkipCount)) / float64(card.PassCount)) * 100.0
 }
 
 // AdjustSession updates the session based on card actions

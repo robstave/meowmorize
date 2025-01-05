@@ -29,7 +29,7 @@ import { ThemeContext } from '../context/ThemeContext'; // Import ThemeContext
 const Navbar = () => {
   const { isDarkMode, toggleTheme } = useContext(ThemeContext); // Access ThemeContext
 
-  const { decks, setDecks, loadDecks, loading, error } = useContext(DeckContext);
+  const { decks, setDecks, loadDecks  } = useContext(DeckContext);
   const { auth, logout } = useContext(AuthContext);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);

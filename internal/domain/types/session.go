@@ -7,10 +7,12 @@ import "sync"
 type SessionMethod string
 
 const (
-	RandomMethod SessionMethod = "Random"
-	FailsMethod  SessionMethod = "Fails"
-	SkipsMethod  SessionMethod = "Skips"
-	WorstMethod  SessionMethod = "Worst"
+	RandomMethod  SessionMethod = "Random"
+	FailsMethod   SessionMethod = "Fails"
+	SkipsMethod   SessionMethod = "Skips"
+	WorstMethod   SessionMethod = "Worst"
+	StarsMethod   SessionMethod = "Stars"
+	UnratedMethod SessionMethod = "Unrated"
 )
 
 // CardStats represents the state of a card within a session

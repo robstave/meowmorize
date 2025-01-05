@@ -1389,7 +1389,9 @@ const docTemplate = `{
                         "Random",
                         "Fails",
                         "Skips",
-                        "Worst"
+                        "Worst",
+                        "Stars",
+                        "Unrated"
                     ]
                 }
             }
@@ -1502,6 +1504,9 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "skipped": {
+                    "type": "boolean"
+                },
+                "stars": {
                     "type": "boolean"
                 },
                 "viewed": {

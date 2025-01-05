@@ -19,7 +19,7 @@ import {
   CircularProgress,
   Alert,
   Rating,
-
+  Link,
 } from '@mui/material';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -29,7 +29,6 @@ import ReactMarkdown from 'react-markdown';
 
 import { Link as RouterLink } from 'react-router-dom';
 
-import DeleteIcon from '@mui/icons-material/Delete'; // Import DeleteIcon
 import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
 
 import PieStatusChart from '../components/CatStatusChart';
@@ -264,10 +263,15 @@ const CardPage = () => {
   return (
     <Container sx={{ mt: 4 }}>
 
-      {/* Deck Title */}
+
+
+      {/* Deck Title as a Link */}
       <Typography variant="h5" gutterBottom>
-        {deckName}
+        <Link component={RouterLink} to={`/decks/${deckId}`} underline="hover">
+          {deckName}
+        </Link>
       </Typography>
+
 
       {/* Render card text as Markdown */}
       {/* Card Header with Front/Back Label and Pie Chart */}

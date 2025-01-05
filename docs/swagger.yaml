@@ -118,6 +118,8 @@ definitions:
         - Fails
         - Skips
         - Worst
+        - Stars
+        - Unrated
         type: string
     required:
     - deck_id
@@ -194,6 +196,8 @@ definitions:
       passed:
         type: boolean
       skipped:
+        type: boolean
+      stars:
         type: boolean
       viewed:
         type: boolean

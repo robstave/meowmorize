@@ -1382,7 +1382,9 @@
                         "Random",
                         "Fails",
                         "Skips",
-                        "Worst"
+                        "Worst",
+                        "Stars",
+                        "Unrated"
                     ]
                 }
             }
@@ -1495,6 +1497,9 @@
                     "type": "boolean"
                 },
                 "skipped": {
+                    "type": "boolean"
+                },
+                "stars": {
                     "type": "boolean"
                 },
                 "viewed": {

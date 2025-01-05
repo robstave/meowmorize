@@ -135,10 +135,12 @@ func main() {
 
 	// Catch-all route to serve index.html for client-side routing
 	e.GET("/*", func(c echo.Context) error {
+		slogger.Info("other url", "path", c.Request().URL.Path)
 		// Prevent Echo from serving API routes with this handler
 		if strings.HasPrefix(c.Request().URL.Path, "/api/") {
 			return c.NoContent(http.StatusNotFound)
 		}
+		slogger.Info("other url2")
 		return c.File(reactBuildPath + "/index.html")
 	})
 

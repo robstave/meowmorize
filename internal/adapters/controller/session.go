@@ -12,7 +12,7 @@ import (
 type StartSessionRequest struct {
 	DeckID string              `json:"deck_id" validate:"required,uuid"`
 	Count  int                 `json:"count" validate:"min=1"`
-	Method types.SessionMethod `json:"method" validate:"required,oneof=Random Fails Skips Worst"`
+	Method types.SessionMethod `json:"method" validate:"required,oneof=Random Fails Skips Worst Stars Unrated"`
 }
 
 // StartSession handles the initiation of a new review session for a deck
