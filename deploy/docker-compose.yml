@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  backend:
+    image: rstave/meowmorize-backend:latest
+    container_name: meowmorize-backend
+    ports:
+      - "8789:8789"
+    environment:
+      - DB_PATH=/app/data/db.sqlite3
+      # Add other environment variables here
+    volumes:
+      - db-data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    image: rstave/meowmorize-frontend:latest
+    container_name: meowmorize-frontend
+    ports:
+      - "8999:80"
+    environment:
+      - REACT_APP_BACKEND_URL=http://backend:8789
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  db-data:
+    driver: local

@@ -24,7 +24,7 @@ services:
     ports:
       - "8999:80"  # Ensure frontend Dockerfile exposes port 8999
     environment:
-      - REACT_APP_BACKEND_URL=http://backend:8789  # Example environment variable
+      - REACT_APP_API_BASE_URL=http://backend:8789/xxx  # Example environment variable
     depends_on:
       - backend
     restart: unless-stopped

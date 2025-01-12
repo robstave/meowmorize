@@ -2,8 +2,71 @@
 
 MeowMorize is a comprehensive flashcard application designed to help users effectively study and memorize information. Built with a robust Go backend and a dynamic React frontend, MeowMorize offers seamless interactions, efficient data management, and easy deployment using Docker.
 
-Ok...that sounds good and created fron Chat.  It was.  This is really an experiment on using Chat to build an app from the ground up.   Its still a pretty decent flashcard app too.
+Ok...that sounds impressive and kinda feels like the copy was created from Chat.  **It was!**  
 
+There are two things that I was trying to acomplish here.
+
+- **I wanted a flashcard app that I liked**.  Dont get me wrong, there are probably as many flashcard apps out there as to-do lists.  I seem to always find something I dont like about those too.  I actually use flashcards all the time.  My handwriting sucks and I dont have the patience to craft nice ones.  By the time I do, I know the subject. I LOVE [Obsidian](https://obsidian.md/). I love markdown.  I wanted an option to be able to create/curate my cards in markdown. This app imports markdown!
+
+- **Play with ChatGPT**. My job really does not allow for unfettered use of ChatGTP in coding. This is understandable for a cybersecurity company.  Wholesale exchanges of code with an industry that sucks up information is bad. But personal apps...have at it!
+
+In a year, my little process will seem quaint.  I have yaml files to outline what files to concat so I can paste large chunks ( about 7k tokens ?) into the chat.  It works pretty well.  Copilot really doesnt work like that. Cursor does, but it seems like they have a little ways to go before I pay for another chat service. By the end of 2025, an agent will just take your full repo and suck it in.  It can now, but not as an affordable option for the unwashed masses.
+
+An interesting twist that makes this project unique is the ability to bulk import cards from a chat friendly format.
+
+ 
+```markdown
+<!-- Card Start -->
+
+### Front
+
+[Question Here]
+
+### Back
+
+[Answer Here]
+
+<!-- Card End -->
+```
+
+Tell chat to create 20 or so cards on your favorite subject using the above format.  It just works! This app understands this perfectly.  And you can edit cards on the fly in case there is an issue.  Its all done in Markdown.
+
+
+## App Overview
+
+![Front](assets/front.png)
+
+As you are browsing cards you can
+
+- Flip ( see the other side)'
+- Pass
+- Skip ( kinda like a fail, I wanted a bump option)
+- Fail
+
+When you pass/skip/fail...it will mark that and move on.
+
+
+
+![Back](assets/back.png)
+
+
+A few things of note is the progress
+
+![step1](assets/step1.png)
+
+You can see your progress as move along the deck.
+When you finish, it will reshuffle the deck with the skips first then fails.
+
+
+![step2](assets/step2.png)
+
+### Cat Pie chart
+
+![cat](assets/cat2.png)
+
+As part of the silliness, I did want a visualization to show how well you were doing with a particular card.  Pie charts bite.  But this one kinda works for me.  Its all in D3.js and is pretty much a stand alone React component if you want to just steal it. 
+
+ 
 ## Architecture Overview
 
 MeowMorize is composed of two main components:
@@ -16,8 +79,29 @@ The application leverages a SQLite database (`meowmorize.db`) located at the roo
 
 
 ## Project Status
-This is still a work in progress and has a few things I would like to do, but its workable
+This is still a work in progress and has a lot of work to go.  But its enough for me to study with and I will probably put features on hold.
 
+A list of things I would like though
+
+
+### Decks
+
+- Decouple Decks from Cards:  The format in SQL is not super.  I did allow Chat some freedom, and would like to refactor things so that the decks/cards use a junction table.  
+
+- Export to markdown would be nice.  The native format is a Json with UUIDs. 
+
+
+
+### Users/IAM
+
+- Multiple users: The current app does have a login, but really there is only one user at a time. The session for a deck is basically a singleton in the domain service.  This needs to change, but that would require a whole IAM process too.  This would require ANOTHER junction table for the users to card relation too.
+
+- Federation:  Okta/Cognito.  Something to this effect
+
+
+### Advanced
+
+- Use golang chain to update cards on the fly.
 
 
 
