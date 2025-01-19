@@ -115,10 +115,10 @@ func (s *Service) UpdateCardStats(cardID string, action types.CardAction, value 
 	case types.IncrementSkip:
 		card.SkipCount++
 	case types.SetStars:
-		if value == nil {
-			return errors.New("star rating value is required")
+		if value != nil {
+			card.StarRating = *value
 		}
-		card.StarRating = *value
+
 	case types.Retire:
 		card.Retired = true
 	case types.Unretire:
@@ -142,7 +142,7 @@ func (s *Service) UpdateCardStats(cardID string, action types.CardAction, value 
 		return err
 	}
 
-	err = s.AdjustSession(deckID, cardID, action)
+	err = s.AdjustSession(deckID, cardID, action, card.StarRating)
 	if err != nil {
 		s.logger.Error("Failed to update session", "card_id", cardID, "deck_id", deckID, "error", err)
 		return err

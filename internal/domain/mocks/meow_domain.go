@@ -12,13 +12,13 @@ type MeowDomain struct {
 	mock.Mock
 }
 
-// AdjustSession provides a mock function with given fields: deckID, cardID, action
-func (_m *MeowDomain) AdjustSession(deckID string, cardID string, action types.CardAction) error {
-	ret := _m.Called(deckID, cardID, action)
+// AdjustSession provides a mock function with given fields: deckID, cardID, action, value
+func (_m *MeowDomain) AdjustSession(deckID string, cardID string, action types.CardAction, value int) error {
+	ret := _m.Called(deckID, cardID, action, value)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, string, types.CardAction) error); ok {
-		r0 = rf(deckID, cardID, action)
+	if rf, ok := ret.Get(0).(func(string, string, types.CardAction, int) error); ok {
+		r0 = rf(deckID, cardID, action, value)
 	} else {
 		r0 = ret.Error(0)
 	}

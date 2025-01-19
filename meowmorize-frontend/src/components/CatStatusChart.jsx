@@ -10,7 +10,6 @@ const CatStatusChart = ({ pass = 0, skip = 0, fail = 0, retire = false,  isDarkM
 
     // Define colors based on dark mode
     const earColor = isDarkMode ? '#FFFFFF' : '#000000'; // White in dark mode, black otherwise
-    const faceColor = isDarkMode ? '#FFFFFF' : '#000000'; // White in dark mode, black otherwise
     const edgeColor = isDarkMode ? '#FFFFFF' : '#000000'; // White in dark mode, black otherwise
   
 

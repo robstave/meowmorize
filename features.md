@@ -16,6 +16,9 @@ add date ( above) to decks
 
 add bookmark to deck
 
+add stars to the bar
+https://jsfiddle.net/sqvgLw98/1/
+
 
 new concept  ( notes )
 

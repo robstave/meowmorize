@@ -34,7 +34,7 @@ type MeowDomain interface {
 
 	// Session Management
 	StartSession(deckID string, count int, method types.SessionMethod) error
-	AdjustSession(deckID string, cardID string, action types.CardAction) error
+	AdjustSession(deckID string, cardID string, action types.CardAction, value int) error
 	GetNextCard(deckID string) (string, error)
 	ClearSession(deckID string) error
 	GetSessionStats(deckID string) (types.SessionStats, error)

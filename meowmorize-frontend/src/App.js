@@ -1,7 +1,6 @@
 // src/App.js
 
-import React, { useState, useMemo, useEffect, useContext  } from 'react';
-//import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useMemo, useContext } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import Navbar from './components/Navbar';
@@ -12,8 +11,8 @@ import CardPage from './pages/CardPage'; //
 import CardForm from './pages/CardForm'; //
 import { lightTheme, darkTheme } from './theme';
 import LoginPage from './pages/LoginPage'; // Import LoginPage
- import { AuthContext } from './context/AuthContext'; // Import AuthContext
- import { ThemeContext } from './context/ThemeContext'; // Import ThemeContext
+import { AuthContext } from './context/AuthContext'; // Import AuthContext
+import { ThemeContext } from './context/ThemeContext'; // Import ThemeContext
 
 
 
@@ -24,16 +23,16 @@ function App() {
   // Memoize the MUI theme to optimize performance
   const theme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
-   
+
   const { auth } = useContext(AuthContext);
-  
+
   return (
     <ThemeProvider theme={theme}>
       {/* CssBaseline to apply global styles */}
       <CssBaseline />
       <Router>
-      <Navbar  />
-      <Routes>
+        <Navbar />
+        <Routes>
           {/* Public Route */}
           <Route path="/login" element={!auth.token ? <LoginPage /> : <Navigate to="/" />} />
 
@@ -48,7 +47,7 @@ function App() {
           {/* Redirect any unknown routes to login */}
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
-        
+
       </Router>
     </ThemeProvider>
   );

@@ -51,6 +51,7 @@ func (s *Service) StartSession(deckID string, count int, method types.SessionMet
 			Skipped: false,
 			Passed:  false,
 			Failed:  false,
+			Stars:   card.StarRating,
 		}
 	}
 
@@ -97,7 +98,7 @@ func selectCards(cards []types.Card, count int, method types.SessionMethod) ([]t
 }
 
 // AdjustSession updates the session based on card actions
-func (s *Service) AdjustSession(deckID string, cardID string, action types.CardAction) error {
+func (s *Service) AdjustSession(deckID string, cardID string, action types.CardAction, value int) error {
 	s.sessionsMu.RLock()
 	session, exists := s.sessions[deckID]
 	s.sessionsMu.RUnlock()
@@ -144,7 +145,9 @@ func (s *Service) AdjustSession(deckID string, cardID string, action types.CardA
 		cardStat.Passed = false
 
 	case types.SetStars:
-		// Implement if necessary
+
+		cardStat.Stars = value
+
 	case types.Retire:
 		cardStat.Viewed = true
 		cardStat.Skipped = false

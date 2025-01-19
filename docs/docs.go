@@ -1507,7 +1507,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "stars": {
-                    "type": "boolean"
+                    "type": "integer"
                 },
                 "viewed": {
                     "type": "boolean"

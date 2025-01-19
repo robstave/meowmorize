@@ -138,7 +138,7 @@ func TestAdjustSession_Success(t *testing.T) {
 	cardRepoMock.On("UpdateCard", mock.Anything).Return(nil)
 
 	// Act
-	err = service.AdjustSession(deckID, cardID, types.IncrementPass)
+	err = service.AdjustSession(deckID, cardID, types.IncrementPass, 0)
 
 	// Assert
 	assert.NoError(t, err)
@@ -163,7 +163,7 @@ func TestAdjustSession_InvalidDeckID(t *testing.T) {
 	service := setupService(deckRepoMock, cardRepoMock)
 
 	// Act
-	err := service.AdjustSession(deckID, cardID, types.IncrementPass)
+	err := service.AdjustSession(deckID, cardID, types.IncrementPass, 0)
 
 	// Assert no error  if there is not a session...then so what
 	assert.NoError(t, err)
@@ -315,7 +315,7 @@ func TestGetSessionStats_Success(t *testing.T) {
 	// Adjust session
 	cardRepoMock.On("GetCardByID", card1.ID).Return(&card1, nil)
 	cardRepoMock.On("UpdateCard", mock.Anything).Return(nil)
-	err = service.AdjustSession(deckID, card1.ID, types.IncrementPass)
+	err = service.AdjustSession(deckID, card1.ID, types.IncrementPass, 0)
 	assert.NoError(t, err)
 
 	// Act
@@ -546,7 +546,7 @@ func TestAdjustSession_UnknownAction(t *testing.T) {
 	cardRepoMock.On("GetCardByID", cardID).Return(&card, nil)
 
 	// Act: Use an unknown action
-	err = service.AdjustSession(deckID, cardID, "UnknownAction")
+	err = service.AdjustSession(deckID, cardID, "UnknownAction", 0)
 
 	// Assert
 	assert.Error(t, err)

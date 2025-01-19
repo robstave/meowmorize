@@ -22,7 +22,7 @@ type CardStats struct {
 	Skipped bool   `json:"skipped"`
 	Failed  bool   `json:"failed"`
 	Passed  bool   `json:"passed"`
-	Stars   bool   `json:"stars"`
+	Stars   int    `json:"stars"`
 }
 
 // Session represents a review session for a specific deck
