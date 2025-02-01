@@ -92,6 +92,8 @@ func selectCards(cards []types.Card, count int, method types.SessionMethod) ([]t
 		return selectStarsCards(cards, count), nil // New Stars method
 	case types.UnratedMethod:
 		return selectUnratedCards(cards, count), nil // New Unrated method
+	case types.AdjustedRandomMethod:
+		return selectAdjustedRandomCards(cards, count), nil // New Unrated method
 	default:
 		return nil, errors.New("invalid session method")
 	}

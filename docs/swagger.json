@@ -1384,7 +1384,8 @@
                         "Skips",
                         "Worst",
                         "Stars",
-                        "Unrated"
+                        "Unrated",
+                        "Adjustedrandom"
                     ]
                 }
             }

@@ -1391,7 +1391,8 @@ const docTemplate = `{
                         "Skips",
                         "Worst",
                         "Stars",
-                        "Unrated"
+                        "Unrated",
+                        "Adjustedrandom"
                     ]
                 }
             }

@@ -123,6 +123,56 @@ func selectStarsCards(cards []types.Card, count int) []types.Card {
 	return selectedCards
 }
 
+// selectAdjustedRandomCards selects cards using the adjusted random strategy.
+// For each card, it calculates a score as follows:
+//   - If star rating is 0, treat it as 2.5; otherwise use the actual star rating
+//   - Multiply the star rating by 2 (baseline score between 0 and 10)
+//   - Add a random number between -2.5 and 2.5
+//   - If FailCount > PassCount, add a random number between 0 and 2
+//
+// Then it sorts the cards ascending by the score and returns the top 'count' cards.
+func selectAdjustedRandomCards(cards []types.Card, count int) []types.Card {
+	type scoredCard struct {
+		card  types.Card
+		score float64
+	}
+
+	scoredCards := make([]scoredCard, len(cards))
+	for i, card := range cards {
+		var baseline float64
+		if card.StarRating == 0 {
+			baseline = 2.5 * 2 // equals 5
+		} else {
+			baseline = float64(card.StarRating) * 2
+		}
+		randomAdj := (rand.Float64() * 5) - 2.5 // random from -2.5 to 2.5
+		extra := 0.0
+		if card.FailCount > card.PassCount {
+			extra = rand.Float64() * 2 // random from 0 to 2
+		}
+		score := baseline + randomAdj + extra
+		scoredCards[i] = scoredCard{
+			card:  card,
+			score: score,
+		}
+	}
+
+	// Sort by ascending score (lower score means higher priority)
+	sort.Slice(scoredCards, func(i, j int) bool {
+		return scoredCards[i].score > scoredCards[j].score
+	})
+
+	n := count
+	if n > len(scoredCards) {
+		n = len(scoredCards)
+	}
+	result := make([]types.Card, n)
+	for i := 0; i < n; i++ {
+		result[i] = scoredCards[i].card
+	}
+	return result
+}
+
 // selectUnratedCards selects top N unrated cards first, then randomize
 func selectUnratedCards(cards []types.Card, count int) []types.Card {
 	unratedCards := []types.Card{}

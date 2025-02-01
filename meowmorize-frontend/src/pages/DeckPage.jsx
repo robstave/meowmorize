@@ -626,6 +626,8 @@ const DeckPage = () => {
               <MenuItem value="Worst">Worst</MenuItem>
               <MenuItem value="Stars">Stars</MenuItem>
               <MenuItem value="Unrated">Unrated</MenuItem>
+              <MenuItem value="AdjustedRandom">AdjustedRandom</MenuItem>
+              
             </Select>
           </FormControl>
         </DialogContent>

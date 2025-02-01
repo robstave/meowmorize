@@ -120,6 +120,7 @@ definitions:
         - Worst
         - Stars
         - Unrated
+        - Adjustedrandom
         type: string
     required:
     - deck_id
