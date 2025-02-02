@@ -1,6 +1,6 @@
 // src/pages/Dashboard.jsx
-import React, {   useState, useContext } from 'react';
-import {   deleteDeck, updateDeck  } from '../services/api';
+import React, { useState, useContext } from 'react';
+import { deleteDeck, updateDeck } from '../services/api';
 import {
   Container,
   Typography,
@@ -22,41 +22,81 @@ import {
   Button,
   Snackbar,
   TextField,
+  TableSortLabel,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit'; // Import EditIcon
-import { Link as RouterLink } from 'react-router-dom'; // **Import RouterLink**
- 
-import { DeckContext } from '../context/DeckContext'; // Import DeckContext
- 
-import { formatLastAccessed } from '../utils/dateUtils'; // Import the utility functionimport {
+import EditIcon from '@mui/icons-material/Edit';
+import { Link as RouterLink } from 'react-router-dom';
+import { DeckContext } from '../context/DeckContext';
+import { formatLastAccessed } from '../utils/dateUtils';
+
+function descendingComparator(a, b, orderBy) {
+  let valueA, valueB;
+  switch (orderBy) {
+    case 'name':
+      valueA = a.name.toLowerCase();
+      valueB = b.name.toLowerCase();
+      break;
+    case 'description':
+      valueA = a.description ? a.description.toLowerCase() : '';
+      valueB = b.description ? b.description.toLowerCase() : '';
+      break;
+    case 'last_accessed':
+      valueA = new Date(a.last_accessed);
+      valueB = new Date(b.last_accessed);
+      break;
+    case 'cards':
+      valueA = a.cards.length;
+      valueB = b.cards.length;
+      break;
+    default:
+      return 0;
+  }
+  if (valueB < valueA) return -1;
+  if (valueB > valueA) return 1;
+  return 0;
+}
+
+function getComparator(order, orderBy) {
+  return order === 'desc'
+    ? (a, b) => descendingComparator(a, b, orderBy)
+    : (a, b) => -descendingComparator(a, b, orderBy);
+}
+
+function stableSort(array, comparator) {
+  const stabilizedThis = array.map((el, index) => [el, index]);
+  stabilizedThis.sort((a, b) => {
+    const orderResult = comparator(a[0], b[0]);
+    if (orderResult !== 0) return orderResult;
+    return a[1] - b[1];
+  });
+  return stabilizedThis.map((el) => el[0]);
+}
 
 const Dashboard = () => {
-
   const { decks, setDecks, loading, error } = useContext(DeckContext);
-  //const [ setOpenDeleteDialog] = useState(false);
-   
-  // State for Edit Dialog
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
-
-
-  // **State for Delete Confirmation Dialog**
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [deckToDelete, setDeckToDelete] = useState(null);
-  // **State for Snackbar Notifications**
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
-    severity: 'success', // 'success' | 'error' | 'warning' | 'info'
+    severity: 'success',
   });
-  
 
- 
+  // Sorting state
+  const [order, setOrder] = useState('asc');
+  const [orderBy, setOrderBy] = useState('name');
 
-  // Function to open the edit dialog
+  const handleRequestSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
   const handleOpenEditDialog = (deck) => {
     setSelectedDeck(deck);
     setEditName(deck.name);
@@ -64,7 +104,6 @@ const Dashboard = () => {
     setOpenEditDialog(true);
   };
 
-  // Function to close the edit dialog
   const handleCloseEditDialog = () => {
     setSelectedDeck(null);
     setEditName('');
@@ -75,7 +114,6 @@ const Dashboard = () => {
   const handleEditDeck = async () => {
     if (!selectedDeck) return;
 
-    // Basic validation
     if (editName.trim() === '') {
       setSnackbar({
         open: true,
@@ -91,24 +129,20 @@ const Dashboard = () => {
         description: editDescription,
       };
 
-      // Call the API to update the deck
       const response = await updateDeck(selectedDeck.id, updatedDeck);
 
-      // Update the decks state
       setDecks((prevDecks) =>
         prevDecks.map((deck) =>
           deck.id === selectedDeck.id ? response : deck
         )
       );
 
-      // Show success notification
       setSnackbar({
         open: true,
         message: 'Deck updated successfully!',
         severity: 'success',
       });
 
-      // Close the dialog
       handleCloseEditDialog();
     } catch (err) {
       console.error(err);
@@ -120,35 +154,30 @@ const Dashboard = () => {
     }
   };
 
+  const handleOpenDeleteDialog = (deck) => {
+    setDeckToDelete(deck);
+    setOpenDeleteDialog(true);
+  };
 
- // Handler to open delete confirmation dialog
- const handleOpenDeleteDialog = (deck) => {
-  setDeckToDelete(deck);
-  setOpenDeleteDialog(true);
-};
+  const handleCloseDeleteDialog = () => {
+    setDeckToDelete(null);
+    setOpenDeleteDialog(false);
+  };
 
-// Handler to close delete confirmation dialog
-const handleCloseDeleteDialog = () => {
-  setDeckToDelete(null);
-  setOpenDeleteDialog(false);
-};
-
-  // **Handle Delete Deck**
   const handleDeleteDeck = async () => {
     if (!deckToDelete) return;
 
     try {
       await deleteDeck(deckToDelete.id);
-      // Remove the deleted deck from the state
-      setDecks((prevDecks) => prevDecks.filter((deck) => deck.id !== deckToDelete.id));
-      // Show success notification
+      setDecks((prevDecks) =>
+        prevDecks.filter((deck) => deck.id !== deckToDelete.id)
+      );
       setSnackbar({
         open: true,
         message: `Deck "${deckToDelete.name}" deleted successfully.`,
         severity: 'success',
       });
     } catch (err) {
-      // Show error notification
       setSnackbar({
         open: true,
         message: 'Failed to delete the deck. Please try again.',
@@ -160,11 +189,8 @@ const handleCloseDeleteDialog = () => {
     }
   };
 
-  // **Handle Close Snackbar**
   const handleCloseSnackbar = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
+    if (reason === 'clickaway') return;
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
@@ -193,6 +219,9 @@ const handleCloseDeleteDialog = () => {
     );
   }
 
+  // Sort decks using the current sort parameters
+  const sortedDecks = stableSort(decks, getComparator(order, orderBy));
+
   return (
     <Container sx={{ mt: 4 }}>
       <Typography variant="h4" gutterBottom>
@@ -202,19 +231,49 @@ const handleCloseDeleteDialog = () => {
         <Table aria-label="decks table">
           <TableHead>
             <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Description</TableCell>             
-               <TableCell align="right">Last Session</TableCell>
-
-              <TableCell align="right">Cards</TableCell>
-              <TableCell align="center">Actions</TableCell> {/* New Actions Column */}
+              <TableCell>
+                <TableSortLabel
+                  active={orderBy === 'name'}
+                  direction={orderBy === 'name' ? order : 'asc'}
+                  onClick={() => handleRequestSort('name')}
+                >
+                  Name
+                </TableSortLabel>
+              </TableCell>
+              <TableCell>
+                <TableSortLabel
+                  active={orderBy === 'description'}
+                  direction={orderBy === 'description' ? order : 'asc'}
+                  onClick={() => handleRequestSort('description')}
+                >
+                  Description
+                </TableSortLabel>
+              </TableCell>
+              <TableCell align="right">
+                <TableSortLabel
+                  active={orderBy === 'last_accessed'}
+                  direction={orderBy === 'last_accessed' ? order : 'asc'}
+                  onClick={() => handleRequestSort('last_accessed')}
+                >
+                  Last Session
+                </TableSortLabel>
+              </TableCell>
+              <TableCell align="right">
+                <TableSortLabel
+                  active={orderBy === 'cards'}
+                  direction={orderBy === 'cards' ? order : 'asc'}
+                  onClick={() => handleRequestSort('cards')}
+                >
+                  Cards
+                </TableSortLabel>
+              </TableCell>
+              <TableCell align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {decks.map((deck) => (
+            {sortedDecks.map((deck) => (
               <TableRow key={deck.id}>
                 <TableCell component="th" scope="row">
-                  {/* **Deck Name as a Link to DeckPage** */}
                   <Typography
                     component={RouterLink}
                     to={`/decks/${deck.id}`}
@@ -229,7 +288,6 @@ const handleCloseDeleteDialog = () => {
                 <TableCell align="right">{formatLastAccessed(deck.last_accessed)}</TableCell>
                 <TableCell align="right">{deck.cards.length}</TableCell>
                 <TableCell align="center">
-
                   <IconButton
                     aria-label="edit"
                     color="primary"
@@ -237,9 +295,6 @@ const handleCloseDeleteDialog = () => {
                   >
                     <EditIcon />
                   </IconButton>
-
-
-                  {/* **Delete Button** */}
                   <IconButton
                     aria-label="delete"
                     color="error"
@@ -253,7 +308,6 @@ const handleCloseDeleteDialog = () => {
           </TableBody>
         </Table>
       </TableContainer>
-
 
       {/* Edit Deck Dialog */}
       <Dialog
@@ -297,8 +351,7 @@ const handleCloseDeleteDialog = () => {
         </DialogActions>
       </Dialog>
 
-
-      {/* **Delete Confirmation Dialog** */}
+      {/* Delete Confirmation Dialog */}
       <Dialog
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
@@ -321,7 +374,7 @@ const handleCloseDeleteDialog = () => {
         </DialogActions>
       </Dialog>
 
-      {/* **Snackbar for Notifications** */}
+      {/* Snackbar for Notifications */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
