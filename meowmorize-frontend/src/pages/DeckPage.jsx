@@ -1,8 +1,14 @@
-// src/pages/DeckPage.jsx
 import React, { useEffect, useState, useContext } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { fetchDeckById, exportDeck, deleteCard, startSession, getNextCard, updateDeck } from '../services/api';
-import { formatLastAccessed } from '../utils/dateUtils'; // Import the utility functionimport {
+import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
+import {
+  fetchDeckById,
+  exportDeck,
+  deleteCard,
+  startSession,
+  getNextCard,
+  updateDeck
+} from '../services/api';
+import { formatLastAccessed } from '../utils/dateUtils';
 import {
   Container,
   Typography,
@@ -25,7 +31,6 @@ import {
   DialogContentText,
   DialogTitle,
   Collapse,
-
   Radio,
   RadioGroup,
   FormControlLabel,
@@ -34,28 +39,21 @@ import {
   TextField,
   Select,
   MenuItem,
-
 } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
-import DeleteIcon from '@mui/icons-material/Delete'; // Import DeleteIcon
-//import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import GetAppIcon from '@mui/icons-material/GetApp'; // Icon for export button
-import { saveAs } from 'file-saver'; // To save files on client-side
-import ImportMarkdownDialog from '../components/ImportMarkdownDialog'; // Import the dialog
-import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
-import { DeckContext } from '../context/DeckContext'; // Import DeckContext
-
+import DeleteIcon from '@mui/icons-material/Delete';
+import GetAppIcon from '@mui/icons-material/GetApp';
+import { saveAs } from 'file-saver';
+import ImportMarkdownDialog from '../components/ImportMarkdownDialog';
+import MuiAlert from '@mui/material/Alert';
+import { DeckContext } from '../context/DeckContext';
 
 const AlertSnackbar = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-
-
 const DeckPage = () => {
-  const { id } = useParams(); // Extract the deck ID from the URL
-  const { setDecks, loadDecks } = useContext(DeckContext); // Access DeckContext
-
+  const { id } = useParams();
+  const { setDecks, loadDecks } = useContext(DeckContext);
   const [deck, setDeck] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -63,39 +61,41 @@ const DeckPage = () => {
   // State to manage the visibility of the cards list
   const [showCards, setShowCards] = useState(false);
 
-  // State for Export Dialog
+  // Export Dialog states
   const [openExportDialog, setOpenExportDialog] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState('');
 
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
-  // State for Import Markdown Dialog
+  // Import Markdown Dialog state
   const [openImportDialog, setOpenImportDialog] = useState(false);
   const [importSuccessCount, setImportSuccessCount] = useState(0);
 
-  // State for Delete Card Dialog
+  // Delete Card Dialog states
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [cardToDelete, setCardToDelete] = useState(null);
 
+  // Start Session Dialog states
   const [openStartSessionDialog, setOpenStartSessionDialog] = useState(false);
   const [sessionCountOption, setSessionCountOption] = useState('all'); // 'all' or 'count'
   const [sessionCount, setSessionCount] = useState(20); // Default value
-  const [sessionMethod, setSessionMethod] = useState('Random'); // Default method
+  const [sessionMethod, setSessionMethod] = useState('Random');
 
-
+  // States for inline editing of deck name
   const [isEditing, setIsEditing] = useState(false);
   const [newDeckName, setNewDeckName] = useState('');
 
-  // State for Snackbar Notifications
+  // New states for inline editing of deck description
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [newDeckDescription, setNewDeckDescription] = useState('');
+
+  // Snackbar Notification state
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
-    severity: 'success', // 'success' | 'error' | 'warning' | 'info'
+    severity: 'success',
   });
-
-
-
 
   useEffect(() => {
     const getDeck = async () => {
@@ -113,12 +113,8 @@ const DeckPage = () => {
     getDeck();
   }, [id]);
 
-
-
-
   const handleOpenStartSessionDialog = () => {
     setOpenStartSessionDialog(true);
-    // Set default session count based on deck size
     if (deck.cards.length <= 20) {
       setSessionCount(deck.cards.length);
     } else {
@@ -130,26 +126,20 @@ const DeckPage = () => {
     setOpenStartSessionDialog(false);
   };
 
-
-
-  // Handler to toggle the visibility of the cards list
   const handleToggleCards = () => {
     setShowCards((prev) => !prev);
   };
 
-
-  // Handler to activate edit mode
+  // Handlers for deck name editing
   const handleDeckNameClick = () => {
     setIsEditing(true);
     setNewDeckName(deck.name);
   };
 
-  // Handler to update the new deck name as the user types
   const handleDeckNameChange = (event) => {
     setNewDeckName(event.target.value);
   };
 
-  // Handler to save the new deck name
   const handleDeckNameSave = async () => {
     if (newDeckName.trim() === '') {
       setSnackbar({
@@ -161,7 +151,10 @@ const DeckPage = () => {
     }
 
     try {
-      const updatedDeck = await updateDeck(id, { name: newDeckName });
+      // Include the current description so it isn’t overwritten
+
+
+      const updatedDeck = await updateDeck(id, { name: newDeckName, description: deck.description });
       setDeck(updatedDeck);
       setDecks((prevDecks) =>
         prevDecks.map((d) => (d.id === id ? updatedDeck : d))
@@ -182,14 +175,52 @@ const DeckPage = () => {
     }
   };
 
-  // Handler to cancel editing
+
   const handleDeckNameCancel = () => {
     setIsEditing(false);
     setNewDeckName('');
   };
 
+  // Handlers for deck description editing
+  const handleDescriptionClick = () => {
+    setIsEditingDescription(true);
+    setNewDeckDescription(deck.description || '');
+  };
+
+  const handleDeckDescriptionChange = (event) => {
+    setNewDeckDescription(event.target.value);
+  };
+
+  const handleDeckDescriptionSave = async () => {
+    try {
+      // Include the current name so it isn’t overwritten
+      const currentName = deck.name || newDeckName;
+      const updatedDeck = await updateDeck(id, { name: deck.name, description: newDeckDescription });
+      setDeck(updatedDeck);
+      setDecks((prevDecks) =>
+        prevDecks.map((d) => (d.id === id ? updatedDeck : d))
+      );
+      setSnackbar({
+        open: true,
+        message: 'Deck description updated successfully!',
+        severity: 'success',
+      });
+      setIsEditingDescription(false);
+    } catch (err) {
+      console.error(err);
+      setSnackbar({
+        open: true,
+        message: 'Failed to update deck description. Please try again.',
+        severity: 'error',
+      });
+    }
+  };
 
 
+  const handleDeckDescriptionCancel = () => {
+    setIsEditingDescription(false);
+    setNewDeckDescription('');
+  };
 
   // Handlers for Export Dialog
   const handleOpenExportDialog = () => {
@@ -203,7 +234,6 @@ const DeckPage = () => {
     }
   };
 
-  // Function to handle exporting the deck
   const handleExportDeck = async () => {
     try {
       setExporting(true);
@@ -224,24 +254,29 @@ const DeckPage = () => {
     }
   };
 
-
   // Handlers for Import Markdown Dialog
   const handleOpenImportDialog = () => {
     setOpenImportDialog(true);
-    setTimeout(() => setOpenImportDialog(true), 0); // Ensure the state update is rendered
-
   };
-
-
 
   const handleCloseImportDialog = () => {
     setOpenImportDialog(false);
   };
 
+  // New function to refresh the deck state
+  const refreshDeck = async () => {
+    try {
+      const data = await fetchDeckById(id);
+      setDeck(data);
+    } catch (err) {
+      console.error('Failed to refresh deck:', err);
+    }
+  };
+
   const handleImportSuccess = (count) => {
     setImportSuccessCount(count);
-    // Refresh the deck to include new cards
-    loadDecks();
+    loadDecks();         // Update global decks list, if needed
+    refreshDeck();       // Re-fetch this deck's data to update the card count
     setSnackbar({
       open: true,
       message: `${count} card(s) imported successfully!`,
@@ -265,7 +300,6 @@ const DeckPage = () => {
 
     try {
       await deleteCard(cardToDelete.id);
-      // Remove the deleted card from the deck state
       setDeck((prevDeck) => ({
         ...prevDeck,
         cards: prevDeck.cards.filter((card) => card.id !== cardToDelete.id),
@@ -292,11 +326,8 @@ const DeckPage = () => {
     }
   };
 
-  // Handler to close the Snackbar
   const handleCloseSnackbar = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
+    if (reason === 'clickaway') return;
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
@@ -327,7 +358,6 @@ const DeckPage = () => {
     }
   };
 
-
   const handleSessionCountOptionChange = (event) => {
     setSessionCountOption(event.target.value);
   };
@@ -342,7 +372,6 @@ const DeckPage = () => {
   const handleSessionMethodChange = (event) => {
     setSessionMethod(event.target.value);
   };
-
 
   if (loading) {
     return (
@@ -380,9 +409,7 @@ const DeckPage = () => {
             onClick={handleDeckNameClick}
             sx={{
               cursor: 'pointer',
-              '&:hover': {
-                textDecoration: 'underline',
-              },
+              '&:hover': { textDecoration: 'underline' },
             }}
           >
             {deck.name}
@@ -406,10 +433,39 @@ const DeckPage = () => {
         )}
       </Box>
 
+      {/* Editable Deck Description */}
+      <Box sx={{ mt: 1 }}>
+        {!isEditingDescription ? (
+          <Typography
+            variant="body1"
+            gutterBottom
+            onClick={handleDescriptionClick}
+            sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+          >
+            {deck.description || 'Click to add description'}
+          </Typography>
+        ) : (
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <TextField
+              variant="standard"
+              fullWidth
+              value={newDeckDescription}
+              onChange={handleDeckDescriptionChange}
+              label="Deck Description"
+            />
+            <Button variant="contained" color="primary" onClick={handleDeckDescriptionSave} sx={{ ml: 1 }}>
+              Save
+            </Button>
+            <Button variant="outlined" color="secondary" onClick={handleDeckDescriptionCancel} sx={{ ml: 1 }}>
+              Cancel
+            </Button>
+          </Box>
+        )}
+      </Box>
 
       {/* Last Accessed */}
       <Typography variant="subtitle1" color="textSecondary" gutterBottom>
-       Last Session: {formatLastAccessed(deck.last_accessed)}
+        Last Session: {formatLastAccessed(deck.last_accessed)}
       </Typography>
 
       {/* Number of Cards */}
@@ -417,66 +473,26 @@ const DeckPage = () => {
         Number of Cards: {deck.cards.length}
       </Typography>
 
-      {/* Deck Description */}
-      {deck.description && (
-        <Typography variant="body1" gutterBottom>
-          {deck.description}
-        </Typography>
-      )}
-
+      {/* Action Buttons */}
       <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
-
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleOpenStartSessionDialog}
-        >
+        <Button variant="contained" color="primary" onClick={handleOpenStartSessionDialog}>
           Start Session
         </Button>
-
-
-        {/* Preview Button to Toggle Cards List */}
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleToggleCards}
-
-        >
+        <Button variant="contained" color="primary" onClick={handleToggleCards}>
           {showCards ? 'Hide Preview' : 'Show Preview'}
         </Button>
-
-        {/* Back to Dashboard Button */}
-        <Button
-          component={RouterLink}
-          to="/"
-          variant="outlined"
-          color="secondary"
-
-        >
+        <Button component={RouterLink} to="/" variant="outlined" color="secondary">
           Back to Dashboard
         </Button>
-
-        {/* Export Deck Button */}
-        <Button
-          variant="outlined"
-          color="secondary"
-          startIcon={<GetAppIcon />}
-          onClick={handleOpenExportDialog}
-        >
+        <Button variant="outlined" color="secondary" startIcon={<GetAppIcon />} onClick={handleOpenExportDialog}>
           Export Deck
         </Button>
-
-        {/* Import Markdown Button */}
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={handleOpenImportDialog}
-        >
+        <Button variant="outlined" color="primary" onClick={handleOpenImportDialog}>
           Import from Markdown
         </Button>
-
       </Box>
-      {/* Cards List (Conditionally Rendered) */}
+
+      {/* Cards List */}
       <Collapse in={showCards}>
         <TableContainer component={Paper} sx={{ mt: 2 }}>
           <Table aria-label="cards table">
@@ -484,7 +500,7 @@ const DeckPage = () => {
               <TableRow>
                 <TableCell>Front</TableCell>
                 <TableCell>Back</TableCell>
-                <TableCell>Stars</TableCell>  
+                <TableCell>Stars</TableCell>
                 <TableCell align="center">Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -493,14 +509,9 @@ const DeckPage = () => {
                 <TableRow key={card.id}>
                   <TableCell>{card.front.text}</TableCell>
                   <TableCell>{card.back.text}</TableCell>
-                  <TableCell>{card.star_rating || 0}</TableCell>  
+                  <TableCell>{card.star_rating || 0}</TableCell>
                   <TableCell align="center">
-                    {/* Delete Button */}
-                    <IconButton
-                      aria-label="delete"
-                      color="error"
-                      onClick={() => handleOpenDeleteDialog(card)}
-                    >
+                    <IconButton aria-label="delete" color="error" onClick={() => handleOpenDeleteDialog(card)}>
                       <DeleteIcon />
                     </IconButton>
                   </TableCell>
@@ -541,7 +552,6 @@ const DeckPage = () => {
         onImportSuccess={handleImportSuccess}
       />
 
-
       {/* Delete Card Confirmation Dialog */}
       <Dialog
         open={openDeleteDialog}
@@ -577,8 +587,6 @@ const DeckPage = () => {
           <DialogContentText id="start-session-dialog-description">
             Configure the parameters for your new review session.
           </DialogContentText>
-
-          {/* Session Count Option */}
           <FormControl component="fieldset" sx={{ mt: 2 }}>
             <FormLabel component="legend">Number of Cards</FormLabel>
             <RadioGroup
@@ -591,8 +599,6 @@ const DeckPage = () => {
               <FormControlLabel value="count" control={<Radio />} label="Specify Count" />
             </RadioGroup>
           </FormControl>
-
-          {/* Session Count Input (Visible only if 'Specify Count' is selected) */}
           {sessionCountOption === 'count' && (
             <TextField
               autoFocus
@@ -610,24 +616,16 @@ const DeckPage = () => {
               helperText={`Enter a number between 1 and ${deck.cards.length}`}
             />
           )}
-
-          {/* Session Method Selection */}
           <FormControl fullWidth sx={{ mt: 2 }}>
             <FormLabel>Session Method</FormLabel>
-            <Select
-              value={sessionMethod}
-              onChange={handleSessionMethodChange}
-              variant="standard"
-            >
+            <Select value={sessionMethod} onChange={handleSessionMethodChange} variant="standard">
               <MenuItem value="Random">Random</MenuItem>
-              {/* Add more methods here as needed */}
               <MenuItem value="Fails">Fails</MenuItem>
               <MenuItem value="Skips">Skips</MenuItem>
               <MenuItem value="Worst">Worst</MenuItem>
               <MenuItem value="Stars">Stars</MenuItem>
               <MenuItem value="Unrated">Unrated</MenuItem>
               <MenuItem value="AdjustedRandom">AdjustedRandom</MenuItem>
-              
             </Select>
           </FormControl>
         </DialogContent>
@@ -638,7 +636,6 @@ const DeckPage = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
 
       {/* Snackbar for Notifications */}
       <Snackbar
@@ -651,7 +648,6 @@ const DeckPage = () => {
           {snackbar.message}
         </AlertSnackbar>
       </Snackbar>
-
     </Container>
   );
 };
