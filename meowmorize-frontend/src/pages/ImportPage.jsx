@@ -8,12 +8,23 @@ import {
   Alert,
   CircularProgress,
   Snackbar,
+  Tooltip,
+  Paper,
+  Tabs,
+  Tab,
+  Card,
+  CardContent,
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import MuiAlert from '@mui/material/Alert';
+import ReactMarkdown from 'react-markdown';
 import { importDeck, createEmptyDeck, createCard } from '../services/api';
 import { DeckContext } from '../context/DeckContext';
 import { parseMarkdownToCards } from '../utils/markdownParser';
+
+// Import instructions text from separate files
+import markdownInstructions from './markdownInstructions';
+import jsonInstructions from './jsonInstructions';
 
 const AlertSnackbar = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -29,6 +40,7 @@ const ImportPage = () => {
     severity: 'success',
   });
   const { loadDecks } = useContext(DeckContext);
+  const [tabValue, setTabValue] = useState(0);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -141,27 +153,42 @@ const ImportPage = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
+
   return (
     <Container maxWidth="sm" sx={{ mt: 4 }}>
+      {/* Explanation header */}
       <Typography variant="h4" gutterBottom>
         Import Deck
       </Typography>
+      <Typography variant="body1" sx={{ mb: 2 }}>
+        Import a deck from either <strong>Markdown</strong> or <strong>JSON</strong> format.
+      </Typography>
+
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Button variant="contained" component="label" startIcon={<UploadFileIcon />}>
-          Choose File
-          <input
-            type="file"
-            accept=".json,.md,.markdown,.txt"
-            hidden
-            onChange={handleFileChange}
-          />
-        </Button>
+        {/* Tooltip wrapped file input button */}
+        <Tooltip title="Import file from JSON or Markdown format">
+          <Button variant="contained" component="label" startIcon={<UploadFileIcon />}>
+            Choose File
+            <input
+              type="file"
+              accept=".json,.md,.markdown,.txt"
+              hidden
+              onChange={handleFileChange}
+            />
+          </Button>
+        </Tooltip>
+
         {selectedFile && (
           <Typography variant="body1">
             Selected File: {selectedFile.name}
           </Typography>
         )}
+
         {message.text && <Alert severity={message.type}>{message.text}</Alert>}
+
         <Button
           variant="contained"
           color="primary"
@@ -171,6 +198,25 @@ const ImportPage = () => {
           {loading ? <CircularProgress size={24} /> : 'Import Deck'}
         </Button>
       </Box>
+
+      {/* Card with Tabs for instructions */}
+      <Box sx={{ mt: 4 }}>
+        <Paper elevation={3}>
+          <Tabs value={tabValue} onChange={handleTabChange} variant="fullWidth">
+            <Tab label="Markdown" />
+            <Tab label="JSON" />
+          </Tabs>
+          <CardContent>
+            {tabValue === 0 && (
+              <ReactMarkdown>{markdownInstructions}</ReactMarkdown>
+            )}
+            {tabValue === 1 && (
+              <ReactMarkdown>{jsonInstructions}</ReactMarkdown>
+            )}
+          </CardContent>
+        </Paper>
+      </Box>
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}

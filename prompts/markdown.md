@@ -1,10 +1,6 @@
+# Markdown create prompt V2.0
 
-
-
-
-# V2
-
-Create a set of educational flashcards in Markdown format using the following structure:
+Create a set of educational flashcards in Markdown format using the following structure.
 
 Each card must be wrapped in HTML comments:
 
@@ -16,17 +12,15 @@ Each card must be wrapped in HTML comments:
 
 For each card:
 
-1. Front side begins with "### Front" 
+1. Front side begins with "### Front" followed by the front text of the flashcard in markdown.
 
-   
 
- ### Front AWS Lightsail features
+ ### Front
 
 2. Back side begins with "### Back"
 
 3. Use standard Markdown formatting (bold, images, etc.) within the content
 
-4. Optional: Include "<!--- Card Link --->" before end comment to indicate linked cards
 
 Example card format:
 
@@ -42,8 +36,4 @@ Answer here
 
 <!-- Card End -->
 
-Please create the flashcards directly in this format, without any explanations or additional text. 
-
-Focus on AWS Cloud certifaction questions or topics that relate to AWS Lambda and AWS Step functions.   You can have a few questions that compare.
-
-and create 10 cards.
+Please create the flashcards directly in this format.
