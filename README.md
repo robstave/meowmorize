@@ -6,15 +6,21 @@ Ok...that sounds impressive and kinda feels like the copy was created from Chat.
 
 There are two things that I was trying to acomplish here.
 
-- **I wanted a flashcard app that I liked**.  Dont get me wrong, there are probably as many flashcard apps out there as to-do lists.  I seem to always find something I dont like about those too.  I actually use flashcards all the time.  My handwriting sucks and I dont have the patience to craft nice ones.  By the time I do, I know the subject. I LOVE [Obsidian](https://obsidian.md/). I love markdown.  I wanted an option to be able to create/curate my cards in markdown. This app imports markdown!
+- **I wanted a flashcard app that I liked**.  Dont get me wrong, there are probably as many flashcard apps out there as to-do lists.  I seem to always find something I dont like about those too.  I actually use flashcards all the time.  My handwriting bites and I dont have the patience to craft nice ones.  
 
-- **Play with ChatGPT**. My job really does not allow for unfettered use of ChatGTP in coding. This is understandable for a cybersecurity company.  Wholesale exchanges of code with an industry that sucks up information is bad. But personal apps...have at it!
+I LOVE [Obsidian](https://obsidian.md/). I love markdown.  I wanted an option to be able to create/curate my cards in markdown first. This app imports markdown!
 
-In a year, my little process will seem quaint.  I have yaml files to outline what files to concat so I can paste large chunks ( about 7k tokens ?) into the chat.  It works pretty well.  Copilot really doesnt work like that. Cursor does, but it seems like they have a little ways to go before I pay for another chat service. By the end of 2025, an agent will just take your full repo and suck it in.  It can now, but not as an affordable option for the unwashed masses.
+- **Play with ChatGPT**. My job really does not allow for unfettered use of ChatGTP in coding. This is understandable for a cybersecurity company. But personal apps...have at it!
 
-An interesting twist that makes this project unique is the ability to bulk import cards from a chat friendly format.
+In a year ( its 2025), my little process will seem quaint.  I have yaml files to outline what files to concat so I can paste large chunks ( about 7k tokens ?) into the chat.  It works pretty well.  Copilot really doesnt work like that. Cursor does, but it seems like they have a little ways to go before I pay for another chat service. By the end of 2025, an agent will just take your full repo and suck it in.  It probably can now, but not as an affordable option for the unwashed masses.
+
+An interesting twist that makes this project unique is the ability to bulk import cards from a chat friendly ( Markdown ) format.
 
  
+
+## Markdown format of cards
+
+
 ```markdown
 <!-- Card Start -->
 
@@ -30,6 +36,17 @@ An interesting twist that makes this project unique is the ability to bulk impor
 ```
 
 Tell chat to create 20 or so cards on your favorite subject using the above format.  It just works! This app understands this perfectly.  And you can edit cards on the fly in case there is an issue.  Its all done in Markdown.
+
+[Here is my actual prompt](prompts/instructions.png)
+
+
+[Here is a demo that you can import - Cat Jokes.  Really really bad Chat generated jokes](prompts/demoinput.md)
+
+If you are studying for AWS certs, this can be a great too.
+A good resource of practice exams are here: https://github.com/kananinirav/AWS-Certified-Cloud-Practitioner-Notes/tree/master
+
+I used these as launching points to create cards.  With much more information to pull from
+[](examples/kananinirav-22.md)
 
 
 ## App Overview
@@ -78,11 +95,83 @@ MeowMorize is composed of two main components:
 The application leverages a SQLite database (`meowmorize.db`) located at the root directory for data persistence. To reset the application data, simply delete this database file.
 
 
+
+### Importing Flashcards
+
+MeowMorize supports importing flashcards using a special Markdown format tailored for chat-friendly interactions. Each flashcard must adhere to the following structure:
+
+```markdown
+<!-- Card Start -->
+
+### Front
+
+[Question Here]
+
+### Back
+
+[Answer Here]
+
+<!-- Card End -->
+```
+
+**Optional**: Include a link related to the flashcard by adding the `<!--- Card Link --->` comment before the end comment:
+
+```markdown
+<!-- Card Start -->
+
+### Front
+
+[Question Here]
+
+### Back
+
+[Answer Here]
+
+<!--- Card Link ---> https://example.com/resource
+
+<!-- Card End -->
+```
+
+#### Steps to Import:
+
+1. **Prepare Your Markdown File**
+   
+   Ensure your flashcards are formatted correctly. Below is an example of 10 flashcards focusing on AWS Cloud certification topics related to AWS Lambda and AWS Step Functions:
+
+   ```markdown
+   <!-- Card Start -->
+   ### Front
+   What is AWS Lambda?
+   
+   ### Back
+   AWS Lambda is a serverless compute service that lets you run code without provisioning or managing servers.
+   
+   <!-- Card End -->
+
+   <!-- Card Start -->
+   ### Front
+   How do AWS Step Functions integrate with AWS Lambda?
+   
+   ### Back
+   AWS Step Functions can coordinate multiple AWS Lambda functions into a workflow, managing state and transitions.
+   
+   <!-- Card End -->
+
+   <!-- Add additional cards similarly -->
+   ```
+
+2. **Import via Frontend**
+   
+   - Navigate to the Import section in the frontend application.
+   - Upload your Markdown file containing the flashcards.
+   - The application will parse the file and add the flashcards to the selected deck.
+
+
+
 ## Project Status
 This is still a work in progress and has a lot of work to go.  But its enough for me to study with and I will probably put features on hold.
 
 A list of things I would like though
-
 
 ### Decks
 
@@ -90,20 +179,15 @@ A list of things I would like though
 
 - Export to markdown would be nice.  The native format is a Json with UUIDs. 
 
-
-
 ### Users/IAM
 
 - Multiple users: The current app does have a login, but really there is only one user at a time. The session for a deck is basically a singleton in the domain service.  This needs to change, but that would require a whole IAM process too.  This would require ANOTHER junction table for the users to card relation too.
 
 - Federation:  Okta/Cognito.  Something to this effect
 
-
 ### Advanced
 
 - Use golang chain to update cards on the fly.
-
-
 
 
 ## Getting Started
@@ -304,77 +388,6 @@ MeowMorize utilizes a helper script to streamline various build and deployment t
   ```bash
   ./helper help
   ```
-
-### Importing Flashcards
-
-MeowMorize supports importing flashcards using a special Markdown format tailored for chat-friendly interactions. Each flashcard must adhere to the following structure:
-
-```markdown
-<!-- Card Start -->
-
-### Front
-
-[Question Here]
-
-### Back
-
-[Answer Here]
-
-<!-- Card End -->
-```
-
-**Optional**: Include a link related to the flashcard by adding the `<!--- Card Link --->` comment before the end comment:
-
-```markdown
-<!-- Card Start -->
-
-### Front
-
-[Question Here]
-
-### Back
-
-[Answer Here]
-
-<!--- Card Link ---> https://example.com/resource
-
-<!-- Card End -->
-```
-
-#### Steps to Import:
-
-1. **Prepare Your Markdown File**
-   
-   Ensure your flashcards are formatted correctly. Below is an example of 10 flashcards focusing on AWS Cloud certification topics related to AWS Lambda and AWS Step Functions:
-
-   ```markdown
-   <!-- Card Start -->
-   ### Front
-   What is AWS Lambda?
-   
-   ### Back
-   AWS Lambda is a serverless compute service that lets you run code without provisioning or managing servers.
-   
-   <!-- Card End -->
-
-   <!-- Card Start -->
-   ### Front
-   How do AWS Step Functions integrate with AWS Lambda?
-   
-   ### Back
-   AWS Step Functions can coordinate multiple AWS Lambda functions into a workflow, managing state and transitions.
-   
-   <!-- Card End -->
-
-   <!-- Add additional cards similarly -->
-   ```
-
-2. **Import via Frontend**
-   
-   - Navigate to the Import section in the frontend application.
-   - Upload your Markdown file containing the flashcards.
-   - The application will parse the file and add the flashcards to the selected deck.
-
 
 
 ## API Documentation
