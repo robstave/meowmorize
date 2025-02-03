@@ -1,4 +1,3 @@
-// src/pages/Dashboard.jsx
 import React, { useState, useContext } from 'react';
 import { deleteDeck, updateDeck } from '../services/api';
 import {
@@ -23,55 +22,13 @@ import {
   Snackbar,
   TextField,
   TableSortLabel,
+  Tooltip,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { Link as RouterLink } from 'react-router-dom';
 import { DeckContext } from '../context/DeckContext';
 import { formatLastAccessed } from '../utils/dateUtils';
-
-function descendingComparator(a, b, orderBy) {
-  let valueA, valueB;
-  switch (orderBy) {
-    case 'name':
-      valueA = a.name.toLowerCase();
-      valueB = b.name.toLowerCase();
-      break;
-    case 'description':
-      valueA = a.description ? a.description.toLowerCase() : '';
-      valueB = b.description ? b.description.toLowerCase() : '';
-      break;
-    case 'last_accessed':
-      valueA = new Date(a.last_accessed);
-      valueB = new Date(b.last_accessed);
-      break;
-    case 'cards':
-      valueA = a.cards.length;
-      valueB = b.cards.length;
-      break;
-    default:
-      return 0;
-  }
-  if (valueB < valueA) return -1;
-  if (valueB > valueA) return 1;
-  return 0;
-}
-
-function getComparator(order, orderBy) {
-  return order === 'desc'
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
-}
-
-function stableSort(array, comparator) {
-  const stabilizedThis = array.map((el, index) => [el, index]);
-  stabilizedThis.sort((a, b) => {
-    const orderResult = comparator(a[0], b[0]);
-    if (orderResult !== 0) return orderResult;
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map((el) => el[0]);
-}
 
 const Dashboard = () => {
   const { decks, setDecks, loading, error } = useContext(DeckContext);
@@ -87,16 +44,54 @@ const Dashboard = () => {
     severity: 'success',
   });
 
-  // Sorting state
-  const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState('name');
+  // State for sorting
+  const [order, setOrder] = useState('asc'); // 'asc' or 'desc'
+  const [orderBy, setOrderBy] = useState('name'); // property to sort by
 
-  const handleRequestSort = (property) => {
+  const handleSort = (property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
   };
 
+  // Helper function: descending comparator
+  function descendingComparator(a, b, orderBy) {
+    if (orderBy === 'cards') {
+      if (b.cards.length < a.cards.length) return -1;
+      if (b.cards.length > a.cards.length) return 1;
+      return 0;
+    }
+    if (orderBy === 'last_accessed') {
+      const dateA = new Date(a.last_accessed);
+      const dateB = new Date(b.last_accessed);
+      if (dateB < dateA) return -1;
+      if (dateB > dateA) return 1;
+      return 0;
+    }
+    if (b[orderBy] < a[orderBy]) return -1;
+    if (b[orderBy] > a[orderBy]) return 1;
+    return 0;
+  }
+
+  // Helper function: get comparator based on order and orderBy
+  function getComparator(order, orderBy) {
+    return order === 'desc'
+      ? (a, b) => descendingComparator(a, b, orderBy)
+      : (a, b) => -descendingComparator(a, b, orderBy);
+  }
+
+  // Helper function: stable sort
+  function stableSort(array, comparator) {
+    const stabilizedThis = array.map((el, index) => [el, index]);
+    stabilizedThis.sort((a, b) => {
+      const cmp = comparator(a[0], b[0]);
+      if (cmp !== 0) return cmp;
+      return a[1] - b[1];
+    });
+    return stabilizedThis.map((el) => el[0]);
+  }
+
+  // Handlers for Edit Dialog
   const handleOpenEditDialog = (deck) => {
     setSelectedDeck(deck);
     setEditName(deck.name);
@@ -128,21 +123,17 @@ const Dashboard = () => {
         name: editName,
         description: editDescription,
       };
-
       const response = await updateDeck(selectedDeck.id, updatedDeck);
-
       setDecks((prevDecks) =>
         prevDecks.map((deck) =>
           deck.id === selectedDeck.id ? response : deck
         )
       );
-
       setSnackbar({
         open: true,
         message: 'Deck updated successfully!',
         severity: 'success',
       });
-
       handleCloseEditDialog();
     } catch (err) {
       console.error(err);
@@ -154,6 +145,7 @@ const Dashboard = () => {
     }
   };
 
+  // Handlers for Delete Dialog
   const handleOpenDeleteDialog = (deck) => {
     setDeckToDelete(deck);
     setOpenDeleteDialog(true);
@@ -219,7 +211,7 @@ const Dashboard = () => {
     );
   }
 
-  // Sort decks using the current sort parameters
+  // Apply sorting to decks
   const sortedDecks = stableSort(decks, getComparator(order, orderBy));
 
   return (
@@ -231,38 +223,38 @@ const Dashboard = () => {
         <Table aria-label="decks table">
           <TableHead>
             <TableRow>
-              <TableCell>
+              <TableCell sortDirection={orderBy === 'name' ? order : false}>
                 <TableSortLabel
                   active={orderBy === 'name'}
                   direction={orderBy === 'name' ? order : 'asc'}
-                  onClick={() => handleRequestSort('name')}
+                  onClick={() => handleSort('name')}
                 >
                   Name
                 </TableSortLabel>
               </TableCell>
-              <TableCell>
+              <TableCell sortDirection={orderBy === 'description' ? order : false}>
                 <TableSortLabel
                   active={orderBy === 'description'}
                   direction={orderBy === 'description' ? order : 'asc'}
-                  onClick={() => handleRequestSort('description')}
+                  onClick={() => handleSort('description')}
                 >
                   Description
                 </TableSortLabel>
               </TableCell>
-              <TableCell align="right">
+              <TableCell align="right" sortDirection={orderBy === 'last_accessed' ? order : false}>
                 <TableSortLabel
                   active={orderBy === 'last_accessed'}
                   direction={orderBy === 'last_accessed' ? order : 'asc'}
-                  onClick={() => handleRequestSort('last_accessed')}
+                  onClick={() => handleSort('last_accessed')}
                 >
                   Last Session
                 </TableSortLabel>
               </TableCell>
-              <TableCell align="right">
+              <TableCell align="right" sortDirection={orderBy === 'cards' ? order : false}>
                 <TableSortLabel
                   active={orderBy === 'cards'}
                   direction={orderBy === 'cards' ? order : 'asc'}
-                  onClick={() => handleRequestSort('cards')}
+                  onClick={() => handleSort('cards')}
                 >
                   Cards
                 </TableSortLabel>
@@ -288,20 +280,24 @@ const Dashboard = () => {
                 <TableCell align="right">{formatLastAccessed(deck.last_accessed)}</TableCell>
                 <TableCell align="right">{deck.cards.length}</TableCell>
                 <TableCell align="center">
-                  <IconButton
-                    aria-label="edit"
-                    color="primary"
-                    onClick={() => handleOpenEditDialog(deck)}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton
-                    aria-label="delete"
-                    color="error"
-                    onClick={() => handleOpenDeleteDialog(deck)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
+                  <Tooltip title="Edit this deck">
+                    <IconButton
+                      aria-label="edit"
+                      color="primary"
+                      onClick={() => handleOpenEditDialog(deck)}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Delete this deck">
+                    <IconButton
+                      aria-label="delete"
+                      color="error"
+                      onClick={() => handleOpenDeleteDialog(deck)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
                 </TableCell>
               </TableRow>
             ))}
@@ -365,9 +361,7 @@ const Dashboard = () => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} color="primary">
-            Cancel
-          </Button>
+          <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
           <Button onClick={handleDeleteDeck} color="error" variant="contained" autoFocus>
             Delete
           </Button>

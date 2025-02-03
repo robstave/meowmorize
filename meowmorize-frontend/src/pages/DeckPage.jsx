@@ -1,3 +1,4 @@
+// src/pages/DeckPage.jsx
 import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
@@ -6,7 +7,7 @@ import {
   deleteCard,
   startSession,
   getNextCard,
-  updateDeck
+  updateDeck,
 } from '../services/api';
 import { formatLastAccessed } from '../utils/dateUtils';
 import {
@@ -39,6 +40,8 @@ import {
   TextField,
   Select,
   MenuItem,
+  Tooltip,
+  CardContent,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import GetAppIcon from '@mui/icons-material/GetApp';
@@ -50,6 +53,10 @@ import { DeckContext } from '../context/DeckContext';
 const AlertSnackbar = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
+
+// Utility to truncate a string to n characters, appending "..." if needed.
+const truncate = (str, n) =>
+  str.length > n ? `${str.substring(0, n)}...` : str;
 
 const DeckPage = () => {
   const { id } = useParams();
@@ -151,9 +158,6 @@ const DeckPage = () => {
     }
 
     try {
-      // Include the current description so it isn’t overwritten
-
-
       const updatedDeck = await updateDeck(id, { name: newDeckName, description: deck.description });
       setDeck(updatedDeck);
       setDecks((prevDecks) =>
@@ -175,7 +179,6 @@ const DeckPage = () => {
     }
   };
 
-
   const handleDeckNameCancel = () => {
     setIsEditing(false);
     setNewDeckName('');
@@ -193,8 +196,6 @@ const DeckPage = () => {
 
   const handleDeckDescriptionSave = async () => {
     try {
-      // Include the current name so it isn’t overwritten
-      const currentName = deck.name || newDeckName;
       const updatedDeck = await updateDeck(id, { name: deck.name, description: newDeckDescription });
       setDeck(updatedDeck);
       setDecks((prevDecks) =>
@@ -215,7 +216,6 @@ const DeckPage = () => {
       });
     }
   };
-
 
   const handleDeckDescriptionCancel = () => {
     setIsEditingDescription(false);
@@ -263,20 +263,9 @@ const DeckPage = () => {
     setOpenImportDialog(false);
   };
 
-  // New function to refresh the deck state
-  const refreshDeck = async () => {
-    try {
-      const data = await fetchDeckById(id);
-      setDeck(data);
-    } catch (err) {
-      console.error('Failed to refresh deck:', err);
-    }
-  };
-
   const handleImportSuccess = (count) => {
     setImportSuccessCount(count);
-    loadDecks();         // Update global decks list, if needed
-    refreshDeck();       // Re-fetch this deck's data to update the card count
+    loadDecks();
     setSnackbar({
       open: true,
       message: `${count} card(s) imported successfully!`,
@@ -400,20 +389,19 @@ const DeckPage = () => {
 
   return (
     <Container sx={{ mt: 4 }}>
-      {/* Deck Title */}
-      <Box className="deck-header" sx={{ display: 'flex', alignItems: 'center' }}>
+      {/* Deck Title with Tooltip */}
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
         {!isEditing ? (
-          <Typography
-            variant="h4"
-            gutterBottom
-            onClick={handleDeckNameClick}
-            sx={{
-              cursor: 'pointer',
-              '&:hover': { textDecoration: 'underline' },
-            }}
-          >
-            {deck.name}
-          </Typography>
+          <Tooltip title="Click to edit deck name">
+            <Typography
+              variant="h4"
+              gutterBottom
+              onClick={handleDeckNameClick}
+              sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+            >
+              {deck.name}
+            </Typography>
+          </Tooltip>
         ) : (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <TextField
@@ -433,18 +421,19 @@ const DeckPage = () => {
         )}
       </Box>
 
-      {/* Editable Deck Description */}
+      {/* Editable Deck Description with Tooltip */}
       <Box sx={{ mt: 1 }}>
         {!isEditingDescription ? (
-          <Typography
-            variant="body1"
-            gutterBottom
-            onClick={handleDescriptionClick}
-            className="editable-field"
-            sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
-          >
-            {deck.description || 'Click to add description'}
-          </Typography>
+          <Tooltip title="Click to edit deck description">
+            <Typography
+              variant="body1"
+              gutterBottom
+              onClick={handleDescriptionClick}
+              sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+            >
+              {deck.description || 'Click to add description'}
+            </Typography>
+          </Tooltip>
         ) : (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <TextField
@@ -464,38 +453,46 @@ const DeckPage = () => {
         )}
       </Box>
 
-      {/* Last Accessed */}
+      {/* Last Accessed & Number of Cards */}
       <Typography variant="subtitle1" color="textSecondary" gutterBottom>
         Last Session: {formatLastAccessed(deck.last_accessed)}
       </Typography>
-
-      {/* Number of Cards */}
       <Typography variant="subtitle1" gutterBottom>
         Number of Cards: {deck.cards.length}
       </Typography>
 
-      {/* Action Buttons */}
+      {/* Action Buttons with Tooltips */}
       <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
-        <Button variant="contained" color="primary" onClick={handleOpenStartSessionDialog}>
-          Start Session
-        </Button>
-        <Button variant="contained" color="primary" onClick={handleToggleCards}>
-          {showCards ? 'Hide Preview' : 'Show Preview'}
-        </Button>
-        <Button component={RouterLink} to="/" variant="outlined" color="secondary">
-          Back to Dashboard
-        </Button>
-        <Button variant="outlined" color="secondary" startIcon={<GetAppIcon />} onClick={handleOpenExportDialog}>
-          Export Deck
-        </Button>
-        <Button variant="outlined" color="primary" onClick={handleOpenImportDialog}>
-          Import from Markdown
-        </Button>
+        <Tooltip title="Start a new review session using this deck">
+          <Button variant="contained" color="primary" onClick={handleOpenStartSessionDialog}>
+            Start Session
+          </Button>
+        </Tooltip>
+        <Tooltip title="Toggle preview of deck cards">
+          <Button variant="contained" color="primary" onClick={handleToggleCards}>
+            {showCards ? 'Hide Preview' : 'Show Preview'}
+          </Button>
+        </Tooltip>
+        <Tooltip title="Return to Dashboard">
+          <Button component={RouterLink} to="/" variant="outlined" color="secondary">
+            Back to Dashboard
+          </Button>
+        </Tooltip>
+        <Tooltip title="Export deck as JSON">
+          <Button variant="outlined" color="secondary" startIcon={<GetAppIcon />} onClick={handleOpenExportDialog}>
+            Export Deck
+          </Button>
+        </Tooltip>
+        <Tooltip title="Import additional cards from Markdown">
+          <Button variant="outlined" color="primary" onClick={handleOpenImportDialog}>
+            Import from Markdown
+          </Button>
+        </Tooltip>
       </Box>
 
-      {/* Cards List */}
+      {/* Cards List with Truncated Preview */}
       <Collapse in={showCards}>
-        <TableContainer component={Paper} className="table-container" sx={{ mt: 2 }}>
+        <TableContainer component={Paper} sx={{ mt: 2 }}>
           <Table aria-label="cards table">
             <TableHead>
               <TableRow>
@@ -508,13 +505,23 @@ const DeckPage = () => {
             <TableBody>
               {deck.cards.map((card) => (
                 <TableRow key={card.id}>
-                  <TableCell>{card.front.text}</TableCell>
-                  <TableCell>{card.back.text}</TableCell>
+                  <TableCell>
+                    <Tooltip title={card.front.text}>
+                      <span>{truncate(card.front.text, 150)}</span>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell>
+                    <Tooltip title={card.back.text}>
+                      <span>{truncate(card.back.text, 150)}</span>
+                    </Tooltip>
+                  </TableCell>
                   <TableCell>{card.star_rating || 0}</TableCell>
                   <TableCell align="center">
-                    <IconButton aria-label="delete" color="error" onClick={() => handleOpenDeleteDialog(card)}>
-                      <DeleteIcon />
-                    </IconButton>
+                    <Tooltip title="Delete this card">
+                      <IconButton aria-label="delete" color="error" onClick={() => handleOpenDeleteDialog(card)}>
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))}
