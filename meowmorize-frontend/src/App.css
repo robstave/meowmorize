@@ -53,3 +53,47 @@ th {
   background-color: #f5f5f5;
   font-weight: bold;
 }
+
+
+/* App.css */
+
+/* Header area for decks */
+.deck-header {
+  background: linear-gradient(135deg, #f6d365, #fda085);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* Table container styling */
+.table-container {
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* Table row hover effect */
+.table-row:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* For any field that is editable */
+.editable-field {
+  transition: background-color 0.2s ease;
+}
+
+.editable-field:hover {
+  background-color: #e3f2fd;
+  cursor: pointer;
+}
+
+/* Button hover effects */
+.MuiButton-root {
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.MuiButton-root:hover {
+  transform: translateY(-2px);
+}

@@ -401,7 +401,7 @@ const DeckPage = () => {
   return (
     <Container sx={{ mt: 4 }}>
       {/* Deck Title */}
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <Box className="deck-header" sx={{ display: 'flex', alignItems: 'center' }}>
         {!isEditing ? (
           <Typography
             variant="h4"
@@ -440,6 +440,7 @@ const DeckPage = () => {
             variant="body1"
             gutterBottom
             onClick={handleDescriptionClick}
+            className="editable-field"
             sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
           >
             {deck.description || 'Click to add description'}
@@ -494,7 +495,7 @@ const DeckPage = () => {
 
       {/* Cards List */}
       <Collapse in={showCards}>
-        <TableContainer component={Paper} sx={{ mt: 2 }}>
+        <TableContainer component={Paper} className="table-container" sx={{ mt: 2 }}>
           <Table aria-label="cards table">
             <TableHead>
               <TableRow>
