@@ -16,10 +16,7 @@ In a year ( its 2025), my little process will seem quaint.  I have yaml files to
 
 An interesting twist that makes this project unique is the ability to bulk import cards from a chat friendly ( Markdown ) format.
 
- 
-
 ## Markdown format of cards
-
 
 ```markdown
 <!-- Card Start -->
@@ -39,15 +36,13 @@ Tell chat to create 20 or so cards on your favorite subject using the above form
 
 [Here is my actual prompt](prompts/instructions.png)
 
-
 [Here is a demo that you can import - Cat Jokes.  Really really bad Chat generated jokes](prompts/demoinput.md)
 
 If you are studying for AWS certs, this can be a great too.
-A good resource of practice exams are here: https://github.com/kananinirav/AWS-Certified-Cloud-Practitioner-Notes/tree/master
+A good resource of practice exams are here: <https://github.com/kananinirav/AWS-Certified-Cloud-Practitioner-Notes/tree/master>
 
 I used these as launching points to create cards.  With much more information to pull from
 [](examples/kananinirav-22.md)
-
 
 ## App Overview
 
@@ -62,10 +57,7 @@ As you are browsing cards you can
 
 When you pass/skip/fail...it will mark that and move on.
 
-
-
 ![Back](assets/back.png)
-
 
 A few things of note is the progress
 
@@ -74,16 +66,14 @@ A few things of note is the progress
 You can see your progress as move along the deck.
 When you finish, it will reshuffle the deck with the skips first then fails.
 
-
 ![step2](assets/step2.png)
 
 ### Cat Pie chart
 
 ![cat](assets/cat2.png)
 
-As part of the silliness, I did want a visualization to show how well you were doing with a particular card.  Pie charts bite.  But this one kinda works for me.  Its all in D3.js and is pretty much a stand alone React component if you want to just steal it. 
+As part of the silliness, I did want a visualization to show how well you were doing with a particular card.  Pie charts bite.  But this one kinda works for me.  Its all in D3.js and is pretty much a stand alone React component if you want to just steal it.
 
- 
 ## Architecture Overview
 
 MeowMorize is composed of two main components:
@@ -93,8 +83,6 @@ MeowMorize is composed of two main components:
 - **Frontend**: Developed with React, the frontend resides in the `/meowmorize-frontend` directory and listens on port `8999` as defined in the `.env` file. It provides an intuitive user interface for interacting with flashcards, importing data, and tracking study sessions.
 
 The application leverages a SQLite database (`meowmorize.db`) located at the root directory for data persistence. To reset the application data, simply delete this database file.
-
-
 
 ### Importing Flashcards
 
@@ -132,10 +120,10 @@ MeowMorize supports importing flashcards using a special Markdown format tailore
 <!-- Card End -->
 ```
 
-#### Steps to Import:
+#### Steps to Import
 
 1. **Prepare Your Markdown File**
-   
+
    Ensure your flashcards are formatted correctly. Below is an example of 10 flashcards focusing on AWS Cloud certification topics related to AWS Lambda and AWS Step Functions:
 
    ```markdown
@@ -161,14 +149,13 @@ MeowMorize supports importing flashcards using a special Markdown format tailore
    ```
 
 2. **Import via Frontend**
-   
+
    - Navigate to the Import section in the frontend application.
    - Upload your Markdown file containing the flashcards.
    - The application will parse the file and add the flashcards to the selected deck.
 
-
-
 ## Project Status
+
 This is still a work in progress and has a lot of work to go.  But its enough for me to study with and I will probably put features on hold.
 
 A list of things I would like though
@@ -177,7 +164,7 @@ A list of things I would like though
 
 - Decouple Decks from Cards:  The format in SQL is not super.  I did allow Chat some freedom, and would like to refactor things so that the decks/cards use a junction table.  
 
-- Export to markdown would be nice.  The native format is a Json with UUIDs. 
+- Export to markdown would be nice.  The native format is a Json with UUIDs.
 
 ### Users/IAM
 
@@ -188,7 +175,6 @@ A list of things I would like though
 ### Advanced
 
 - Use golang chain to update cards on the fly.
-
 
 ## Getting Started
 
@@ -207,60 +193,47 @@ MeowMorize is containerized using Docker, allowing for easy deployment and scala
 
    From the project's root directory, execute:
 
-   ```bash
+```bash
    docker-compose up --build
-   ```
+```
+
+  Can run detached with:
+
+```bash
+   docker-compose up -d
+```
 
    This command will build Docker images for both the backend and frontend services and start the containers.
 
 2. **Accessing the Services**
 
-   - **Backend**: Accessible at `http://localhost:8789`
    - **Frontend**: Accessible at `http://localhost:8999`
 
-3. **Docker Compose Services**
-
-   - **backend**
-     - **Build Context**: Current directory (`.`)
-     - **Dockerfile**: `Dockerfile.backend`
-     - **Ports**: Maps host port `8789` to container port `8789`
-     - **Environment Variables**:
-       - `DB_PATH`: `/app/data/db.sqlite3`
-     - **Volumes**:
-       - `db-data`: Persists database data at `/app/data` inside the container
-     - **Restart Policy**: `unless-stopped`
-
-   - **frontend**
-     - **Build Context**: `./meowmorize-frontend`
-     - **Dockerfile**: `Dockerfile`
-     - **Ports**: Maps host port `8999` to container port `80`
-     - **Environment Variables**:
-       - `REACT_APP_BACKEND_URL`: `http://backend:8789`
-     - **Depends On**: `backend`
-     - **Restart Policy**: `unless-stopped`
-
-4. **Managing the Containers**
+3. **Managing the Containers**
 
    - **Stop Containers**
-     ```bash
+
+ ```bash
      docker compose down
-     ```
+```
 
    - **Rebuild Containers**
-     ```bash
-     docker compose up --build
-     ```
 
-5. **Pushing Docker Images**
+```bash
+     docker compose up --build
+```
+
+4. **Pushing Docker Images**
 
    Utilize the helper script to build and push Docker images to Docker Hub:
 
-   ```bash
+   ( note...you will have to change a few things as the script currently pushes to my docker account)
+
+```bash
    ./helper push-docker
-   ```
+```
 
    **Note**: Ensure you are logged in to Docker Hub before executing this command.
-
 
 ### Building locally
 
@@ -270,10 +243,13 @@ MeowMorize is containerized using Docker, allowing for easy deployment and scala
 - **Node.js & npm**: Required for the React frontend. [Download Node.js](https://nodejs.org/)
 - **Docker & Docker Compose**: For containerized deployment. [Install Docker](https://docs.docker.com/get-docker/)
 - **Swag**: For generating Swagger documentation.
+
   ```bash
   go install github.com/swaggo/swag/cmd/swag@latest
   ```
+
 - **Mockery**: For generating mock files.
+
   ```bash
   go install github.com/vektra/mockery/v2@latest
   ```
@@ -281,6 +257,7 @@ MeowMorize is containerized using Docker, allowing for easy deployment and scala
 #### Installation
 
 1. **Clone the Repository**
+
    ```bash
    git clone https://github.com/yourusername/meowmorize.git
    cd meowmorize
@@ -289,18 +266,21 @@ MeowMorize is containerized using Docker, allowing for easy deployment and scala
 ( Skip to docker compose if your not interested in actually putting this together)
 
 2. **Set Up the Backend**
-   
+
    The backend is managed through the helper script located at the root of the project.
 
    - **Make the Helper Script Executable**
+
      ```bash
      chmod +x helper
      ```
 
    - **Run the Backend Application**
+
      ```bash
      ./helper run
      ```
+
      This command executes `go run cmd/main/main.go`, starting the backend server on port `8789`.
 
 3. **Set Up the Frontend**
@@ -313,82 +293,95 @@ MeowMorize is containerized using Docker, allowing for easy deployment and scala
    ```
 
    **Run the Frontend Application**
-   ```bash
-   npm start
-   ```
-   The frontend will be accessible at `http://localhost:8999`.
 
-  **Run the Frontend Application from helper**
-   ```bash
-   ./helper npm-start
-   ```
-   The frontend will be accessible at `http://localhost:8999`.
+   The front end is tied to the back with Golang using echo to serve both as the webserver and api.
 
+   ```bash
+   ./helper npm-build
+   ```
+
+   will build the front end
+
+   ```bash
+   ./helper run
+   ``` 
+
+   will run the go app
+
+   The frontend will be accessible at `http://localhost:8999`.
+ 
+ 
 ### Building the Application
 
 MeowMorize utilizes a helper script to streamline various build and deployment tasks. Below are the available commands and their descriptions:
 
 ```bash
-./helper {run|concat|swagger|redoswagger|mocks|npm-start|npm-build|npm-test|push-docker|test|help}
+./helper {run|concat|swagger|redoswagger|mocks|npm-build|npm-test|push-docker|test|help}
 ```
 
-##### Commands:
+##### Commands
 
-- **run**: Start the main backend application.
+- **run**: Start the main backend application. ( and serve up the frontend)
+
   ```bash
   ./helper run
   ```
 
 - **concat**: Concatenate files for Chat pasting purposes.
+
   ```bash
   ./helper concat
   ```
 
 - **swagger**: Initialize Swagger documentation.
+
   ```bash
   ./helper swagger
   ```
 
 - **redoswagger**: Regenerate Swagger documentation from the `cmd/main` directory.
+
   ```bash
   ./helper redoswagger
   ```
 
 - **mocks**: Generate mock files for testing.
+
   ```bash
   ./helper mocks
   ```
 
 - **npm-build**: Build the React frontend application.
+
   ```bash
   ./helper npm-build
   ```
 
-- **npm-start**: Start the React frontend application.
-  ```bash
-  ./helper npm-start
-  ```
+ 
 
 - **npm-test**: Run JavaScript tests in the frontend.
+
   ```bash
   ./helper npm-test
   ```
 
 - **push-docker**: Build and push Docker images for both backend and frontend.
+
   ```bash
   ./helper push-docker
   ```
 
 - **test**: Execute backend tests.
+
   ```bash
   ./helper test
   ```
 
 - **help**: Display usage information.
+
   ```bash
   ./helper help
   ```
-
 
 ## API Documentation
 
@@ -399,11 +392,13 @@ Comprehensive API documentation is available via Swagger at `http://localhost:87
 Ensure all dependencies are installed and run the following commands using the helper script:
 
 - **Backend Tests**
+
   ```bash
   ./helper test
   ```
 
 - **Frontend Tests**
+
   ```bash
   ./helper npm-test
   ```

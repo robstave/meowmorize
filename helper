@@ -80,7 +80,7 @@ usage() {
     echo "  swagger     Initialize swagger docs"
     echo "  redoswagger Redo swagger docs from cmd/main directory"
     echo "  mocks       Generate mock files"
-    echo "  npm-start   Run npm in meowmorize directory ( Frontend )"
+    ## echo "  npm-start   Run npm in meowmorize directory ( Frontend )"
     echo "  npm-build   Run build npm in meowmorize directory"
     echo "  npm-test    javascript test"
     echo "  push-docker push to docker "
@@ -116,9 +116,9 @@ case "$1" in
     npm-build)
         run_npm_build
         ;;
-    npm-start)
-        run_npm_start
-        ;;
+   ## npm-start)
+   ##     run_npm_start
+   ##     ;;
     npm-test)
         run_npm_test
         ;;
