@@ -1,35 +1,20 @@
-
 ## version: '3.8'
 
 services:
-  backend:
+  meowmorize:
     build:
       context: .
-      dockerfile: Dockerfile.backend
-    container_name: meowmorize-backend
+      dockerfile: Dockerfile  # Your combined Dockerfile
+    container_name: meowmorize
     ports:
-      - "8789:8789"  # 
+      - "8999:8999"  # Expose the port that your Go app listens on (set to 8999 in this example)
     environment:
-      - DB_PATH=/app/data/db.sqlite3  # Consistent with Dockerfile.backend
-      # Add other environment variables here
+      - DB_PATH=/app/data/db.sqlite3
+      # Other environment variables as needed
     volumes:
-      - db-data:/app/data # Mount the 'db-data' volume to /app/data in the container
-    restart: unless-stopped
-
-  frontend:
-    build:
-      context: ./meowmorize-frontend
-      dockerfile: Dockerfile
-    container_name: meowmorize-frontend
-    ports:
-      - "8999:80"  # Ensure frontend Dockerfile exposes port 8999
-    environment:
-      - REACT_APP_API_BASE_URL=http://backend:8789/xxx  # Example environment variable
-    depends_on:
-      - backend
+      - db-data:/app/data  # Persist your SQLite data
     restart: unless-stopped
 
 volumes:
   db-data:
     driver: local
-

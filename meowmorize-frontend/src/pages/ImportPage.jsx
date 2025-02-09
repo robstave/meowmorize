@@ -10,12 +10,12 @@ import {
   Snackbar,
   Tooltip,
   Paper,
-  Tabs,
-  Tab,
-  Card,
-  CardContent,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MuiAlert from '@mui/material/Alert';
 import ReactMarkdown from 'react-markdown';
 import { importDeck, createEmptyDeck, createCard } from '../services/api';
@@ -40,7 +40,6 @@ const ImportPage = () => {
     severity: 'success',
   });
   const { loadDecks } = useContext(DeckContext);
-  const [tabValue, setTabValue] = useState(0);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -153,10 +152,6 @@ const ImportPage = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-  };
-
   return (
     <Container maxWidth="sm" sx={{ mt: 4 }}>
       {/* Explanation header */}
@@ -199,22 +194,29 @@ const ImportPage = () => {
         </Button>
       </Box>
 
-      {/* Card with Tabs for instructions */}
+      {/* Accordion for instructions */}
       <Box sx={{ mt: 4 }}>
-        <Paper elevation={3}>
-          <Tabs value={tabValue} onChange={handleTabChange} variant="fullWidth">
-            <Tab label="Markdown" />
-            <Tab label="JSON" />
-          </Tabs>
-          <CardContent>
-            {tabValue === 0 && (
-              <ReactMarkdown>{markdownInstructions}</ReactMarkdown>
-            )}
-            {tabValue === 1 && (
-              <ReactMarkdown>{jsonInstructions}</ReactMarkdown>
-            )}
-          </CardContent>
-        </Paper>
+        <Typography variant="h6" gutterBottom>
+          Import File Types
+        </Typography>
+
+        <Accordion>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography>Markdown</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <ReactMarkdown>{markdownInstructions}</ReactMarkdown>
+          </AccordionDetails>
+        </Accordion>
+
+        <Accordion>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography>JSON</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <ReactMarkdown>{jsonInstructions}</ReactMarkdown>
+          </AccordionDetails>
+        </Accordion>
       </Box>
 
       <Snackbar
@@ -223,7 +225,11 @@ const ImportPage = () => {
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <AlertSnackbar onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+        <AlertSnackbar
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
           {snackbar.message}
         </AlertSnackbar>
       </Snackbar>

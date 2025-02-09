@@ -26,13 +26,9 @@ init_swagger() {
 # docker login  first 
 push_docker() {
     echo "pushing to docker..."
-docker build -t rstave/meowmorize-backend:latest -f Dockerfile.backend .
-docker build -t rstave/meowmorize-frontend:latest ./meowmorize-frontend
-docker push rstave/meowmorize-backend:latest
-docker push rstave/meowmorize-frontend:latest
+    docker build -t rstave/meowmorize:latest -f Dockerfile .
+    docker push rstave/meowmorize:latest
 }
-
-
 
 # Function to redo swagger from project root
 redo_swagger() {

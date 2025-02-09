@@ -76,7 +76,6 @@ meow-bk-domain:
 
 meow-example:
   - prompts/instructions.md
-  - capitols.json
   - prompts/markdown.md
   - prompts/demoimport.md
   - README.md

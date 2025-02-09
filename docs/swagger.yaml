@@ -221,7 +221,6 @@ definitions:
       name:
         type: string
     type: object
-host: 192.168.86.176:8789
 info:
   contact: {}
   description: API documentation for the MeowMorize Flashcard App.

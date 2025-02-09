@@ -22,7 +22,6 @@ import (
 // @title MeowMorize Flashcard API
 // @version 1.0
 // @description API documentation for the MeowMorize Flashcard App.
-// @host 192.168.86.176:8789
 // @BasePath /api
 // @securityDefinitions.apikey BearerAuth
 // @in header
@@ -131,7 +130,7 @@ func main() {
 	reactBuildPath := "./meowmorize-frontend/build"
 
 	// Serve static files
-	e.Static("/", reactBuildPath)
+	e.Use(middleware.Static(reactBuildPath))
 
 	// Catch-all route to serve index.html for client-side routing
 	e.GET("/*", func(c echo.Context) error {
@@ -140,12 +139,12 @@ func main() {
 		if strings.HasPrefix(c.Request().URL.Path, "/api/") {
 			return c.NoContent(http.StatusNotFound)
 		}
-		slogger.Info("other url2")
+		slogger.Info("other url2: " + reactBuildPath + "/index.html")
 		return c.File(reactBuildPath + "/index.html")
 	})
 
 	// Start Server
-	port := "8789"
+	port := "8999"
 	if p := os.Getenv("PORT"); p != "" {
 		port = p
 	}

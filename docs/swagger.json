@@ -6,7 +6,6 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "192.168.86.176:8789",
     "basePath": "/api",
     "paths": {
         "/cards": {
