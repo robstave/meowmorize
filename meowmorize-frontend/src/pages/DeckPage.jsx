@@ -41,8 +41,9 @@ import {
   Select,
   MenuItem,
   Tooltip,
-  CardContent,
+  Menu,
 } from '@mui/material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DeleteIcon from '@mui/icons-material/Delete';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import { saveAs } from 'file-saver';
@@ -93,7 +94,7 @@ const DeckPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [newDeckName, setNewDeckName] = useState('');
 
-  // New states for inline editing of deck description
+  // States for inline editing of deck description
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [newDeckDescription, setNewDeckDescription] = useState('');
 
@@ -103,6 +104,15 @@ const DeckPage = () => {
     message: '',
     severity: 'success',
   });
+
+  // New state for the More Actions menu (three dots)
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const handleMenuOpen = (event) => {
+    setMenuAnchorEl(event.currentTarget);
+  };
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+  };
 
   useEffect(() => {
     const getDeck = async () => {
@@ -263,9 +273,15 @@ const DeckPage = () => {
     setOpenImportDialog(false);
   };
 
-  const handleImportSuccess = (count) => {
+  const handleImportSuccess = async (count) => {
     setImportSuccessCount(count);
-    loadDecks();
+    loadDecks(); // Update context if needed
+    try {
+      const updatedDeck = await fetchDeckById(id);
+      setDeck(updatedDeck);
+    } catch (error) {
+      console.error('Failed to refresh deck after import:', error);
+    }
     setSnackbar({
       open: true,
       message: `${count} card(s) imported successfully!`,
@@ -286,7 +302,6 @@ const DeckPage = () => {
 
   const handleDeleteCard = async () => {
     if (!cardToDelete) return;
-
     try {
       await deleteCard(cardToDelete.id);
       setDeck((prevDeck) => ({
@@ -322,7 +337,6 @@ const DeckPage = () => {
 
   const handleStartSessionSubmit = async () => {
     const count = sessionCountOption === 'all' ? -1 : sessionCount;
-
     try {
       await startSession(id, count, sessionMethod);
       const nextCardId = await getNextCard(id);
@@ -389,7 +403,7 @@ const DeckPage = () => {
 
   return (
     <Container sx={{ mt: 4 }}>
-      {/* Deck Title with Tooltip */}
+      {/* Deck Title */}
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         {!isEditing ? (
           <Tooltip title="Click to edit deck name">
@@ -421,7 +435,7 @@ const DeckPage = () => {
         )}
       </Box>
 
-      {/* Editable Deck Description with Tooltip */}
+      {/* Editable Deck Description */}
       <Box sx={{ mt: 1 }}>
         {!isEditingDescription ? (
           <Tooltip title="Click to edit deck description">
@@ -461,8 +475,8 @@ const DeckPage = () => {
         Number of Cards: {deck.cards.length}
       </Typography>
 
-      {/* Action Buttons with Tooltips */}
-      <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
+      {/* Action Buttons */}
+      <Box sx={{ display: 'flex', gap: 2, mt: 4, alignItems: 'center' }}>
         <Tooltip title="Start a new review session using this deck">
           <Button variant="contained" color="primary" onClick={handleOpenStartSessionDialog}>
             Start Session
@@ -473,24 +487,29 @@ const DeckPage = () => {
             {showCards ? 'Hide Preview' : 'Show Preview'}
           </Button>
         </Tooltip>
-        <Tooltip title="Return to Dashboard">
-          <Button component={RouterLink} to="/" variant="outlined" color="secondary">
-            Back to Dashboard
-          </Button>
-        </Tooltip>
-        <Tooltip title="Export deck as JSON">
-          <Button variant="outlined" color="secondary" startIcon={<GetAppIcon />} onClick={handleOpenExportDialog}>
-            Export Deck
-          </Button>
-        </Tooltip>
-        <Tooltip title="Import additional cards from Markdown">
-          <Button variant="outlined" color="primary" onClick={handleOpenImportDialog}>
-            Import from Markdown
-          </Button>
+        <Tooltip title="More actions">
+          <IconButton onClick={handleMenuOpen}>
+            <MoreVertIcon />
+          </IconButton>
         </Tooltip>
       </Box>
+      <Menu
+        anchorEl={menuAnchorEl}
+        open={Boolean(menuAnchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem component={RouterLink} to="/" onClick={handleMenuClose}>
+          Back to Dashboard
+        </MenuItem>
+        <MenuItem onClick={() => { handleOpenExportDialog(); handleMenuClose(); }}>
+          Export Deck
+        </MenuItem>
+        <MenuItem onClick={() => { handleOpenImportDialog(); handleMenuClose(); }}>
+          Import from Markdown
+        </MenuItem>
+      </Menu>
 
-      {/* Cards List with Truncated Preview */}
+      {/* Cards List */}
       <Collapse in={showCards}>
         <TableContainer component={Paper} sx={{ mt: 2 }}>
           <Table aria-label="cards table">
@@ -545,7 +564,9 @@ const DeckPage = () => {
           {exportError && <Alert severity="error" sx={{ mt: 2 }}>{exportError}</Alert>}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseExportDialog} disabled={exporting}>Cancel</Button>
+          <Button onClick={handleCloseExportDialog} disabled={exporting}>
+            Cancel
+          </Button>
           <Button onClick={handleExportDeck} color="secondary" variant="contained" disabled={exporting}>
             {exporting ? 'Exporting...' : 'Export'}
           </Button>
@@ -638,7 +659,9 @@ const DeckPage = () => {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseStartSessionDialog} disabled={exporting}>Cancel</Button>
+          <Button onClick={handleCloseStartSessionDialog} disabled={exporting}>
+            Cancel
+          </Button>
           <Button onClick={handleStartSessionSubmit} variant="contained" color="primary">
             Start Session
           </Button>
