@@ -178,6 +178,35 @@ A list of things I would like though
 
 ## Getting Started
 
+### Running Locally
+
+If you just want to run locally, you will need npm and golang.  Once all that is place
+
+This will build the front end
+```bash
+./helper npm-build
+```
+
+you may need to generate or regenerate the swagger for the backend
+```bash
+./helper swagger
+```
+
+Swagger and mocks should be regenerated from time to time
+```bash
+./helper redoswagg
+./helper mocks
+```
+
+This runs the backend...which is also serving up the front end on 8999
+
+```bash
+./helper run
+```
+
+point your browser to http://localhost:8999/
+
+
 ### Docker Deployment
 
 MeowMorize is containerized using Docker, allowing for easy deployment and scalability. Below are the steps to deploy using Docker Compose.
@@ -186,6 +215,27 @@ MeowMorize is containerized using Docker, allowing for easy deployment and scala
 
 - **Docker**: [Install Docker](https://docs.docker.com/get-docker/)
 - **Docker Compose**: [Install Docker Compose](https://docs.docker.com/compose/install/)
+
+
+### Running from Docker
+
+```js
+docker pull rstave/meowmorize:latest
+```
+
+
+```js
+docker run -d \
+  -p 8999:8999 \
+  --name meowmorize \
+  -e DB_PATH=/app/data/db.sqlite3 \
+  -e DEFAULT_USER_USERNAME=mycustomuser \
+  -e DEFAULT_USER_PASSWORD=mycustompass \
+  rstave/meowmorize:latest
+```
+
+### Building  from Docker
+
 
 #### Steps to Deploy
 

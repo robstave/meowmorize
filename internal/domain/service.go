@@ -61,7 +61,8 @@ func NewService(logger *slog.Logger, deckRepo repositories.DeckRepository, cardR
 		sessionsMu: sync.RWMutex{},
 	}
 
-	// Seed the initial user
+	// Seed the initial user.   This is called on every startup, but will only create the user if it doesn't already exist
+	// To reset the app, just delete the database file  ( assuming you're using the default sqlite3 database )
 	if err := service.SeedUser(); err != nil {
 		logger.Error("Failed to seed initial user", "error", err)
 	}

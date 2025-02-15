@@ -41,6 +41,9 @@ EXPOSE 8999
 ENV DB_PATH=/app/data/db.sqlite3
 ENV PORT=8999
 # Add a non-root user for security
+# Optional default values for the initial user credentials
+# ENV DEFAULT_USER_USERNAME=meow
+# ENV DEFAULT_USER_PASSWORD=meow
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup && chown -R appuser:appgroup /app
 USER appuser
 # Run the backend binary
