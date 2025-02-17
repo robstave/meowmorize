@@ -11,7 +11,6 @@ meow-front:
   - meowmorize-frontend/src/App.js
   - meowmorize-frontend/src/index.css
   - meowmorize-frontend/src/index.js  
-  - meowmorize-frontend/src/components/CollapseDecksDialog.jsx  
   - meowmorize-frontend/src/components/Navbar.jsx  
   - meowmorize-frontend/src/context/AuthContext.js
   - meowmorize-frontend/src/context/DeckContext.js
@@ -33,6 +32,7 @@ meow-front3:
   - meowmorize-frontend/src/components/ImportMarkdownDialog.jsx  
   - meowmorize-frontend/src/pages/ImportPage.jsx 
   - meowmorize-frontend/src/utils/markdownParser.js
+  - meowmorize-frontend/src/components/CollapseDecksDialog.jsx  
 
 meow-front-charts:
   - prompts/instructions.md
