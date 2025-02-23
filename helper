@@ -84,7 +84,7 @@ usage() {
     echo "  npm-build   Run build npm in meowmorize directory"
     echo "  npm-test    javascript test"
     echo "  push-docker push to docker "
-
+    echo "  all         Run all build/run commands"
 
     echo "  test        Run tests"
     echo "  help        Display this help message"
@@ -127,6 +127,12 @@ case "$1" in
         ;;
     test)
         run_tests
+        ;;
+    all)
+        run_npm_build
+        redo_swagger
+        generate_mocks
+        run_main
         ;;
     help|--help|-h)
         usage

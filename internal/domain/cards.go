@@ -27,27 +27,18 @@ func (s *Service) GetCardByID(cardID string) (*types.Card, error) {
 	return card, nil
 }
 
-// CreateCard adds a new card to the repository
-func (s *Service) CreateCard(card types.Card) (*types.Card, error) {
-	// Generate a UUID for the card if not already set
+func (s *Service) CreateCard(card types.Card, deckID string) (*types.Card, error) {
+	// Create the card in the cards table
 	if card.ID == "" {
 		card.ID = uuid.New().String()
 	}
-
-	// Validate DeckID exists
-	_, err := s.deckRepo.GetDeckByID(card.DeckID)
-	if err != nil {
-		s.logger.Error("Deck not found", "deck_id", card.DeckID, "error", err)
-		return nil, err
-	}
-
-	// Create the card
 	if err := s.cardRepo.CreateCard(card); err != nil {
-		s.logger.Error("Failed to create card", "error", err)
 		return nil, err
 	}
-
-	s.logger.Info("Card created successfully", "card_id", card.ID)
+	// Associate card with the given deck (use a helper method, or directly use GORM's association API)
+	if err := s.deckRepo.AddCardToDeck(deckID, card); err != nil {
+		return nil, err
+	}
 	return &card, nil
 }
 

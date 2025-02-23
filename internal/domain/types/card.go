@@ -4,7 +4,6 @@ import "time"
 
 type Card struct {
 	ID         string    `gorm:"primaryKey" json:"id"`
-	DeckID     string    `gorm:"not null" json:"deck_id"`
 	Front      CardFront `gorm:"embedded;embeddedPrefix:front_" json:"front"`
 	Back       CardBack  `gorm:"embedded;embeddedPrefix:back_" json:"back"`
 	Link       string    `gorm:"type:text" json:"link"`

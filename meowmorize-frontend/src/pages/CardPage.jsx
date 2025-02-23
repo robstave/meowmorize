@@ -43,10 +43,11 @@ const AlertSnackbar = React.forwardRef(function Alert(props, ref) {
 
 
 const CardPage = () => {
-  const { id } = useParams(); // Get card ID from URL
+  const { deckId: deckId, id: id } = useParams(); // Get card ID from URL
+
   const navigate = useNavigate();
   const [card, setCard] = useState(null);
-  const [deckId, setDeckId] = useState(null); // Track the deckId
+  //const [deckId, setDeckId] = useState(null); // Track the deckId
   const [deckName, setDeckName] = useState(''); // New state for deck name
   const [showFront, setShowFront] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -104,19 +105,23 @@ const CardPage = () => {
         const data = await fetchCardById(id);
         setCard(data);
         setShowFront(true);
-        setDeckId(data.deck_id); // Set the deckId for future fetches
+        // setDeckId(data.deck_id); // no longer valids
+
+        //setDeckId(d); // Set the deckId for future fetches
         // set card stats
         setPassCount(data.pass_count);
         setSkipCount(data.skip_count);
         setFailCount(data.fail_count);
         setStars(data.star_rating || 0); // Initialize stars
         // set session stats
-        const stats = await getSessionStats(data.deck_id);
+        //const stats = await getSessionStats(data.deck_id); no longer valid
+
+        const stats = await getSessionStats(deckId);  // will this work?
         setSessionStats(stats);
 
 
         // Fetch deck details to get the deck name
-        const deckData = await fetchDeckById(data.deck_id);
+        const deckData = await fetchDeckById(deckId);
         setDeckName(deckData.name);
 
 
@@ -169,7 +174,9 @@ const CardPage = () => {
       if (nextCardId) {
         // setShowFront(true); // Reset to show the front of the new card
 
-        navigate(`/card/${nextCardId}`);
+        navigate(`/decks/${deckId}/card/${nextCardId}`);
+
+        //navigate(`/card/${nextCardId}`);
       } else {
         setSnackbar({
           open: true,
@@ -318,7 +325,6 @@ const CardPage = () => {
           name="card-rating"
           value={stars}
           onChange={(event, newValue) => {
-            console.log("beep")
             if (newValue !== null) {
               handleCardAction('SetStars', newValue);
             }

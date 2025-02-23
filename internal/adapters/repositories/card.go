@@ -17,6 +17,7 @@ type CardRepository interface {
 	UpdateCard(card types.Card) error
 	DeleteCardByID(cardID string) error
 	CloneCardToDeck(cardID string, targetDeckID string) (*types.Card, error)
+	CountDeckAssociations(cardID string) (int, error)
 }
 
 type CardRepositorySQLite struct {
@@ -28,11 +29,11 @@ func NewCardRepositorySQLite(db *gorm.DB) CardRepository {
 }
 
 func (r *CardRepositorySQLite) GetCardsByDeckID(deckID string) ([]types.Card, error) {
-	var cards []types.Card
-	if err := r.db.Where("deck_id = ?", deckID).Find(&cards).Error; err != nil {
+	var deck types.Deck
+	if err := r.db.Preload("Cards").First(&deck, "id = ?", deckID).Error; err != nil {
 		return nil, err
 	}
-	return cards, nil
+	return deck.Cards, nil
 }
 
 func (r *CardRepositorySQLite) CreateCard(card types.Card) error {
@@ -80,9 +81,7 @@ func (r *CardRepositorySQLite) CloneCardToDeck(cardID string, targetDeckID strin
 	}
 
 	var newCard *types.Card
-
 	err := r.db.Transaction(func(tx *gorm.DB) error {
-		// Retrieve the original card
 		originalCard, err := r.GetCardByID(cardID)
 		if err != nil {
 			return fmt.Errorf("error retrieving original card: %w", err)
@@ -90,24 +89,35 @@ func (r *CardRepositorySQLite) CloneCardToDeck(cardID string, targetDeckID strin
 		if originalCard == nil {
 			return fmt.Errorf("no card found with ID %s", cardID)
 		}
-
-		// Create a copy of the original card
 		cloned := *originalCard
-		cloned.ID = uuid.New().String() // Generate a new UUID
-		cloned.DeckID = targetDeckID    // Assign to the target deck
-
-		// Create the new card in the database
+		cloned.ID = uuid.New().String() // New UUID for cloned card
+		// Create the cloned card:
 		if err := tx.Create(&cloned).Error; err != nil {
 			return fmt.Errorf("error creating cloned card: %w", err)
 		}
-
 		newCard = &cloned
+		// Associate the cloned card with the target deck:
+		var deck types.Deck
+		if err := tx.Where("id = ?", targetDeckID).First(&deck).Error; err != nil {
+			return fmt.Errorf("target deck not found: %w", err)
+		}
+		if err := tx.Model(&deck).Association("Cards").Append(newCard); err != nil {
+			return fmt.Errorf("error associating cloned card with deck: %w", err)
+		}
 		return nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
-
 	return newCard, nil
+}
+
+// CountDeckAssociations returns the number of decks a card is associated with.
+func (r *CardRepositorySQLite) CountDeckAssociations(cardID string) (int, error) {
+	var card types.Card
+	if err := r.db.Where("id = ?", cardID).First(&card).Error; err != nil {
+		return 0, err
+	}
+	count := r.db.Model(&card).Association("Decks").Count()
+	return int(count), nil
 }

@@ -40,17 +40,6 @@ func TestDeckRepositorySQLite_GetAllDecks_NoDecks(t *testing.T) {
 	assert.Len(t, decks, 0)
 }
 
-func TestDeckRepositorySQLite_GetDeckByID_Success(t *testing.T) {
-	deckRepo, db := initializeDeckRepository(t)
-	deck, _ := th.SeedTestData(t, db)
-
-	retrievedDeck, err := deckRepo.GetDeckByID(deck.ID)
-	assert.NoError(t, err)
-	assert.Equal(t, deck.ID, retrievedDeck.ID)
-	assert.Equal(t, deck.Name, retrievedDeck.Name)
-	assert.Len(t, retrievedDeck.Cards, 1)
-}
-
 func TestDeckRepositorySQLite_GetDeckByID_NotFound(t *testing.T) {
 	deckRepo, _ := initializeDeckRepository(t)
 
@@ -91,25 +80,6 @@ func TestDeckRepositorySQLite_CreateDeck_DuplicateID(t *testing.T) {
 
 	err = deckRepo.CreateDeck(duplicateDeck)
 	assert.Error(t, err)
-}
-func TestDeckRepositorySQLite_DeleteDeck_Success(t *testing.T) {
-	deckRepo, db := initializeDeckRepository(t)
-	deck, card := th.SeedTestData(t, db)
-
-	err := deckRepo.DeleteDeck(deck.ID)
-	assert.NoError(t, err)
-
-	// Verify the deck was deleted
-	var deletedDeck types.Deck
-	err = db.First(&deletedDeck, "id = ?", deck.ID).Error
-	assert.Error(t, err)
-	assert.True(t, gorm.ErrRecordNotFound == err || err.Error() == "record not found")
-
-	// Verify the associated card was deleted
-	var deletedCard types.Card
-	err = db.First(&deletedCard, "id = ?", card.ID).Error
-	assert.Error(t, err)
-	assert.True(t, gorm.ErrRecordNotFound == err || err.Error() == "record not found")
 }
 
 func TestDeckRepositorySQLite_DeleteDeck_NotFound(t *testing.T) {

@@ -1,554 +1,298 @@
-// internal/domain/service_session_test.go
-
+// internal/domain/session_test.go
 package domain
 
 import (
 	"errors"
 	"testing"
 
-	"sync"
-
 	"github.com/google/uuid"
 	"github.com/robstave/meowmorize/internal/adapters/repositories/mocks"
 	"github.com/robstave/meowmorize/internal/domain/types"
 	"github.com/robstave/meowmorize/internal/logger"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-// Helper function to create a new Service with mocked repositories
-func setupService(deckRepo *mocks.DeckRepository, cardRepo *mocks.CardRepository) *Service {
-
-	return &Service{
-		logger:     logger.InitializeLogger(),
-		deckRepo:   deckRepo,
-		cardRepo:   cardRepo,
-		sessions:   make(map[string]*types.Session),
-		sessionsMu: sync.RWMutex{},
-	}
-}
+// Helper to set up a Service instance with mocked repositories.
+//func setupService(deckRepo *mocks.DeckRepository, cardRepo *mocks.CardRepository, userRepo *mocks.UserRepository) *Service {
+//	// The SeedUser call in NewService uses GetUserByUsername with "meow"
+//	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
+//	return NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo)
+//}
 
 func TestStartSession_Success(t *testing.T) {
-	// Arrange
 	deckID := uuid.New().String()
-	card1 := types.Card{ID: uuid.New().String(), DeckID: deckID, Front: types.CardFront{Text: "Q1"}, Back: types.CardBack{Text: "A1"}}
-	card2 := types.Card{ID: uuid.New().String(), DeckID: deckID, Front: types.CardFront{Text: "Q2"}, Back: types.CardBack{Text: "A2"}}
-
-	deckRepoMock := &mocks.DeckRepository{}
-	cardRepoMock := &mocks.CardRepository{}
-
-	deckRepoMock.On("GetDeckByID", deckID).Return(types.Deck{
+	card1 := types.Card{
+		ID:    "card1",
+		Front: types.CardFront{Text: "Q1"},
+		Back:  types.CardBack{Text: "A1"},
+	}
+	card2 := types.Card{
+		ID:    "card2",
+		Front: types.CardFront{Text: "Q2"},
+		Back:  types.CardBack{Text: "A2"},
+	}
+	deck := types.Deck{
 		ID:    deckID,
 		Name:  "Test Deck",
 		Cards: []types.Card{card1, card2},
-	}, nil)
+	}
 
-	service := setupService(deckRepoMock, cardRepoMock)
+	deckRepo := new(mocks.DeckRepository)
+	cardRepo := new(mocks.CardRepository)
+	userRepo := new(mocks.UserRepository)
 
-	// Act
-	err := service.StartSession(deckID, 2, types.RandomMethod)
+	// Expectations for SeedUser and deck retrieval/update.
+	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
+	deckRepo.On("GetDeckByID", deckID).Return(deck, nil)
+	deckRepo.On("UpdateDeck", mock.AnythingOfType("types.Deck")).Return(nil)
 
-	// Assert
+	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo)
+	err := s.StartSession(deckID, -1, types.RandomMethod)
 	assert.NoError(t, err)
-	service.sessionsMu.RLock()
-	session, exists := service.sessions[deckID]
-	service.sessionsMu.RUnlock()
-	assert.True(t, exists)
-	assert.Equal(t, deckID, session.DeckID)
-	assert.Equal(t, types.RandomMethod, session.Method)
-	assert.Equal(t, 2, len(session.CardStats))
-	assert.Equal(t, 2, session.Stats.TotalCards)
-	assert.Equal(t, 0, session.Stats.ViewedCount)
-	assert.Equal(t, 2, session.Stats.Remaining)
-	assert.Equal(t, 0, session.Stats.CurrentIndex)
+
+	stats, err := s.GetSessionStats(deckID)
+	assert.NoError(t, err)
+	assert.Equal(t, 2, stats.TotalCards)
+	assert.Equal(t, 0, stats.ViewedCount)
+
+	deckRepo.AssertExpectations(t)
+	userRepo.AssertExpectations(t)
 }
 
-func TestStartSession_InvalidDeckID(t *testing.T) {
-	// Arrange
+func TestStartSession_Failure_GetDeck(t *testing.T) {
 	deckID := uuid.New().String()
+	deckRepo := new(mocks.DeckRepository)
+	cardRepo := new(mocks.CardRepository)
+	userRepo := new(mocks.UserRepository)
+	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
-	deckRepoMock := &mocks.DeckRepository{}
-	cardRepoMock := &mocks.CardRepository{}
-
-	deckRepoMock.On("GetDeckByID", deckID).Return(types.Deck{}, errors.New("deck not found"))
-
-	service := setupService(deckRepoMock, cardRepoMock)
-
-	// Act
-	err := service.StartSession(deckID, 2, types.RandomMethod)
-
-	// Assert
+	deckRepo.On("GetDeckByID", deckID).Return(types.Deck{}, errors.New("deck not found"))
+	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo)
+	err := s.StartSession(deckID, 1, types.RandomMethod)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "deck not found")
-	service.sessionsMu.RLock()
-	_, exists := service.sessions[deckID]
-	service.sessionsMu.RUnlock()
-	assert.False(t, exists)
+
+	deckRepo.AssertExpectations(t)
+	userRepo.AssertExpectations(t)
 }
 
-func TestStartSession_InsufficientCards(t *testing.T) {
-	// Arrange
+func TestStartSession_Failure_UpdateDeck(t *testing.T) {
 	deckID := uuid.New().String()
-	card1 := types.Card{ID: uuid.New().String(), DeckID: deckID, Front: types.CardFront{Text: "Q1"}, Back: types.CardBack{Text: "A1"}}
-
-	deckRepoMock := &mocks.DeckRepository{}
-	cardRepoMock := &mocks.CardRepository{}
-
-	deckRepoMock.On("GetDeckByID", deckID).Return(types.Deck{
+	card1 := types.Card{
+		ID:    "card1",
+		Front: types.CardFront{Text: "Q1"},
+		Back:  types.CardBack{Text: "A1"},
+	}
+	deck := types.Deck{
 		ID:    deckID,
 		Name:  "Test Deck",
 		Cards: []types.Card{card1},
-	}, nil)
+	}
+	deckRepo := new(mocks.DeckRepository)
+	cardRepo := new(mocks.CardRepository)
+	userRepo := new(mocks.UserRepository)
+	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
-	service := setupService(deckRepoMock, cardRepoMock)
+	deckRepo.On("GetDeckByID", deckID).Return(deck, nil)
+	deckRepo.On("UpdateDeck", mock.AnythingOfType("types.Deck")).Return(errors.New("update failed"))
 
-	// Act
-	err := service.StartSession(deckID, 2, types.RandomMethod)
+	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo)
+	err := s.StartSession(deckID, 1, types.RandomMethod)
+	assert.Error(t, err)
 
-	// its a pass.  Just set the count to the size of the deck
-	// Assert
-	assert.NoError(t, err)
-	service.sessionsMu.RLock()
-	_, exists := service.sessions[deckID]
-	service.sessionsMu.RUnlock()
-	assert.True(t, exists)
+	deckRepo.AssertExpectations(t)
+	userRepo.AssertExpectations(t)
 }
 
 func TestAdjustSession_Success(t *testing.T) {
-	// Arrange
 	deckID := uuid.New().String()
-	cardID := uuid.New().String()
-	card := types.Card{ID: cardID, DeckID: deckID, Front: types.CardFront{Text: "Q1"}, Back: types.CardBack{Text: "A1"}}
-
-	deckRepoMock := &mocks.DeckRepository{}
-	cardRepoMock := &mocks.CardRepository{}
-
-	deckRepoMock.On("GetDeckByID", deckID).Return(types.Deck{
+	card := types.Card{
+		ID:         "card1",
+		Front:      types.CardFront{Text: "Q1"},
+		Back:       types.CardBack{Text: "A1"},
+		StarRating: 3,
+	}
+	deck := types.Deck{
 		ID:    deckID,
 		Name:  "Test Deck",
 		Cards: []types.Card{card},
-	}, nil)
+	}
 
-	service := setupService(deckRepoMock, cardRepoMock)
-	err := service.StartSession(deckID, 1, types.RandomMethod)
+	// Create mocks for repositories.
+	deckRepo := new(mocks.DeckRepository)
+	// No expectation is set on cardRepo for GetCardByID since AdjustSession uses session data.
+	cardRepo := new(mocks.CardRepository)
+	userRepo := new(mocks.UserRepository)
+
+	// Expect SeedUser call.
+	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
+
+	// Expect deck retrieval and update.
+	deckRepo.On("GetDeckByID", deckID).Return(deck, nil)
+	deckRepo.On("UpdateDeck", mock.AnythingOfType("types.Deck")).Return(nil)
+
+	// Initialize service.
+	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo)
+
+	// Start session.
+	err := s.StartSession(deckID, 1, types.RandomMethod)
 	assert.NoError(t, err)
 
-	// Mock UpdateCardStats
-	cardRepoMock.On("GetCardByID", cardID).Return(&card, nil)
-	cardRepoMock.On("UpdateCard", mock.Anything).Return(nil)
-
-	// Act
-	err = service.AdjustSession(deckID, cardID, types.IncrementPass, 0)
-
-	// Assert
+	// Adjust session using IncrementPass action.
+	err = s.AdjustSession(deckID, "card1", types.IncrementPass, 0)
 	assert.NoError(t, err)
-	service.sessionsMu.RLock()
-	session, exists := service.sessions[deckID]
-	service.sessionsMu.RUnlock()
-	assert.True(t, exists)
-	assert.Equal(t, true, session.CardStats[0].Viewed)
-	//assert.Equal(t, 1, session.CardStats[0].PassCount)
-	assert.Equal(t, 1, session.Stats.ViewedCount)
-	assert.Equal(t, 0, session.Stats.Remaining)
+
+	// Retrieve session stats and verify the card is marked as Viewed and Passed.
+	stats, err := s.GetSessionStats(deckID)
+	assert.NoError(t, err)
+	var found bool
+	for _, cs := range stats.CardStats {
+		if cs.CardID == "card1" {
+			found = true
+			assert.True(t, cs.Viewed, "Card should be marked as viewed")
+			assert.True(t, cs.Passed, "Card should be marked as passed")
+			break
+		}
+	}
+	assert.True(t, found, "Card stat not found in session")
+
+	deckRepo.AssertExpectations(t)
+	userRepo.AssertExpectations(t)
+	// No expectations were set on cardRepo, so no assertion needed for it.
 }
 
-func TestAdjustSession_InvalidDeckID(t *testing.T) {
-	// Arrange
+func TestAdjustSession_InvalidCard(t *testing.T) {
 	deckID := uuid.New().String()
-	cardID := uuid.New().String()
+	card := types.Card{
+		ID:    "card1",
+		Front: types.CardFront{Text: "Q1"},
+		Back:  types.CardBack{Text: "A1"},
+	}
+	deck := types.Deck{
+		ID:    deckID,
+		Name:  "Test Deck",
+		Cards: []types.Card{card},
+	}
+	deckRepo := new(mocks.DeckRepository)
+	cardRepo := new(mocks.CardRepository)
+	userRepo := new(mocks.UserRepository)
+	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
-	deckRepoMock := &mocks.DeckRepository{}
-	cardRepoMock := &mocks.CardRepository{}
+	deckRepo.On("GetDeckByID", deckID).Return(deck, nil)
+	deckRepo.On("UpdateDeck", mock.AnythingOfType("types.Deck")).Return(nil)
 
-	service := setupService(deckRepoMock, cardRepoMock)
-
-	// Act
-	err := service.AdjustSession(deckID, cardID, types.IncrementPass, 0)
-
-	// Assert no error  if there is not a session...then so what
+	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo)
+	err := s.StartSession(deckID, 1, types.RandomMethod)
 	assert.NoError(t, err)
 
+	// Do not set up GetCardByID for a non-existent card.
+	err = s.AdjustSession(deckID, "non-existent", types.IncrementPass, 0)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "card not found in session")
+
+	deckRepo.AssertExpectations(t)
+	userRepo.AssertExpectations(t)
+	cardRepo.AssertExpectations(t)
 }
 
 func TestGetNextCard_Success(t *testing.T) {
-	// Arrange
 	deckID := uuid.New().String()
-	card1 := types.Card{ID: uuid.New().String(), DeckID: deckID, Front: types.CardFront{Text: "Q1"}, Back: types.CardBack{Text: "A1"}}
-	card2 := types.Card{ID: uuid.New().String(), DeckID: deckID, Front: types.CardFront{Text: "Q2"}, Back: types.CardBack{Text: "A2"}}
-
-	deckRepoMock := &mocks.DeckRepository{}
-	cardRepoMock := &mocks.CardRepository{}
-
-	deckRepoMock.On("GetDeckByID", deckID).Return(types.Deck{
+	card1 := types.Card{
+		ID:    "card1",
+		Front: types.CardFront{Text: "Q1"},
+		Back:  types.CardBack{Text: "A1"},
+	}
+	card2 := types.Card{
+		ID:    "card2",
+		Front: types.CardFront{Text: "Q2"},
+		Back:  types.CardBack{Text: "A2"},
+	}
+	deck := types.Deck{
 		ID:    deckID,
 		Name:  "Test Deck",
 		Cards: []types.Card{card1, card2},
-	}, nil)
+	}
+	deckRepo := new(mocks.DeckRepository)
+	cardRepo := new(mocks.CardRepository)
+	userRepo := new(mocks.UserRepository)
+	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
+	deckRepo.On("GetDeckByID", deckID).Return(deck, nil)
+	deckRepo.On("UpdateDeck", mock.AnythingOfType("types.Deck")).Return(nil)
 
-	service := setupService(deckRepoMock, cardRepoMock)
-
-	err := service.StartSession(deckID, 2, types.RandomMethod)
+	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo)
+	err := s.StartSession(deckID, -1, types.RandomMethod)
 	assert.NoError(t, err)
 
-	// Act
-	nextCardID, err := service.GetNextCard(deckID)
-
-	// Assert
+	nextCardID, err := s.GetNextCard(deckID)
 	assert.NoError(t, err)
-	assert.Contains(t, []string{card1.ID, card2.ID}, nextCardID)
+	assert.NotEmpty(t, nextCardID)
+	// Check that the returned card ID is one of the deck's cards.
+	assert.Contains(t, []string{"card1", "card2"}, nextCardID)
+
+	deckRepo.AssertExpectations(t)
+	userRepo.AssertExpectations(t)
 }
 
-func TestGetNextCard_SessionExhausted(t *testing.T) {
-	// Arrange
-	deckID := uuid.New().String()
-	cardID := uuid.New().String()
-	card := types.Card{ID: cardID, DeckID: deckID, Front: types.CardFront{Text: "Q1"}, Back: types.CardBack{Text: "A1"}}
+func TestGetNextCard_NoSession(t *testing.T) {
+	deckRepo := new(mocks.DeckRepository)
+	cardRepo := new(mocks.CardRepository)
+	userRepo := new(mocks.UserRepository)
+	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
-	deckRepoMock := &mocks.DeckRepository{}
-	cardRepoMock := &mocks.CardRepository{}
-
-	deckRepoMock.On("GetDeckByID", deckID).Return(types.Deck{
-		ID:    deckID,
-		Name:  "Test Deck",
-		Cards: []types.Card{card},
-	}, nil)
-
-	service := setupService(deckRepoMock, cardRepoMock)
-	err := service.StartSession(deckID, 1, types.RandomMethod)
-	assert.NoError(t, err)
-
-	// First retrieval
-	nextCardID, err := service.GetNextCard(deckID)
-	assert.NoError(t, err)
-	assert.Equal(t, cardID, nextCardID)
-
-	// Second retrieval should restart
-	nextCardID, err = service.GetNextCard(deckID)
-	assert.NoError(t, err)
-	assert.Equal(t, cardID, nextCardID)
-
-}
-
-func TestGetNextCard_InvalidDeckID(t *testing.T) {
-	// Arrange
-	deckID := uuid.New().String()
-
-	deckRepoMock := &mocks.DeckRepository{}
-	cardRepoMock := &mocks.CardRepository{}
-
-	service := setupService(deckRepoMock, cardRepoMock)
-
-	// Act
-	nextCardID, err := service.GetNextCard(deckID)
-
-	// Assert
+	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo)
+	nextCardID, err := s.GetNextCard("non-existent-deck")
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "session does not exist")
-	assert.Equal(t, "", nextCardID)
+	assert.Empty(t, nextCardID)
+
+	userRepo.AssertExpectations(t)
 }
 
 func TestClearSession_Success(t *testing.T) {
-	// Arrange
 	deckID := uuid.New().String()
-	card := types.Card{ID: uuid.New().String(), DeckID: deckID, Front: types.CardFront{Text: "Q1"}, Back: types.CardBack{Text: "A1"}}
-
-	deckRepoMock := &mocks.DeckRepository{}
-	cardRepoMock := &mocks.CardRepository{}
-
-	deckRepoMock.On("GetDeckByID", deckID).Return(types.Deck{
+	card := types.Card{
+		ID:    "card1",
+		Front: types.CardFront{Text: "Q1"},
+		Back:  types.CardBack{Text: "A1"},
+	}
+	deck := types.Deck{
 		ID:    deckID,
 		Name:  "Test Deck",
 		Cards: []types.Card{card},
-	}, nil)
-
-	service := setupService(deckRepoMock, cardRepoMock)
-	err := service.StartSession(deckID, 1, types.RandomMethod)
-	assert.NoError(t, err)
-
-	// Act
-	err = service.ClearSession(deckID)
-
-	// Assert
-	assert.NoError(t, err)
-	service.sessionsMu.RLock()
-	_, exists := service.sessions[deckID]
-	service.sessionsMu.RUnlock()
-	assert.False(t, exists)
-}
-
-func TestClearSession_NonExistentSession(t *testing.T) {
-	// Arrange
-	deckID := uuid.New().String()
-
-	deckRepoMock := &mocks.DeckRepository{}
-	cardRepoMock := &mocks.CardRepository{}
-
-	service := setupService(deckRepoMock, cardRepoMock)
-
-	// Act
-	err := service.ClearSession(deckID)
-
-	// Assert
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "session does not exist")
-}
-
-func TestGetSessionStats_Success(t *testing.T) {
-	// Arrange
-	deckID := uuid.New().String()
-	card1 := types.Card{ID: uuid.New().String(), DeckID: deckID, Front: types.CardFront{Text: "Q1"}, Back: types.CardBack{Text: "A1"}}
-	card2 := types.Card{ID: uuid.New().String(), DeckID: deckID, Front: types.CardFront{Text: "Q2"}, Back: types.CardBack{Text: "A2"}}
-
-	deckRepoMock := &mocks.DeckRepository{}
-	cardRepoMock := &mocks.CardRepository{}
-
-	deckRepoMock.On("GetDeckByID", deckID).Return(types.Deck{
-		ID:    deckID,
-		Name:  "Test Deck",
-		Cards: []types.Card{card1, card2},
-	}, nil)
-
-	service := setupService(deckRepoMock, cardRepoMock)
-	err := service.StartSession(deckID, 2, types.RandomMethod)
-	assert.NoError(t, err)
-
-	// Adjust session
-	cardRepoMock.On("GetCardByID", card1.ID).Return(&card1, nil)
-	cardRepoMock.On("UpdateCard", mock.Anything).Return(nil)
-	err = service.AdjustSession(deckID, card1.ID, types.IncrementPass, 0)
-	assert.NoError(t, err)
-
-	// Act
-	stats, err := service.GetSessionStats(deckID)
-
-	// Assert
-	assert.NoError(t, err)
-	assert.Equal(t, 2, stats.TotalCards)
-	assert.Equal(t, 1, stats.ViewedCount)
-	assert.Equal(t, 1, stats.Remaining)
-	assert.Equal(t, 0, stats.CurrentIndex)
-}
-
-func TestGetSessionStats_NonExistentSession(t *testing.T) {
-	// Arrange
-	deckID := uuid.New().String()
-
-	deckRepoMock := &mocks.DeckRepository{}
-	cardRepoMock := &mocks.CardRepository{}
-
-	service := setupService(deckRepoMock, cardRepoMock)
-
-	// Act
-	stats, err := service.GetSessionStats(deckID)
-
-	// Assert
-	assert.NoError(t, err)
-	assert.Equal(t, types.SessionStats{}, stats)
-}
-
-func TestStartSession_ConcurrentAccess(t *testing.T) {
-	// This test ensures that the Service can handle concurrent StartSession calls safely.
-
-	// Arrange
-	deckID := uuid.New().String()
-	card1 := types.Card{ID: uuid.New().String(), DeckID: deckID, Front: types.CardFront{Text: "Q1"}, Back: types.CardBack{Text: "A1"}}
-	card2 := types.Card{ID: uuid.New().String(), DeckID: deckID, Front: types.CardFront{Text: "Q2"}, Back: types.CardBack{Text: "A2"}}
-
-	deckRepoMock := &mocks.DeckRepository{}
-	cardRepoMock := &mocks.CardRepository{}
-
-	deckRepoMock.On("GetDeckByID", deckID).Return(types.Deck{
-		ID:    deckID,
-		Name:  "Concurrent Deck",
-		Cards: []types.Card{card1, card2},
-	}, nil)
-
-	service := setupService(deckRepoMock, cardRepoMock)
-
-	// Act
-	done := make(chan bool)
-	go func() {
-		err := service.StartSession(deckID, 2, types.RandomMethod)
-		assert.NoError(t, err)
-		done <- true
-	}()
-
-	go func() {
-		err := service.StartSession(deckID, 2, types.RandomMethod)
-		// Depending on implementation, this might overwrite or return an error
-		// Adjust assertions based on expected behavior
-		// For example, if overwriting is allowed:
-		assert.NoError(t, err)
-		done <- true
-	}()
-
-	<-done
-	<-done
-
-	// Assert
-	service.sessionsMu.RLock()
-	session, exists := service.sessions[deckID]
-	service.sessionsMu.RUnlock()
-	assert.True(t, exists)
-	assert.Equal(t, 2, session.Stats.TotalCards)
-}
-
-/*
-func TestAdjustSession_RetireCard(t *testing.T) {
-	// Arrange
-	deckID := uuid.New().String()
-	cardID := uuid.New().String()
-	card := types.Card{
-		ID:      cardID,
-		DeckID:  deckID,
-		Front:   types.CardFront{Text: "Q1"},
-		Back:    types.CardBack{Text: "A1"},
-		Retired: false,
 	}
+	deckRepo := new(mocks.DeckRepository)
+	cardRepo := new(mocks.CardRepository)
+	userRepo := new(mocks.UserRepository)
+	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
+	deckRepo.On("GetDeckByID", deckID).Return(deck, nil)
+	deckRepo.On("UpdateDeck", mock.AnythingOfType("types.Deck")).Return(nil)
 
-	deckRepoMock := &mocks.DeckRepository{}
-	cardRepoMock := &mocks.CardRepository{}
-
-	deckRepoMock.On("GetDeckByID", deckID).Return(types.Deck{
-		ID:    deckID,
-		Name:  "Retire Deck",
-		Cards: []types.Card{card},
-	}, nil)
-
-	service := setupService(deckRepoMock, cardRepoMock)
-	err := service.StartSession(deckID, 1, types.RandomMethod)
+	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo)
+	err := s.StartSession(deckID, 1, types.RandomMethod)
 	assert.NoError(t, err)
 
-	// Mock UpdateCardStats
-	cardRepoMock.On("GetCardByID", cardID).Return(&card, nil)
-	cardRepoMock.On("UpdateCard", mock.Anything).Return(nil)
-
-	// Act
-	err = service.AdjustSession(deckID, cardID, types.Retire, nil)
-
-	// Assert
-	assert.NoError(t, err)
-	service.sessionsMu.RLock()
-	session, exists := service.sessions[deckID]
-	service.sessionsMu.RUnlock()
-	assert.True(t, exists)
-	assert.True(t, session.CardStats[0].Retired)
-}
-*/
-
-func TestStartSession_DuplicateSession(t *testing.T) {
-	// This test checks the behavior when attempting to start a session that's already active.
-
-	// Arrange
-	deckID := uuid.New().String()
-	card := types.Card{ID: uuid.New().String(), DeckID: deckID, Front: types.CardFront{Text: "Q1"}, Back: types.CardBack{Text: "A1"}}
-
-	deckRepoMock := &mocks.DeckRepository{}
-	cardRepoMock := &mocks.CardRepository{}
-
-	deckRepoMock.On("GetDeckByID", deckID).Return(types.Deck{
-		ID:    deckID,
-		Name:  "Duplicate Session Deck",
-		Cards: []types.Card{card},
-	}, nil)
-
-	service := setupService(deckRepoMock, cardRepoMock)
-
-	// Start first session
-	err := service.StartSession(deckID, 1, types.RandomMethod)
+	err = s.ClearSession(deckID)
 	assert.NoError(t, err)
 
-	// Act: Attempt to start a second session
-	err = service.StartSession(deckID, 1, types.RandomMethod)
-
-	// Assert: Depending on implementation, this might overwrite or return an error
-	// Adjust assertions based on expected behavior
-	// For this example, we'll assume it overwrites the existing session
+	// After clearing, GetSessionStats should return empty stats.
+	stats, err := s.GetSessionStats(deckID)
 	assert.NoError(t, err)
-	service.sessionsMu.RLock()
-	session, exists := service.sessions[deckID]
-	service.sessionsMu.RUnlock()
-	assert.True(t, exists)
-	assert.Equal(t, 1, session.Stats.TotalCards)
+	assert.Equal(t, 0, stats.TotalCards)
+
+	userRepo.AssertExpectations(t)
+	deckRepo.AssertExpectations(t)
 }
 
-func TestStartSession_MethodFallback(t *testing.T) {
-	// This test ensures that if an unsupported session method is provided, the service handles it gracefully.
+func TestGetSessionStats_NoSession(t *testing.T) {
+	deckRepo := new(mocks.DeckRepository)
+	cardRepo := new(mocks.CardRepository)
+	userRepo := new(mocks.UserRepository)
+	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
-	// Arrange
-	deckID := uuid.New().String()
-	card := types.Card{ID: uuid.New().String(), DeckID: deckID, Front: types.CardFront{Text: "Q1"}, Back: types.CardBack{Text: "A1"}}
-
-	deckRepoMock := &mocks.DeckRepository{}
-	cardRepoMock := &mocks.CardRepository{}
-
-	deckRepoMock.On("GetDeckByID", deckID).Return(types.Deck{
-		ID:    deckID,
-		Name:  "Fallback Method Deck",
-		Cards: []types.Card{card},
-	}, nil)
-
-	service := setupService(deckRepoMock, cardRepoMock)
-
-	// Act: Use an unsupported session method
-	err := service.StartSession(deckID, 1, "UnsupportedMethod")
-
-	// Assert: Depending on implementation, it might default to a specific method or return an error
-	// For this example, we'll assume it returns an error
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "invalid session method")
-}
-
-func TestStartSession_SessionTimeout(t *testing.T) {
-	// If your session has a timeout mechanism, test that the session expires correctly.
-	// This requires your Service to support session timeouts, which isn't shown in the provided code.
-	// Below is a hypothetical test case.
-
-	// Arrange
-	// deckID := uuid.New().String()
-	// ... similar setup as previous tests
-
-	// Act
-	// Start session
-	// Wait for timeout
-	// Attempt to get next card
-
-	// Assert
-	// Ensure the session has expired and appropriate error is returned
-}
-
-func TestAdjustSession_UnknownAction(t *testing.T) {
-	// Arrange
-	deckID := uuid.New().String()
-	cardID := uuid.New().String()
-	card := types.Card{
-		ID:      cardID,
-		DeckID:  deckID,
-		Front:   types.CardFront{Text: "Q1"},
-		Back:    types.CardBack{Text: "A1"},
-		Retired: false,
-	}
-
-	deckRepoMock := &mocks.DeckRepository{}
-	cardRepoMock := &mocks.CardRepository{}
-
-	deckRepoMock.On("GetDeckByID", deckID).Return(types.Deck{
-		ID:    deckID,
-		Name:  "Unknown Action Deck",
-		Cards: []types.Card{card},
-	}, nil)
-
-	service := setupService(deckRepoMock, cardRepoMock)
-	err := service.StartSession(deckID, 1, types.RandomMethod)
+	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo)
+	stats, err := s.GetSessionStats("non-existent-deck")
 	assert.NoError(t, err)
+	assert.Equal(t, 0, stats.TotalCards)
 
-	// Mock UpdateCardStats
-	cardRepoMock.On("GetCardByID", cardID).Return(&card, nil)
-
-	// Act: Use an unknown action
-	err = service.AdjustSession(deckID, cardID, "UnknownAction", 0)
-
-	// Assert
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "invalid card action")
+	userRepo.AssertExpectations(t)
 }

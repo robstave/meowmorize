@@ -40,7 +40,7 @@ function App() {
           <Route path="/" element={auth.token ? <Dashboard /> : <Navigate to="/login" />} />
           <Route path="/import" element={auth.token ? <ImportPage /> : <Navigate to="/login" />} />
           <Route path="/decks/:id" element={auth.token ? <DeckPage /> : <Navigate to="/login" />} />
-          <Route path="/card/:id" element={auth.token ? <CardPage /> : <Navigate to="/login" />} />
+          <Route path="/decks/:deckId/card/:id" element={auth.token ? <CardPage /> : <Navigate to="/login" />} />
           <Route path="/card-form" element={auth.token ? <CardForm /> : <Navigate to="/login" />} />
           <Route path="/card-form/:id" element={auth.token ? <CardForm /> : <Navigate to="/login" />} />
 

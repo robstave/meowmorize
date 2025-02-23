@@ -7,9 +7,9 @@ import {
   Box,
   Alert,
   CircularProgress,
+  TextField,
   Snackbar,
   Tooltip,
-  Paper,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -18,11 +18,15 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MuiAlert from '@mui/material/Alert';
 import ReactMarkdown from 'react-markdown';
-import { importDeck, createEmptyDeck, createCard } from '../services/api';
+import {
+  importDeck,
+  createEmptyDeck,
+  createCard,
+  updateDeck,
+} from '../services/api';
 import { DeckContext } from '../context/DeckContext';
 import { parseMarkdownToCards } from '../utils/markdownParser';
-
-// Import instructions text from separate files
+// Optionally import instructions for markdown/json if needed
 import markdownInstructions from './markdownInstructions';
 import jsonInstructions from './jsonInstructions';
 
@@ -31,6 +35,8 @@ const AlertSnackbar = React.forwardRef(function Alert(props, ref) {
 });
 
 const ImportPage = () => {
+  // New state for deck title, defaulting to "Default Deck"
+  const [deckTitle, setDeckTitle] = useState('Default Deck');
   const [selectedFile, setSelectedFile] = useState(null);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [loading, setLoading] = useState(false);
@@ -69,13 +75,17 @@ const ImportPage = () => {
         const formData = new FormData();
         formData.append('deck_file', selectedFile);
         const response = await importDeck(formData);
+        // If a custom title was provided, update the deck
+        if (deckTitle.trim() !== 'Default Deck') {
+          await updateDeck(response.id, { name: deckTitle });
+        }
         setMessage({
           type: 'success',
-          text: `Deck "${response.name}" imported successfully!`,
+          text: `Deck "${deckTitle}" imported successfully!`,
         });
         setSnackbar({
           open: true,
-          message: `Deck "${response.name}" imported successfully!`,
+          message: `Deck "${deckTitle}" imported successfully!`,
           severity: 'success',
         });
       }
@@ -99,20 +109,24 @@ const ImportPage = () => {
           });
           return;
         }
-        // Create a new empty deck first
+        // Create a new empty deck
         const newDeck = await createEmptyDeck();
-        // For each parsed card, assign the new deck id and create the card
+        // If the title is different, update the new deck’s name
+        if (deckTitle.trim() !== 'Default Deck') {
+          await updateDeck(newDeck.id, { name: deckTitle });
+        }
+        // Create each card for the new deck
         for (const card of cards) {
           card.deck_id = newDeck.id;
-          await createCard(card);
+          await createCard(card, newDeck.id);
         }
         setMessage({
           type: 'success',
-          text: `Deck "${newDeck.name}" imported successfully with ${cards.length} cards!`,
+          text: `Deck "${deckTitle}" imported successfully with ${cards.length} cards!`,
         });
         setSnackbar({
           open: true,
-          message: `Deck "${newDeck.name}" imported successfully with ${cards.length} cards!`,
+          message: `Deck "${deckTitle}" imported successfully with ${cards.length} cards!`,
           severity: 'success',
         });
       }
@@ -124,11 +138,11 @@ const ImportPage = () => {
         });
         setSnackbar({
           open: true,
-          message: 'Unsupported file format. Please select a .json or markdown file.',
+          message:
+            'Unsupported file format. Please select a .json or markdown file.',
           severity: 'error',
         });
       }
-      // Refresh decks list after a successful import
       loadDecks();
       setSelectedFile(null);
     } catch (error) {
@@ -154,18 +168,27 @@ const ImportPage = () => {
 
   return (
     <Container maxWidth="sm" sx={{ mt: 4 }}>
-      {/* Explanation header */}
       <Typography variant="h4" gutterBottom>
         Import Deck
       </Typography>
       <Typography variant="body1" sx={{ mb: 2 }}>
-        Import a deck from either <strong>Markdown</strong> or <strong>JSON</strong> format.
+        Import a deck from either <strong>Markdown</strong> or{' '}
+        <strong>JSON</strong> format.
       </Typography>
-
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {/* Tooltip wrapped file input button */}
+        {/* Editable Deck Title Input */}
+        <TextField
+          label="Deck Title"
+          value={deckTitle}
+          onChange={(e) => setDeckTitle(e.target.value)}
+          fullWidth
+        />
         <Tooltip title="Import file from JSON or Markdown format">
-          <Button variant="contained" component="label" startIcon={<UploadFileIcon />}>
+          <Button
+            variant="contained"
+            component="label"
+            startIcon={<UploadFileIcon />}
+          >
             Choose File
             <input
               type="file"
@@ -175,15 +198,12 @@ const ImportPage = () => {
             />
           </Button>
         </Tooltip>
-
         {selectedFile && (
           <Typography variant="body1">
             Selected File: {selectedFile.name}
           </Typography>
         )}
-
         {message.text && <Alert severity={message.type}>{message.text}</Alert>}
-
         <Button
           variant="contained"
           color="primary"
@@ -193,13 +213,11 @@ const ImportPage = () => {
           {loading ? <CircularProgress size={24} /> : 'Import Deck'}
         </Button>
       </Box>
-
-      {/* Accordion for instructions */}
+      {/* Optionally include additional instructions via Accordion */}
       <Box sx={{ mt: 4 }}>
         <Typography variant="h6" gutterBottom>
           Import File Types
         </Typography>
-
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography>Markdown</Typography>
@@ -208,7 +226,6 @@ const ImportPage = () => {
             <ReactMarkdown>{markdownInstructions}</ReactMarkdown>
           </AccordionDetails>
         </Accordion>
-
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography>JSON</Typography>
@@ -218,7 +235,6 @@ const ImportPage = () => {
           </AccordionDetails>
         </Accordion>
       </Box>
-
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}

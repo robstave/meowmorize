@@ -27,49 +27,35 @@ func (s *Service) CollapseDecks(targetDeckID string, sourceDeckID string) error 
 		return fmt.Errorf("both targetDeckID and sourceDeckID must be provided")
 	}
 
-	// Retrieve all cards from the source deck
+	// Retrieve all cards associated with the source deck
 	cards, err := s.cardRepo.GetCardsByDeckID(sourceDeckID)
 	if err != nil {
 		s.logger.Error("Failed to retrieve cards from source deck", "sourceDeckID", sourceDeckID, "error", err)
 		return err
 	}
 
-	// Iterate over each card and move it to the target deck
+	// For each card, remove the association with the source deck and add it to the target deck
 	for _, card := range cards {
-		// Delete the card from the source deck
-		if err := s.cardRepo.DeleteCardByID(card.ID); err != nil {
-			s.logger.Error("Failed to delete card from source deck", "cardID", card.ID, "error", err)
+		// Remove association from the source deck
+		if err := s.deckRepo.RemoveCardAssociation(sourceDeckID, card.ID); err != nil {
+			s.logger.Error("Failed to remove association from source deck", "cardID", card.ID, "error", err)
 			return err
 		}
 
-		// Create a new card in the target deck with the same data
-		newCard := types.Card{
-			DeckID:     targetDeckID,
-			ID:         card.ID,
-			Front:      card.Front,
-			Back:       card.Back,
-			Link:       card.Link,
-			PassCount:  card.PassCount,
-			FailCount:  card.FailCount,
-			SkipCount:  card.SkipCount,
-			StarRating: card.StarRating,
-			Retired:    card.Retired,
-			// CreatedAt and UpdatedAt will be handled by GORM
-		}
-
-		if err := s.cardRepo.CreateCard(newCard); err != nil {
-			s.logger.Error("Failed to add card to target deck", "cardID", newCard.ID, "error", err)
+		// Add association to the target deck
+		if err := s.deckRepo.AddCardAssociation(targetDeckID, card.ID); err != nil {
+			s.logger.Error("Failed to add association to target deck", "cardID", card.ID, "error", err)
 			return err
 		}
 
-		s.logger.Info("---- Moved card from source to target deck", "cardID", newCard.ID, "sourceDeckID", sourceDeckID, "targetDeckID", targetDeckID)
+		s.logger.Info("Moved card association", "cardID", card.ID, "from", sourceDeckID, "to", targetDeckID)
 	}
 
+	// Delete the source deck (which now has no associated cards)
 	if err := s.deckRepo.DeleteDeck(sourceDeckID); err != nil {
 		s.logger.Error("Failed to delete source deck", "sourceDeckID", sourceDeckID, "error", err)
 		return err
 	}
 
 	return nil
-
 }

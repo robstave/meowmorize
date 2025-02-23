@@ -87,9 +87,9 @@ export const deleteDeck = async (deckId) => {
 
 
 // Create a new card
-export const createCard = async (cardData) => {
+export const createCard = async (cardData, deckId) => {
   try {
-    const response = await api.post('/cards', cardData);
+    const response = await api.post(`/cards/${deckId}`, cardData);
     return response.data;
   } catch (error) {
     throw error;

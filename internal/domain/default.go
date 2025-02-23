@@ -7,7 +7,7 @@ import (
 )
 
 // CreateDefaultDeck creates a default deck with a sample card
-func (s *Service) CreateDefaultDeck(defaultData bool) (types.Deck, error) {
+func (s *Service) CreateDefaultDeck(defaultData bool, userID string) (types.Deck, error) {
 	// Generate a UUID for the default deck
 	deckID := uuid.New().String()
 
@@ -15,6 +15,7 @@ func (s *Service) CreateDefaultDeck(defaultData bool) (types.Deck, error) {
 
 	defaultDeck := types.Deck{
 		ID:          deckID,
+		UserID:      userID,
 		Name:        "Default Deck",
 		Description: "This is the default deck containing basic cards.",
 	}
@@ -23,8 +24,7 @@ func (s *Service) CreateDefaultDeck(defaultData bool) (types.Deck, error) {
 
 		defaultDeck.Cards = []types.Card{
 			{
-				ID:     uuid.New().String(), // Generate a UUID for the card
-				DeckID: deckID,
+				ID: uuid.New().String(), // Generate a UUID for the card
 
 				Front: struct {
 					Text string `gorm:"type:text;not null" json:"text"`
@@ -38,8 +38,7 @@ func (s *Service) CreateDefaultDeck(defaultData bool) (types.Deck, error) {
 				},
 			},
 			{
-				ID:     uuid.New().String(), // Generate a UUID for the card
-				DeckID: deckID,
+				ID: uuid.New().String(), // Generate a UUID for the card
 
 				Front: struct {
 					Text string `gorm:"type:text;not null" json:"text"`

@@ -91,13 +91,13 @@ func (_m *MeowDomain) CollapseDecks(targetDeckID string, sourceDeckID string) er
 	return r0
 }
 
-// CreateCard provides a mock function with given fields: card
-func (_m *MeowDomain) CreateCard(card types.Card) (*types.Card, error) {
-	ret := _m.Called(card)
+// CreateCard provides a mock function with given fields: card, deckID
+func (_m *MeowDomain) CreateCard(card types.Card, deckID string) (*types.Card, error) {
+	ret := _m.Called(card, deckID)
 
 	var r0 *types.Card
-	if rf, ok := ret.Get(0).(func(types.Card) *types.Card); ok {
-		r0 = rf(card)
+	if rf, ok := ret.Get(0).(func(types.Card, string) *types.Card); ok {
+		r0 = rf(card, deckID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*types.Card)
@@ -105,8 +105,8 @@ func (_m *MeowDomain) CreateCard(card types.Card) (*types.Card, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(types.Card) error); ok {
-		r1 = rf(card)
+	if rf, ok := ret.Get(1).(func(types.Card, string) error); ok {
+		r1 = rf(card, deckID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -128,20 +128,20 @@ func (_m *MeowDomain) CreateDeck(_a0 types.Deck) error {
 	return r0
 }
 
-// CreateDefaultDeck provides a mock function with given fields: defaultDeck
-func (_m *MeowDomain) CreateDefaultDeck(defaultDeck bool) (types.Deck, error) {
-	ret := _m.Called(defaultDeck)
+// CreateDefaultDeck provides a mock function with given fields: defaultDeck, userID
+func (_m *MeowDomain) CreateDefaultDeck(defaultDeck bool, userID string) (types.Deck, error) {
+	ret := _m.Called(defaultDeck, userID)
 
 	var r0 types.Deck
-	if rf, ok := ret.Get(0).(func(bool) types.Deck); ok {
-		r0 = rf(defaultDeck)
+	if rf, ok := ret.Get(0).(func(bool, string) types.Deck); ok {
+		r0 = rf(defaultDeck, userID)
 	} else {
 		r0 = ret.Get(0).(types.Deck)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(bool) error); ok {
-		r1 = rf(defaultDeck)
+	if rf, ok := ret.Get(1).(func(bool, string) error); ok {
+		r1 = rf(defaultDeck, userID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -212,13 +212,13 @@ func (_m *MeowDomain) ExportDeck(deckID string) (types.Deck, error) {
 	return r0, r1
 }
 
-// GetAllDecks provides a mock function with given fields:
-func (_m *MeowDomain) GetAllDecks() ([]types.Deck, error) {
-	ret := _m.Called()
+// GetAllDecks provides a mock function with given fields: userID
+func (_m *MeowDomain) GetAllDecks(userID string) ([]types.Deck, error) {
+	ret := _m.Called(userID)
 
 	var r0 []types.Deck
-	if rf, ok := ret.Get(0).(func() []types.Deck); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(string) []types.Deck); ok {
+		r0 = rf(userID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]types.Deck)
@@ -226,8 +226,8 @@ func (_m *MeowDomain) GetAllDecks() ([]types.Deck, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(userID)
 	} else {
 		r1 = ret.Error(1)
 	}

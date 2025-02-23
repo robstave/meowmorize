@@ -26,6 +26,12 @@ type CreateDeckRequest struct {
 func (hc *MeowController) CreateDefaultDeck(c echo.Context) error {
 	hc.logger.Info("Creating a new deck")
 
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		hc.logger.Error("Failed to extract user ID from token", "error", err)
+		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "unauthorized"})
+	}
+
 	var req CreateDeckRequest
 	if err := c.Bind(&req); err != nil {
 		hc.logger.Error("Invalid request payload", "error", err)
@@ -34,7 +40,7 @@ func (hc *MeowController) CreateDefaultDeck(c echo.Context) error {
 		})
 	}
 
-	deck, err := hc.service.CreateDefaultDeck(req.DefaultData)
+	deck, err := hc.service.CreateDefaultDeck(req.DefaultData, userID)
 	if err != nil {
 		hc.logger.Error("Failed to create deck", "error", err)
 		return c.JSON(http.StatusInternalServerError, echo.Map{

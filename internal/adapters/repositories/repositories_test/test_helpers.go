@@ -38,8 +38,7 @@ func SeedTestData(t *testing.T, db *gorm.DB) (types.Deck, types.Card) {
 
 	// Create a card
 	card := types.Card{
-		ID:     "card1",
-		DeckID: deck.ID,
+		ID: "card1",
 		Front: types.CardFront{
 			Text: "Front Text",
 		},

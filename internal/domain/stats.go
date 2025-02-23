@@ -17,7 +17,7 @@ func (s *Service) ClearDeckStats(deckID string, clearSession bool, clearStats bo
 	// Retrieve the deck to ensure it exists
 	deck, err := s.deckRepo.GetDeckByID(deckID)
 	if err != nil {
-		s.logger.Error("Failed to retrieve deck", "deck_id", deckID, "error", err)
+		s.logger.Error("Failed to retrieve deck  lear", "deck_id", deckID, "error", err)
 		return err
 	}
 

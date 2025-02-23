@@ -39,6 +39,8 @@ func main() {
 	slogger.Info("DBPath set", "dbpath", dbPath)
 
 	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
+
+	//db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
 	if err != nil {
 		slogger.Error("Failed to connect to database", "path", dbPath, "error", err)
 		log.Fatalf("Failed to connect to database: %v", err)
@@ -112,7 +114,7 @@ func main() {
 	protectedCardGroup := cardGroup.Group("", jwtMiddleware)
 	protectedCardGroup.POST("/stats", meowController.UpdateCardStats)
 	protectedCardGroup.GET("/:id", meowController.GetCardByID)
-	protectedCardGroup.POST("", meowController.CreateCard)
+	protectedCardGroup.POST("/:id", meowController.CreateCard)
 	protectedCardGroup.PUT("/:id", meowController.UpdateCard)
 	protectedCardGroup.DELETE("/:id", meowController.DeleteCard)
 

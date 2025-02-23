@@ -36,6 +36,27 @@ func (_m *CardRepository) CloneCardToDeck(cardID string, targetDeckID string) (*
 	return r0, r1
 }
 
+// CountDeckAssociations provides a mock function with given fields: cardID
+func (_m *CardRepository) CountDeckAssociations(cardID string) (int, error) {
+	ret := _m.Called(cardID)
+
+	var r0 int
+	if rf, ok := ret.Get(0).(func(string) int); ok {
+		r0 = rf(cardID)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(cardID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CreateCard provides a mock function with given fields: card
 func (_m *CardRepository) CreateCard(card types.Card) error {
 	ret := _m.Called(card)

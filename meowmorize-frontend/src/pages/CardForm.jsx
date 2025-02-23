@@ -124,8 +124,6 @@ const CardForm = () => {
                 // Create new card
                 const newCard = await createCard(formData);
                 setSuccess('Card created successfully!');
-                console.log('created')
-                console.log(newCard)
                 navigate(`/card/${newCard.id}`); // Navigate to the newly created card
                 return;
             }

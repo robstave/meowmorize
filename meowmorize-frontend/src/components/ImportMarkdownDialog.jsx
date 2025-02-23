@@ -69,7 +69,7 @@ const ImportMarkdownDialog = ({ open, handleClose, deckId, onImportSuccess }) =>
           id: uuidv4(), // Temporary ID for frontend; backend should generate the actual ID
           deck_id: deckId,
         };
-        await createCard(newCard);
+        await createCard(newCard, deckId);
       }
       setImporting(false);
       onImportSuccess(parsedCards.length);

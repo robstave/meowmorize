@@ -341,7 +341,10 @@ const DeckPage = () => {
       await startSession(id, count, sessionMethod);
       const nextCardId = await getNextCard(id);
       if (nextCardId) {
-        navigate(`/card/${nextCardId}`);
+        //navigate(`/card/${nextCardId}`);
+        // navigate to card page
+        navigate(`/decks/${id}/card/${nextCardId}`);
+
       } else {
         setSnackbar({
           open: true,
