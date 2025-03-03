@@ -88,7 +88,7 @@ func (s *Service) CloneCardToDeck(cardID string, targetDeckID string) (*types.Ca
 }
 
 // UpdateCardStats updates the card based on the provided action
-func (s *Service) UpdateCardStats(cardID string, action types.CardAction, value *int, deckID string) error {
+func (s *Service) UpdateCardStats(cardID string, action types.CardAction, value *int, deckID string, userID string) error {
 	card, err := s.cardRepo.GetCardByID(cardID)
 	if err != nil {
 		s.logger.Error("Failed to retrieve card", "card_id", cardID, "error", err)
@@ -133,7 +133,7 @@ func (s *Service) UpdateCardStats(cardID string, action types.CardAction, value 
 		return err
 	}
 
-	err = s.AdjustSession(deckID, cardID, action, card.StarRating)
+	err = s.AdjustSession(deckID, cardID, action, card.StarRating, userID)
 	if err != nil {
 		s.logger.Error("Failed to update session", "card_id", cardID, "deck_id", deckID, "error", err)
 		return err

@@ -37,12 +37,18 @@ func (c *MeowController) UpdateCardStats(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request payload")
 	}
 
+	userID, err := getUserIDFromContext(ctx)
+	if err != nil {
+		c.logger.Error("Failed to extract user id from token", "error", err)
+		userID = "demo_user"
+	}
+
 	// Optional: Add validation here if using a validation library
 	// e.g., if err := ctx.Validate(req); err != nil { ... }
 
 	// Update the card stats
 	// WE are passing the deckID in case we want to update the session too
-	if err := c.service.UpdateCardStats(req.CardID, req.Action, req.Value, req.DeckID); err != nil {
+	if err := c.service.UpdateCardStats(req.CardID, req.Action, req.Value, req.DeckID, userID); err != nil {
 		if err.Error() == "card not found" {
 			c.logger.Warn("Card not found", "card_id", req.CardID)
 			return ctx.JSON(http.StatusNotFound, echo.Map{

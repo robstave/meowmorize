@@ -5,11 +5,17 @@ import (
 	"errors"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/robstave/meowmorize/internal/domain/types"
 )
 
+// generateSessionID generates a unique session ID
+func generateSessionID() string {
+	return uuid.New().String()
+}
+
 // StartSession initializes or resets a session for a given deck
-func (s *Service) StartSession(deckID string, count int, method types.SessionMethod) error {
+func (s *Service) StartSession(deckID string, count int, method types.SessionMethod, userID string) error {
 	s.sessionsMu.Lock()
 	defer s.sessionsMu.Unlock()
 
@@ -62,9 +68,12 @@ func (s *Service) StartSession(deckID string, count int, method types.SessionMet
 		CurrentIndex: 0,
 	}
 
+	sessionID := generateSessionID()
 	// Initialize the session
 	session := &types.Session{
 		DeckID:    deckID,
+		UserID:    userID,
+		SessionID: sessionID,
 		CardStats: cardStats,
 		Method:    method,
 		Index:     0,
@@ -100,7 +109,7 @@ func selectCards(cards []types.Card, count int, method types.SessionMethod) ([]t
 }
 
 // AdjustSession updates the session based on card actions
-func (s *Service) AdjustSession(deckID string, cardID string, action types.CardAction, value int) error {
+func (s *Service) AdjustSession(deckID string, cardID string, action types.CardAction, value int, userID string) error {
 	s.sessionsMu.RLock()
 	session, exists := s.sessions[deckID]
 	s.sessionsMu.RUnlock()
@@ -126,6 +135,8 @@ func (s *Service) AdjustSession(deckID string, cardID string, action types.CardA
 		return errors.New("card not found in session")
 	}
 
+	logSessionStat := false
+
 	// Update card stats based on action
 	switch action {
 	case types.IncrementFail:
@@ -133,18 +144,21 @@ func (s *Service) AdjustSession(deckID string, cardID string, action types.CardA
 		cardStat.Skipped = false
 		cardStat.Failed = true
 		cardStat.Passed = false
+		logSessionStat = true
 
 	case types.IncrementPass:
 		cardStat.Viewed = true
 		cardStat.Skipped = false
 		cardStat.Failed = false
 		cardStat.Passed = true
+		logSessionStat = true
 
 	case types.IncrementSkip:
 		cardStat.Viewed = true
 		cardStat.Skipped = true
 		cardStat.Failed = false
 		cardStat.Passed = false
+		logSessionStat = true
 
 	case types.SetStars:
 
@@ -187,7 +201,18 @@ func (s *Service) AdjustSession(deckID string, cardID string, action types.CardA
 	session.Stats.Remaining = session.Stats.TotalCards - viewed
 	session.Stats.CurrentIndex = session.Index
 
-	s.logger.Info("Session adjusted", "deck_id", deckID, "card_id", cardID, "action", action)
+	// Hook: Log the card action.
+	// (Assuming for this example that sessionID is the same as deckID and username is derived from context.)
+	if logSessionStat {
+		err := s.LogSessionAction(deckID, cardID, session.SessionID, userID, string(action))
+
+		if err != nil {
+			s.logger.Error("Failed to log session action", "card_id", cardID, "action", action, "error", err)
+			// Optionally, you could decide to return the error.
+		}
+	}
+
+	s.logger.Info("Session adjusted", "deck_id", deckID, "card_id", cardID, "action", action, "session_id", session.SessionID)
 	return nil
 }
 

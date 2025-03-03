@@ -34,7 +34,7 @@ import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
 import PieStatusChart from '../components/CatStatusChart';
 import CardStatsBar from '../components/CardStatsBar';
 import { ThemeContext } from '../context/ThemeContext';
-
+ import rehypeHighlight from 'rehype-highlight';
 
 
 const AlertSnackbar = React.forwardRef(function Alert(props, ref) {
@@ -300,7 +300,7 @@ const CardPage = () => {
             <Typography variant="h6" gutterBottom>
               {showFront ? 'Front' : 'Back'}
             </Typography>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{showFront ? card.front.text : card.back.text}</ReactMarkdown>
+            <ReactMarkdown rehypePlugins={[rehypeHighlight]} remarkPlugins={[remarkGfm]}>{showFront ? card.front.text : card.back.text}</ReactMarkdown>
           </Box>
 
           {/* Pie Status Chart */}

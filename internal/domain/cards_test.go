@@ -4,7 +4,6 @@ package domain
 import (
 	"testing"
 
-	"github.com/robstave/meowmorize/internal/adapters/repositories/mocks"
 	"github.com/robstave/meowmorize/internal/domain/types"
 	"github.com/robstave/meowmorize/internal/logger"
 
@@ -13,9 +12,8 @@ import (
 )
 
 func TestCardService_GetCardDetails_Success(t *testing.T) {
-	cardRepo := new(mocks.CardRepository)
-	userRepo := new(mocks.UserRepository)
-	dr := new(mocks.DeckRepository)
+
+	cardRepo, userRepo, dr, sessionRepo := setupRepositories()
 
 	expectedCard := &types.Card{
 		ID: "card1",
@@ -34,7 +32,7 @@ func TestCardService_GetCardDetails_Success(t *testing.T) {
 		return u.Username != ""
 	})).Return(nil, nil)
 
-	dm := NewService(logger.InitializeLogger(), dr, cardRepo, userRepo)
+	dm := NewService(logger.InitializeLogger(), dr, cardRepo, userRepo, sessionRepo)
 
 	card, err := dm.GetCardByID("card1")
 	assert.NoError(t, err)
@@ -48,9 +46,7 @@ func TestCardService_GetCardDetails_Success(t *testing.T) {
 }
 
 func TestCardService_GetCardDetails_NotFound(t *testing.T) {
-	cardRepo := new(mocks.CardRepository)
-	userRepo := new(mocks.UserRepository)
-	dr := new(mocks.DeckRepository)
+	cardRepo, userRepo, dr, sessionRepo := setupRepositories()
 
 	// Set up expectation for the SeedUser call in NewService.
 	// SeedUser calls GetUserByUsername with the default username "meow".
@@ -59,7 +55,7 @@ func TestCardService_GetCardDetails_NotFound(t *testing.T) {
 	// Simulate not finding the card.
 	cardRepo.On("GetCardByID", "non-existent").Return(nil, nil)
 
-	dm := NewService(logger.InitializeLogger(), dr, cardRepo, userRepo)
+	dm := NewService(logger.InitializeLogger(), dr, cardRepo, userRepo, sessionRepo)
 	card, err := dm.GetCardByID("non-existent")
 	assert.Error(t, err)
 	assert.Nil(t, card)
@@ -69,9 +65,7 @@ func TestCardService_GetCardDetails_NotFound(t *testing.T) {
 
 // Test creating a new card successfully.
 func TestCardService_CreateCard_Success(t *testing.T) {
-	cardRepo := new(mocks.CardRepository)
-	userRepo := new(mocks.UserRepository)
-	dr := new(mocks.DeckRepository)
+	cardRepo, userRepo, dr, sessionRepo := setupRepositories()
 
 	// Set up expectations for the SeedUser call.
 	// SeedUser will call GetUserByUsername with the default username "meow".
@@ -87,7 +81,7 @@ func TestCardService_CreateCard_Success(t *testing.T) {
 	cardRepo.On("CreateCard", mock.AnythingOfType("types.Card")).Return(nil)
 	dr.On("AddCardToDeck", "deck1", mock.AnythingOfType("types.Card")).Return(nil)
 
-	dm := NewService(logger.InitializeLogger(), dr, cardRepo, userRepo)
+	dm := NewService(logger.InitializeLogger(), dr, cardRepo, userRepo, sessionRepo)
 	createdCard, err := dm.CreateCard(newCard, "deck1")
 	assert.NoError(t, err)
 	assert.NotNil(t, createdCard)
@@ -101,9 +95,7 @@ func TestCardService_CreateCard_Success(t *testing.T) {
 
 // Test updating an existing card.
 func TestCardService_UpdateCard_Success(t *testing.T) {
-	cardRepo := new(mocks.CardRepository)
-	userRepo := new(mocks.UserRepository)
-	dr := new(mocks.DeckRepository)
+	cardRepo, userRepo, dr, sessionRepo := setupRepositories()
 
 	// Set up expectation for the SeedUser call.
 	// SeedUser will call GetUserByUsername with the default username "meow".
@@ -121,7 +113,7 @@ func TestCardService_UpdateCard_Success(t *testing.T) {
 	cardRepo.On("GetCardByID", "card123").Return(existingCard, nil)
 	cardRepo.On("UpdateCard", mock.AnythingOfType("types.Card")).Return(nil)
 
-	dm := NewService(logger.InitializeLogger(), dr, cardRepo, userRepo)
+	dm := NewService(logger.InitializeLogger(), dr, cardRepo, userRepo, sessionRepo)
 
 	updatedCard := types.Card{
 		ID:    "card123",
@@ -137,9 +129,7 @@ func TestCardService_UpdateCard_Success(t *testing.T) {
 }
 
 func TestCardService_DeleteCardByID_Success(t *testing.T) {
-	cardRepo := new(mocks.CardRepository)
-	userRepo := new(mocks.UserRepository)
-	dr := new(mocks.DeckRepository)
+	cardRepo, userRepo, dr, sessionRepo := setupRepositories()
 
 	// Set up expectation for the SeedUser call.
 	// SeedUser calls GetUserByUsername with the default username "meow".
@@ -148,7 +138,7 @@ func TestCardService_DeleteCardByID_Success(t *testing.T) {
 	// Expect deletion of the card.
 	cardRepo.On("DeleteCardByID", "cardToDelete").Return(nil)
 
-	dm := NewService(logger.InitializeLogger(), dr, cardRepo, userRepo)
+	dm := NewService(logger.InitializeLogger(), dr, cardRepo, userRepo, sessionRepo)
 	err := dm.DeleteCardByID("cardToDelete")
 	assert.NoError(t, err)
 
@@ -158,9 +148,7 @@ func TestCardService_DeleteCardByID_Success(t *testing.T) {
 
 // Test cloning a card to another deck.
 func TestCardService_CloneCardToDeck_Success(t *testing.T) {
-	cardRepo := new(mocks.CardRepository)
-	userRepo := new(mocks.UserRepository)
-	dr := new(mocks.DeckRepository)
+	cardRepo, userRepo, dr, sessionRepo := setupRepositories()
 
 	clonedCard := &types.Card{
 		ID:    "clonedCard1",
@@ -172,7 +160,7 @@ func TestCardService_CloneCardToDeck_Success(t *testing.T) {
 	cardRepo.On("CloneCardToDeck", "cardOriginal", "deckTarget").Return(clonedCard, nil)
 	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
-	dm := NewService(logger.InitializeLogger(), dr, cardRepo, userRepo)
+	dm := NewService(logger.InitializeLogger(), dr, cardRepo, userRepo, sessionRepo)
 	result, err := dm.CloneCardToDeck("cardOriginal", "deckTarget")
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -182,9 +170,7 @@ func TestCardService_CloneCardToDeck_Success(t *testing.T) {
 
 // Test updating card statistics.
 func TestCardService_UpdateCardStats_Success(t *testing.T) {
-	cardRepo := new(mocks.CardRepository)
-	userRepo := new(mocks.UserRepository)
-	dr := new(mocks.DeckRepository)
+	cardRepo, userRepo, dr, sessionRepo := setupRepositories()
 
 	card := &types.Card{
 		ID:         "cardStats1",
@@ -205,8 +191,8 @@ func TestCardService_UpdateCardStats_Success(t *testing.T) {
 		return updatedCard.ID == "cardStats1" && updatedCard.PassCount == 1
 	})).Return(nil)
 
-	dm := NewService(logger.InitializeLogger(), dr, cardRepo, userRepo)
-	err := dm.UpdateCardStats("cardStats1", types.IncrementPass, nil, "deckDummy")
+	dm := NewService(logger.InitializeLogger(), dr, cardRepo, userRepo, sessionRepo)
+	err := dm.UpdateCardStats("cardStats1", types.IncrementPass, nil, "deckDummy", "meow")
 	assert.NoError(t, err)
 	cardRepo.AssertExpectations(t)
 }

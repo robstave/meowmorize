@@ -56,6 +56,7 @@ meow-bk-repo:
   - internal/adapters/repositories/card.go
   - internal/adapters/repositories/deck.go
   - internal/adapters/repositories/user.go
+  - internal/adapters/repositories/session_log.go
 
 meow-bk-domain:
   - prompts/instructions.md
@@ -68,8 +69,10 @@ meow-bk-domain:
   - internal/domain/create.go
   - internal/domain/decks.go
   - internal/domain/default.go
+  - internal/domain/method.go
   - internal/domain/seeder.go
   - internal/domain/service.go
+  - internal/domain/service_log.go
   - internal/domain/session.go
   - internal/domain/stats.go
   - internal/domain/user.go

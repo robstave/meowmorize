@@ -32,6 +32,10 @@ remove DecksDashboard?
 
 
 
+logging session stats
+This is there, but kinda coupled and does not really work for resort.
+maybe do all that processing in a channel.
+
 
 done
 -----------------

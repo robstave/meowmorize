@@ -1,7 +1,10 @@
 // internal/domain/types/session.go
 package types
 
-import "sync"
+import (
+	"sync"
+	"time"
+)
 
 // SessionMethod represents the method used to initialize a session
 type SessionMethod string
@@ -16,6 +19,19 @@ const (
 	AdjustedRandomMethod SessionMethod = "AdjustedRandom"
 )
 
+// SessionLog represents a log entry for a session action.
+type SessionLog struct {
+	ID     string `gorm:"primaryKey" json:"id"`
+	DeckID string `gorm:"index;not null" json:"deck_id"`
+	CardID string `json:"card_id"` // Can be empty for reshuffle
+
+	SessionID string `gorm:"index;not null" json:"session_id"`
+	UserID    string `gorm:"not null" json:"user_id"`
+	// Action can be one of: "pass", "fail", "skip", "reshuffle"
+	Action    string    `gorm:"type:varchar(50);not null" json:"action"`
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
+}
+
 // CardStats represents the state of a card within a session
 type CardStats struct {
 	CardID  string `json:"card_id"`
@@ -29,6 +45,8 @@ type CardStats struct {
 // Session represents a review session for a specific deck
 type Session struct {
 	DeckID    string        `json:"deckId"`
+	UserID    string        `json:"userId"`
+	SessionID string        `json:"sessionId"`
 	CardStats []CardStats   `json:"cardStats"`
 	Method    SessionMethod `json:"method"`
 	Index     int           `json:"index"`
@@ -110,4 +128,5 @@ func resortCards(s *Session) {
 	}
 
 	s.CardStats = append(skippedCards, append(failedCards, remainingCards...)...)
+
 }

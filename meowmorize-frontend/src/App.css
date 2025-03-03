@@ -67,6 +67,42 @@ th {
   margin-bottom: 20px;
 }
 
+.deck-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.deck-description {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.deck-card, .flashcard {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.deck-card:hover, .flashcard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+
+
+.flashcard-content {
+  font-size: 1.2rem;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+
+
 /* Table container styling */
 .table-container {
   border-radius: 10px;

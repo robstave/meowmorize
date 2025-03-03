@@ -12,7 +12,7 @@ Each card must be wrapped in HTML comments:
 
 For each card:
 
-1. Front side begins with "### Front" followed by the front text of the flashcard in markdown.
+1. Front side begins with "### Front" followed by the front text of the flashcard in markdown. Its important that you use ### and not ##
 
 
  ### Front
@@ -21,8 +21,11 @@ For each card:
 
 3. Use standard Markdown formatting (bold, images, etc.) within the content
 
+----------------------------------
 
 Example card format:
+
+
 
 <!-- Card Start -->
 

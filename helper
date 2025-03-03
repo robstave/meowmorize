@@ -43,7 +43,7 @@ generate_mocks() {
     mockery --dir=internal/adapters/repositories  --name=CardRepository --output=internal/adapters/repositories/mocks --outpkg=mocks --case=underscore
     mockery --dir=internal/adapters/repositories  --name=UserRepository --output=internal/adapters/repositories/mocks --outpkg=mocks --case=underscore
     mockery --dir=internal/adapters/repositories  --name=DeckRepository --output=internal/adapters/repositories/mocks --outpkg=mocks --case=underscore
-
+    mockery --dir=internal/adapters/repositories  --name=SessionLogRepository --output=internal/adapters/repositories/mocks --outpkg=mocks --case=underscore
 }
 
 # Function to run build npm in meowmorize directory

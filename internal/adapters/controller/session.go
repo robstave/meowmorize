@@ -36,12 +36,17 @@ func (hc *MeowController) StartSession(c echo.Context) error {
 			"message": "Invalid request payload",
 		})
 	}
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		hc.logger.Error("Failed to extract user id from token", "error", err)
+		userID = "demo_user"
+	}
 
 	// Optional: Add validation here if using a validation library
 	// e.g., if err := c.Validate(req); err != nil { ... }
 
 	// Start the session
-	if err := hc.service.StartSession(req.DeckID, req.Count, req.Method); err != nil {
+	if err := hc.service.StartSession(req.DeckID, req.Count, req.Method, userID); err != nil {
 		// You can handle specific errors if your service returns them
 		hc.logger.Error("Failed to start session", "error", err)
 		return c.JSON(http.StatusInternalServerError, echo.Map{

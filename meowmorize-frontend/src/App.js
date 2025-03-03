@@ -13,6 +13,7 @@ import { lightTheme, darkTheme } from './theme';
 import LoginPage from './pages/LoginPage'; // Import LoginPage
 import { AuthContext } from './context/AuthContext'; // Import AuthContext
 import { ThemeContext } from './context/ThemeContext'; // Import ThemeContext
+import 'highlight.js/styles/atom-one-dark.css'; // or choose your preferred theme
 
 
 

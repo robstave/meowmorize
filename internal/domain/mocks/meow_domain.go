@@ -12,13 +12,13 @@ type MeowDomain struct {
 	mock.Mock
 }
 
-// AdjustSession provides a mock function with given fields: deckID, cardID, action, value
-func (_m *MeowDomain) AdjustSession(deckID string, cardID string, action types.CardAction, value int) error {
-	ret := _m.Called(deckID, cardID, action, value)
+// AdjustSession provides a mock function with given fields: deckID, cardID, action, value, userID
+func (_m *MeowDomain) AdjustSession(deckID string, cardID string, action types.CardAction, value int, userID string) error {
+	ret := _m.Called(deckID, cardID, action, value, userID)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, string, types.CardAction, int) error); ok {
-		r0 = rf(deckID, cardID, action, value)
+	if rf, ok := ret.Get(0).(func(string, string, types.CardAction, int, string) error); ok {
+		r0 = rf(deckID, cardID, action, value, userID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -358,13 +358,13 @@ func (_m *MeowDomain) SeedUser() error {
 	return r0
 }
 
-// StartSession provides a mock function with given fields: deckID, count, method
-func (_m *MeowDomain) StartSession(deckID string, count int, method types.SessionMethod) error {
-	ret := _m.Called(deckID, count, method)
+// StartSession provides a mock function with given fields: deckID, count, method, userID
+func (_m *MeowDomain) StartSession(deckID string, count int, method types.SessionMethod, userID string) error {
+	ret := _m.Called(deckID, count, method, userID)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, int, types.SessionMethod) error); ok {
-		r0 = rf(deckID, count, method)
+	if rf, ok := ret.Get(0).(func(string, int, types.SessionMethod, string) error); ok {
+		r0 = rf(deckID, count, method, userID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -386,13 +386,13 @@ func (_m *MeowDomain) UpdateCard(card types.Card) error {
 	return r0
 }
 
-// UpdateCardStats provides a mock function with given fields: cardID, action, value, deckID
-func (_m *MeowDomain) UpdateCardStats(cardID string, action types.CardAction, value *int, deckID string) error {
-	ret := _m.Called(cardID, action, value, deckID)
+// UpdateCardStats provides a mock function with given fields: cardID, action, value, deckID, userID
+func (_m *MeowDomain) UpdateCardStats(cardID string, action types.CardAction, value *int, deckID string, userID string) error {
+	ret := _m.Called(cardID, action, value, deckID, userID)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, types.CardAction, *int, string) error); ok {
-		r0 = rf(cardID, action, value, deckID)
+	if rf, ok := ret.Get(0).(func(string, types.CardAction, *int, string, string) error); ok {
+		r0 = rf(cardID, action, value, deckID, userID)
 	} else {
 		r0 = ret.Error(0)
 	}

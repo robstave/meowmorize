@@ -46,7 +46,7 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	err = db.AutoMigrate(&types.Deck{}, &types.Card{}, &types.User{})
+	err = db.AutoMigrate(&types.Deck{}, &types.Card{}, &types.User{}, &types.SessionLog{}) // Add this line
 	if err != nil {
 		slogger.Error("Failed to migrate database", "error", err)
 		log.Fatalf("Failed to migrate database: %v", err)
@@ -56,9 +56,10 @@ func main() {
 	deckRepo := repositories.NewDeckRepositorySQLite(db)
 	cardRepo := repositories.NewCardRepositorySQLite(db)
 	userRepo := repositories.NewUserRepositorySQLite(db) // Initialize User Repository
+	sessionLogRepo := repositories.NewSessionLogRepositorySQLite(db)
 
 	// Initialize Service
-	service := domain.NewService(slogger, deckRepo, cardRepo, userRepo)
+	service := domain.NewService(slogger, deckRepo, cardRepo, userRepo, sessionLogRepo)
 
 	// Initialize Controller
 	meowController := controller.NewMeowController(service, slogger)
