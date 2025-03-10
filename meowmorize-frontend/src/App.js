@@ -1,6 +1,8 @@
 // src/App.js
 
-import React, { useMemo, useContext } from 'react';
+import React, { useMemo, useContext, useEffect } from 'react';
+import {   useNavigate } from 'react-router-dom';
+
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import Navbar from './components/Navbar';
@@ -16,6 +18,17 @@ import { ThemeContext } from './context/ThemeContext'; // Import ThemeContext
 import 'highlight.js/styles/atom-one-dark.css'; // or choose your preferred theme
 
 
+
+// New component for redirecting to Swagger UI
+function SwaggerRedirect() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    navigate("/swagger/index.html#/", { replace: true });
+  }, [navigate]);
+
+  return null; // This component doesn't render anything
+}
 
 function App() {
 
@@ -44,6 +57,11 @@ function App() {
           <Route path="/decks/:deckId/card/:id" element={auth.token ? <CardPage /> : <Navigate to="/login" />} />
           <Route path="/card-form" element={auth.token ? <CardForm /> : <Navigate to="/login" />} />
           <Route path="/card-form/:id" element={auth.token ? <CardForm /> : <Navigate to="/login" />} />
+
+
+          {/* Route to handle Swagger UI redirect */}
+          <Route path="/swagger" element={<SwaggerRedirect />} />
+
 
           {/* Redirect any unknown routes to login */}
           <Route path="*" element={<Navigate to="/login" />} />

@@ -15,6 +15,9 @@ type SessionLogRepository interface {
 	CreateLog(log types.SessionLog) error
 	// PruneLogs ensures that the total number of log entries does not exceed maxRows.
 	PruneLogs(maxRows int) error
+
+	GetSessionLogsBySessionID(sessionID string) ([]types.SessionLog, error)
+	GetSessionLogIdsByUser(userID, deckID string) ([]string, error)
 }
 
 // SessionLogRepositorySQLite implements SessionLogRepository using SQLite.
@@ -53,4 +56,38 @@ func (r *SessionLogRepositorySQLite) PruneLogs(maxRows int) error {
 		rowsToDelete,
 	)
 	return r.db.Exec(sql).Error
+}
+
+// GetSessionLogsBySessionID retrieves all session logs for a specific session, ordered by CreatedAt ascending.
+func (r *SessionLogRepositorySQLite) GetSessionLogsBySessionID(sessionID string) ([]types.SessionLog, error) {
+	var logs []types.SessionLog
+	err := r.db.Where("session_id = ?", sessionID).Order("created_at ASC").Find(&logs).Error
+	if err != nil {
+		return nil, err
+	}
+	return logs, nil
+}
+
+func (r *SessionLogRepositorySQLite) GetSessionLogIdsByUser(userID, deckID string) ([]string, error) {
+	var sessionIDs []string
+
+	// Direct query using window functions to get distinct session_ids ordered by their latest created_at
+	query := r.db.Table("session_logs").
+		Select("DISTINCT session_id").
+		Where("user_id = ?", userID)
+
+	if deckID != "" {
+		query = query.Where("deck_id = ?", deckID)
+	}
+
+	err := query.
+		Order("MAX(created_at) OVER (PARTITION BY session_id) DESC").
+		Limit(3).
+		Pluck("session_id", &sessionIDs).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return sessionIDs, nil
 }

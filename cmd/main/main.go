@@ -125,6 +125,14 @@ func main() {
 	protectedSessionGroup.DELETE("/clear", meowController.ClearSession)
 	protectedSessionGroup.GET("/stats", meowController.GetSessionStats)
 
+	protectedSessionGroup.GET("/overview/:id", meowController.GetSessionOverview)
+
+	// Get all logs for a given session:
+	protectedSessionGroup.GET("/:session_id", meowController.GetSessionLogs)
+
+	// Get distinct session log IDs for a user (optionally by deck):
+	protectedSessionGroup.GET("/ids", meowController.GetSessionLogIds)
+
 	// Swagger endpoint
 	e.GET("/swagger/*", httpSwagger.WrapHandler)
 
@@ -142,6 +150,13 @@ func main() {
 		if strings.HasPrefix(c.Request().URL.Path, "/api/") {
 			return c.NoContent(http.StatusNotFound)
 		}
+		path := c.Request().URL.Path
+
+		// Redirect /swagger to /swagger/index.html#/
+		if path == "/swagger" || path == "/swagger/" {
+			return c.Redirect(http.StatusFound, "/swagger/index.html#/")
+		}
+
 		slogger.Info("other url2: " + reactBuildPath + "/index.html")
 		return c.File(reactBuildPath + "/index.html")
 	})

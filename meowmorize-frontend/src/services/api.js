@@ -232,5 +232,40 @@ export const collapseDecks = async (targetDeckId, sourceDeckId) => {
 };
 
 
+// Get Session Log IDs for a user (optionally filtered by deck)
+// note the user id is in the token
+export const getSessionLogIds = async (  deckId = '') => {
+  try {
+    const response = await api.get('/sessions/ids', {
+      params: {  deck_id: deckId },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+ // Get Session Logs by ID
+export const getSessionLogsById = async (sessionId) => {
+  try {
+    const response = await api.get(`/sessions/${sessionId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+ 
+export const getSessionOverview = async (deckId) => {
+  try {
+    const response = await api.get(`/sessions/overview/${deckId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch session overview:', error);
+    throw error;
+  }
+};
+
 
 export default api;

@@ -67,7 +67,7 @@ type UpdateCardRequest struct {
 // @Accept json
 // @Produce json
 // @Param card body CreateCardRequest true "Create Card"
-// @Param id path string true "deck id
+// @Param id path string true "deck id"
 // @Security BearerAuth
 // @Success 201 {object} types.Card
 // @Failure 400 {object} echo.HTTPError

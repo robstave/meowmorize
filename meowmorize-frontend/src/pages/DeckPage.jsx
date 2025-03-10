@@ -1,6 +1,9 @@
 // src/pages/DeckPage.jsx
 import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
+import { getSessionOverview } from '../services/api';
+import { format } from 'date-fns';
+
 import {
   fetchDeckById,
   exportDeck,
@@ -98,6 +101,9 @@ const DeckPage = () => {
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [newDeckDescription, setNewDeckDescription] = useState('');
 
+  const [sessions, setSessions] = useState([]);
+
+
   // Snackbar Notification state
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -114,21 +120,28 @@ const DeckPage = () => {
     setMenuAnchorEl(null);
   };
 
+
+
   useEffect(() => {
-    const getDeck = async () => {
+    const getDeckAndSessions = async () => {
       try {
-        const data = await fetchDeckById(id);
-        setDeck(data);
+        const [deckData, sessionData] = await Promise.all([
+          fetchDeckById(id),
+          getSessionOverview(id),
+        ]);
+        setDeck(deckData);
+        setSessions(sessionData);
       } catch (err) {
-        setError('Failed to fetch deck details. Please try again later.');
+        setError('Failed to fetch deck details or session data.');
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
-    getDeck();
+    getDeckAndSessions();
   }, [id]);
+
 
   const handleOpenStartSessionDialog = () => {
     setOpenStartSessionDialog(true);
@@ -478,6 +491,12 @@ const DeckPage = () => {
         Number of Cards: {deck.cards.length}
       </Typography>
 
+      {/* Session Overview Table */}
+      <Typography variant="h6" sx={{ mt: 4, mb: 2 }}>
+        Last 3 Sessions
+      </Typography>
+
+
       {/* Action Buttons */}
       <Box sx={{ display: 'flex', gap: 2, mt: 4, alignItems: 'center' }}>
         <Tooltip title="Start a new review session using this deck">
@@ -551,6 +570,38 @@ const DeckPage = () => {
           </Table>
         </TableContainer>
       </Collapse>
+
+
+
+      {sessions.length === 0 ? (
+        <Typography variant="body2">No recent sessions available.</Typography>
+      ) : (
+        <TableContainer component={Paper} elevation={2}>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell><strong>Date</strong></TableCell>
+                <TableCell align="right"><strong>Initial %</strong></TableCell>
+                <TableCell align="right"><strong>Final %</strong></TableCell>
+                <TableCell align="right"><strong>Cards Attempted</strong></TableCell>
+                <TableCell align="right"><strong>Cards Final</strong></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {sessions.map((session) => (
+                <TableRow key={session.sessionid}>
+                  <TableCell>{format(new Date(session.timestamp), 'PPPp')}</TableCell>
+                  <TableCell align="right">{session.percentage.toFixed(1)}%</TableCell>
+                  <TableCell align="right">{session.percentage_after.toFixed(1)}%</TableCell>
+                  <TableCell align="right">{session.cards}</TableCell>
+                  <TableCell align="right">{session.cards_after}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+
 
       {/* Export Deck Confirmation Dialog */}
       <Dialog

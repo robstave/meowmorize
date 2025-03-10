@@ -300,6 +300,75 @@ func (_m *MeowDomain) GetNextCard(deckID string) (string, error) {
 	return r0, r1
 }
 
+// GetSessionLogIdsByUser provides a mock function with given fields: userID, deckID
+func (_m *MeowDomain) GetSessionLogIdsByUser(userID string, deckID string) ([]string, error) {
+	ret := _m.Called(userID, deckID)
+
+	var r0 []string
+	if rf, ok := ret.Get(0).(func(string, string) []string); ok {
+		r0 = rf(userID, deckID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(userID, deckID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetSessionLogsBySessionID provides a mock function with given fields: sessionID
+func (_m *MeowDomain) GetSessionLogsBySessionID(sessionID string) ([]types.SessionLog, error) {
+	ret := _m.Called(sessionID)
+
+	var r0 []types.SessionLog
+	if rf, ok := ret.Get(0).(func(string) []types.SessionLog); ok {
+		r0 = rf(sessionID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]types.SessionLog)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(sessionID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetSessionOverview provides a mock function with given fields: userID, deckID
+func (_m *MeowDomain) GetSessionOverview(userID string, deckID string) ([]types.SessionOverview, error) {
+	ret := _m.Called(userID, deckID)
+
+	var r0 []types.SessionOverview
+	if rf, ok := ret.Get(0).(func(string, string) []types.SessionOverview); ok {
+		r0 = rf(userID, deckID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]types.SessionOverview)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(userID, deckID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetSessionStats provides a mock function with given fields: deckID
 func (_m *MeowDomain) GetSessionStats(deckID string) (types.SessionStats, error) {
 	ret := _m.Called(deckID)

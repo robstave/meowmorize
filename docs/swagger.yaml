@@ -135,16 +135,6 @@ definitions:
       link:
         type: string
     type: object
-  controller.UpdateDeckRequest:
-    properties:
-      description:
-        type: string
-      name:
-        type: string
-    required:
-    - description
-    - name
-    type: object
   echo.HTTPError:
     properties:
       message: {}
@@ -154,8 +144,6 @@ definitions:
       back:
         $ref: '#/definitions/types.CardBack'
       created_at:
-        type: string
-      deck_id:
         type: string
       fail_count:
         type: integer
@@ -206,19 +194,56 @@ definitions:
   types.Deck:
     properties:
       cards:
+        description: Updated to many-to-many
         items:
           $ref: '#/definitions/types.Card'
         type: array
       description:
-        description: New Description field
         type: string
       id:
-        description: UUID string as the primary key
         type: string
       last_accessed:
-        description: New LastAccessed field
         type: string
       name:
+        type: string
+      user_id:
+        description: 'NEW: owner of the deck'
+        type: string
+    type: object
+  types.SessionLog:
+    properties:
+      action:
+        description: 'Action can be one of: "pass", "fail", "skip", "reshuffle"'
+        type: string
+      card_id:
+        description: Can be empty for reshuffle
+        type: string
+      created_at:
+        type: string
+      deck_id:
+        type: string
+      id:
+        type: string
+      session_id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  types.SessionOverview:
+    properties:
+      cards:
+        type: integer
+      cards_after:
+        type: integer
+      deck:
+        type: string
+      percentage:
+        type: number
+      percentage_after:
+        type: number
+      sessionid:
+        type: string
+      timestamp:
         type: string
     type: object
 info:
@@ -239,6 +264,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/controller.CreateCardRequest'
+      - description: deck id
+        in: path
+        name: id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -422,7 +452,7 @@ paths:
       - Cards
   /decks:
     get:
-      description: Retrieve a list of all decks
+      description: Retrieve a list of all decks owned by the authenticated user
       produces:
       - application/json
       responses:
@@ -432,6 +462,12 @@ paths:
             items:
               $ref: '#/definitions/types.Deck'
             type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
@@ -440,13 +476,13 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get all decks
+      summary: Get all decks for the logged-in user
       tags:
       - Decks
     post:
       consumes:
       - application/json
-      description: Create a new deck with provided details
+      description: Create a new deck owned by the authenticated user
       parameters:
       - description: Deck to create
         in: body
@@ -467,6 +503,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
@@ -480,7 +522,7 @@ paths:
       - Decks
   /decks/{id}:
     delete:
-      description: Delete a deck by its ID
+      description: Delete a deck owned by the authenticated user
       parameters:
       - description: Deck ID
         in: path
@@ -496,6 +538,12 @@ paths:
             type: object
         "400":
           description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
           schema:
             additionalProperties:
               type: string
@@ -558,8 +606,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: Update the name (and optionally the ID) of an existing deck by
-        its ID
+      description: Update an existing deck, verifying ownership
       parameters:
       - description: Deck ID
         in: path
@@ -571,7 +618,7 @@ paths:
         name: deck
         required: true
         schema:
-          $ref: '#/definitions/controller.UpdateDeckRequest'
+          $ref: '#/definitions/types.Deck'
       produces:
       - application/json
       responses:
@@ -581,6 +628,12 @@ paths:
             $ref: '#/definitions/types.Deck'
         "400":
           description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
           schema:
             additionalProperties:
               type: string
@@ -716,7 +769,8 @@ paths:
     post:
       consumes:
       - multipart/form-data
-      description: Import a new deck by uploading a JSON file
+      description: Import a new deck by uploading a JSON file. The deck owner is set
+        from the JWT.
       parameters:
       - description: Deck JSON File
         in: formData
@@ -831,6 +885,41 @@ paths:
       summary: User Login
       tags:
       - Authentication
+  /sessions/{session_id}:
+    get:
+      description: Retrieve all session logs for a given session ID
+      parameters:
+      - description: Session ID
+        in: path
+        name: session_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/types.SessionLog'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get session logs by session ID
+      tags:
+      - SessionLogs
   /sessions/clear:
     delete:
       description: Terminate and clear the current review session for a specific deck
@@ -872,6 +961,41 @@ paths:
       summary: Clear a review session
       tags:
       - Sessions
+  /sessions/ids:
+    get:
+      description: Retrieve session log IDs for a user, optionally filtered by deck
+        ID
+      parameters:
+      - description: Deck ID
+        in: query
+        name: deck_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get session log IDs by user
+      tags:
+      - SessionLogs
   /sessions/next:
     get:
       description: Retrieve the ID of the next card to review in the current session
@@ -909,6 +1033,47 @@ paths:
       security:
       - BearerAuth: []
       summary: Get the next card in the session
+      tags:
+      - Sessions
+  /sessions/overview/{id}:
+    get:
+      description: Get recent session stats (up to 3 sessions)
+      parameters:
+      - description: Deck ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/types.SessionOverview'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get session overview
       tags:
       - Sessions
   /sessions/start:

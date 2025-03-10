@@ -43,6 +43,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/controller.CreateCardRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "deck id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -325,14 +332,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve a list of all decks",
+                "description": "Retrieve a list of all decks owned by the authenticated user",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Decks"
                 ],
-                "summary": "Get all decks",
+                "summary": "Get all decks for the logged-in user",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -340,6 +347,15 @@ const docTemplate = `{
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/types.Deck"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
                             }
                         }
                     },
@@ -360,7 +376,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Create a new deck with provided details",
+                "description": "Create a new deck owned by the authenticated user",
                 "consumes": [
                     "application/json"
                 ],
@@ -391,6 +407,15 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -589,7 +614,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Import a new deck by uploading a JSON file",
+                "description": "Import a new deck by uploading a JSON file. The deck owner is set from the JWT.",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -770,7 +795,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Update the name (and optionally the ID) of an existing deck by its ID",
+                "description": "Update an existing deck, verifying ownership",
                 "consumes": [
                     "application/json"
                 ],
@@ -795,7 +820,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controller.UpdateDeckRequest"
+                            "$ref": "#/definitions/types.Deck"
                         }
                     }
                 ],
@@ -808,6 +833,15 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -841,7 +875,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Delete a deck by its ID",
+                "description": "Delete a deck owned by the authenticated user",
                 "tags": [
                     "Decks"
                 ],
@@ -867,6 +901,15 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1020,6 +1063,60 @@ const docTemplate = `{
                 }
             }
         },
+        "/sessions/ids": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve session log IDs for a user, optionally filtered by deck ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SessionLogs"
+                ],
+                "summary": "Get session log IDs by user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Deck ID",
+                        "name": "deck_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/sessions/next": {
             "get": {
                 "security": [
@@ -1062,6 +1159,70 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/sessions/overview/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get recent session stats (up to 3 sessions)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sessions"
+                ],
+                "summary": "Get session overview",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Deck ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/types.SessionOverview"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1192,6 +1353,61 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/sessions/{session_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve all session logs for a given session ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SessionLogs"
+                ],
+                "summary": "Get session logs by session ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/types.SessionLog"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1411,21 +1627,6 @@ const docTemplate = `{
                 }
             }
         },
-        "controller.UpdateDeckRequest": {
-            "type": "object",
-            "required": [
-                "description",
-                "name"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
         "echo.HTTPError": {
             "type": "object",
             "properties": {
@@ -1439,9 +1640,6 @@ const docTemplate = `{
                     "$ref": "#/definitions/types.CardBack"
                 },
                 "created_at": {
-                    "type": "string"
-                },
-                "deck_id": {
                     "type": "string"
                 },
                 "fail_count": {
@@ -1519,24 +1717,80 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "cards": {
+                    "description": "Updated to many-to-many",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/types.Card"
                     }
                 },
                 "description": {
-                    "description": "New Description field",
                     "type": "string"
                 },
                 "id": {
-                    "description": "UUID string as the primary key",
                     "type": "string"
                 },
                 "last_accessed": {
-                    "description": "New LastAccessed field",
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "description": "NEW: owner of the deck",
+                    "type": "string"
+                }
+            }
+        },
+        "types.SessionLog": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "description": "Action can be one of: \"pass\", \"fail\", \"skip\", \"reshuffle\"",
+                    "type": "string"
+                },
+                "card_id": {
+                    "description": "Can be empty for reshuffle",
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "deck_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "session_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.SessionOverview": {
+            "type": "object",
+            "properties": {
+                "cards": {
+                    "type": "integer"
+                },
+                "cards_after": {
+                    "type": "integer"
+                },
+                "deck": {
+                    "type": "string"
+                },
+                "percentage": {
+                    "type": "number"
+                },
+                "percentage_after": {
+                    "type": "number"
+                },
+                "sessionid": {
+                    "type": "string"
+                },
+                "timestamp": {
                     "type": "string"
                 }
             }

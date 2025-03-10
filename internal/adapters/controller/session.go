@@ -199,3 +199,94 @@ func (hc *MeowController) GetSessionStats(c echo.Context) error {
 		CardStats:    stats.CardStats,
 	})
 }
+
+// GetSessionLogs retrieves all session logs for the specified session.
+// @Summary Get session logs by session ID
+// @Description Retrieve all session logs for a given session ID
+// @Tags SessionLogs
+// @Produce json
+// @Param session_id path string true "Session ID"
+// @Security BearerAuth
+// @Success 200 {array} types.SessionLog
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /sessions/{session_id} [get]
+func (hc *MeowController) GetSessionLogs(c echo.Context) error {
+	sessionID := c.Param("session_id")
+	if sessionID == "" {
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "Session ID is required"})
+	}
+
+	logs, err := hc.service.GetSessionLogsBySessionID(sessionID)
+	if err != nil {
+		hc.logger.Error("Failed to get session logs", "session_id", sessionID, "error", err)
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "Failed to get session logs"})
+	}
+	return c.JSON(http.StatusOK, logs)
+}
+
+// GetSessionLogIds retrieves distinct session log IDs for a given user (optionally filtered by deck).
+// @Summary Get session log IDs by user
+// @Description Retrieve session log IDs for a user, optionally filtered by deck ID
+// @Tags SessionLogs
+// @Produce json
+// @Param deck_id query string false "Deck ID"
+// @Security BearerAuth
+// @Success 200 {array} string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /sessions/ids [get]
+func (hc *MeowController) GetSessionLogIds(c echo.Context) error {
+
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		hc.logger.Error("Failed to extract user ID from token", "error", err)
+		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "unauthorized"})
+	}
+
+	deckID := c.QueryParam("deck_id")
+	if userID == "" {
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "User ID is required"})
+	}
+
+	ids, err := hc.service.GetSessionLogIdsByUser(userID, deckID)
+	if err != nil {
+		hc.logger.Error("Failed to get session log IDs", "user_id", userID, "error", err)
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "Failed to get session log IDs"})
+	}
+	return c.JSON(http.StatusOK, ids)
+}
+
+// GetSessionOverview returns an overview of recent sessions for a deck
+// @Summary Get session overview
+// @Description Get recent session stats (up to 3 sessions)
+// @Tags Sessions
+// @Produce json
+// @Param id path string true "Deck ID"
+// @Security BearerAuth
+// @Success 200 {array} types.SessionOverview
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /sessions/overview/{id} [get]
+func (hc *MeowController) GetSessionOverview(c echo.Context) error {
+
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		hc.logger.Error("Unauthorized access attempt", "error", err)
+		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "unauthorized"})
+	}
+
+	deckID := c.Param("id")
+	if deckID == "" {
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "Deck ID required"})
+	}
+
+	sessionOverview, err := hc.service.GetSessionOverview(userID, deckID)
+	if err != nil {
+		hc.logger.Error("Failed to retrieve session overview", "deck_id", deckID, "error", err)
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "Failed to retrieve session overview"})
+	}
+
+	return c.JSON(http.StatusOK, sessionOverview)
+}

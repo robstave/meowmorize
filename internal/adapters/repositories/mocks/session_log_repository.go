@@ -27,6 +27,52 @@ func (_m *SessionLogRepository) CreateLog(log types.SessionLog) error {
 	return r0
 }
 
+// GetSessionLogIdsByUser provides a mock function with given fields: userID, deckID
+func (_m *SessionLogRepository) GetSessionLogIdsByUser(userID string, deckID string) ([]string, error) {
+	ret := _m.Called(userID, deckID)
+
+	var r0 []string
+	if rf, ok := ret.Get(0).(func(string, string) []string); ok {
+		r0 = rf(userID, deckID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(userID, deckID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetSessionLogsBySessionID provides a mock function with given fields: sessionID
+func (_m *SessionLogRepository) GetSessionLogsBySessionID(sessionID string) ([]types.SessionLog, error) {
+	ret := _m.Called(sessionID)
+
+	var r0 []types.SessionLog
+	if rf, ok := ret.Get(0).(func(string) []types.SessionLog); ok {
+		r0 = rf(sessionID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]types.SessionLog)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(sessionID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // PruneLogs provides a mock function with given fields: maxRows
 func (_m *SessionLogRepository) PruneLogs(maxRows int) error {
 	ret := _m.Called(maxRows)

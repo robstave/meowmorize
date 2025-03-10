@@ -64,6 +64,17 @@ type SessionStats struct {
 	CardStats    []CardStats `json:"cardStats"`
 }
 
+// SessionOverview represents a summary of a session
+type SessionOverview struct {
+	SessionID       string    `json:"sessionid"`
+	DeckID          string    `json:"deck"`
+	Percentage      float64   `json:"percentage"`
+	PercentageAfter float64   `json:"percentage_after"`
+	Cards           int       `json:"cards"`
+	CardsAfter      int       `json:"cards_after"`
+	Timestamp       time.Time `json:"timestamp"`
+}
+
 // GetNextCard returns the ID of the next card in the session
 func (s *Session) GetNextCard() string {
 	s.mu.Lock()

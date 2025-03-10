@@ -18,7 +18,7 @@ run_concat() {
 init_swagger() {
     echo "Initializing swagger documentation..."
     rm -rf docs
-    swag init --dir ./cmd/main --parseDependency --parseInternal --output ./docs --verbose
+    swag init --dir ./cmd/main --parseDependency --parseInternal --output ./docs 
 }
 
  
