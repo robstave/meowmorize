@@ -392,6 +392,13 @@ const DeckPage = () => {
     setSessionMethod(event.target.value);
   };
 
+  const getColorForPercentage = (value) => {
+    if (value >= 85) return '#4caf50';  // Green for 85%+
+    if (value >= 70) return '#ffeb3b';  // Yellow for 70%-85%
+    return '#f44336';                 // Red for below 70%
+  };
+
+
   if (loading) {
     return (
       <Container sx={{ mt: 4, textAlign: 'center' }}>
@@ -496,9 +503,9 @@ const DeckPage = () => {
         Last 3 Sessions
       </Typography>
 
-
+ 
       {/* Action Buttons */}
-      <Box sx={{ display: 'flex', gap: 2, mt: 4, alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', gap: 2, mt: 4,  mb: 2, alignItems: 'center' }}>
         <Tooltip title="Start a new review session using this deck">
           <Button variant="contained" color="primary" onClick={handleOpenStartSessionDialog}>
             Start Session
@@ -591,8 +598,14 @@ const DeckPage = () => {
               {sessions.map((session) => (
                 <TableRow key={session.sessionid}>
                   <TableCell>{format(new Date(session.timestamp), 'PPPp')}</TableCell>
-                  <TableCell align="right">{session.percentage.toFixed(1)}%</TableCell>
-                  <TableCell align="right">{session.percentage_after.toFixed(1)}%</TableCell>
+                  <TableCell
+                    align="right"
+                    style={{ backgroundColor: getColorForPercentage(session.percentage) }}
+                  >{session.percentage.toFixed(1)}%</TableCell>
+                  <TableCell
+                    align="right"
+                    style={{ backgroundColor: getColorForPercentage(session.percentage_after) }}
+                  >{session.percentage_after.toFixed(1)}%</TableCell>
                   <TableCell align="right">{session.cards}</TableCell>
                   <TableCell align="right">{session.cards_after}</TableCell>
                 </TableRow>

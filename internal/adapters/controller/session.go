@@ -288,5 +288,11 @@ func (hc *MeowController) GetSessionOverview(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "Failed to retrieve session overview"})
 	}
 
+	if sessionOverview == nil {
+		// Return empty array if no sessions found
+
+		return c.JSON(http.StatusOK, []types.SessionOverview{})
+	}
+
 	return c.JSON(http.StatusOK, sessionOverview)
 }

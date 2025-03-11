@@ -41,7 +41,7 @@ Answer here
 <!-- Card End -->
 \`\`\`
 
-Please create the flashcards directly in this format.
+Please create the flashcards directly in this format.  Do not change the number of ###.  it must be exactly 3 ### for the front and 3 ### for the back.
 `;
 
 export default markdownInstructions;

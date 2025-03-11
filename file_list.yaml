@@ -4,6 +4,7 @@
 #  - meowmorize-frontend/src/components/DecksDashboard.jsx  
 #  - meowmorize-frontend/src/components/DecksDashboard.css
  
+# 4.4k
 meow-front:
   - prompts/instructions.md
   - meowmorize-frontend/package.json
@@ -16,23 +17,29 @@ meow-front:
   - meowmorize-frontend/src/context/DeckContext.js
   - meowmorize-frontend/src/context/ThemeContext.js
 
+# 6k
 meow-front2:
   - prompts/instructions.md
   - meowmorize-frontend/src/services/api.js
   - meowmorize-frontend/src/pages/CardForm.jsx  
   - meowmorize-frontend/src/pages/CardPage.jsx
-  - meowmorize-frontend/src/pages/Dashboard.jsx 
-  - meowmorize-frontend/src/pages/DeckPage.jsx
+ 
 
-
+# 7.7k
 meow-front3:
   - prompts/instructions.md
+  - meowmorize-frontend/src/pages/DeckPage.jsx
+  - meowmorize-frontend/src/pages/Dashboard.jsx 
+
+#5k
+meow-front4:
+  - prompts/instructions.md
   - meowmorize-frontend/src/pages/LoginPage.jsx 
+  - meowmorize-frontend/src/components/CollapseDecksDialog.jsx  
   - meowmorize-frontend/src/components/ImportDeck.jsx  
   - meowmorize-frontend/src/components/ImportMarkdownDialog.jsx  
   - meowmorize-frontend/src/pages/ImportPage.jsx 
   - meowmorize-frontend/src/utils/markdownParser.js
-  - meowmorize-frontend/src/components/CollapseDecksDialog.jsx  
 
 meow-front-charts:
   - prompts/instructions.md
@@ -41,12 +48,18 @@ meow-front-charts:
   - meowmorize-frontend/src/components/CatStatusChart.jsx
   - meowmorize-frontend/src/components/StatusSparkline.jsx
 
-meow-bk-controllers:
+# 4k
+meow-bk-controllers1:
   - prompts/instructions.md
   - internal/adapters/controller/auth.go
-  - internal/adapters/controller/controller.go
-  - internal/adapters/controller/card.go
   - internal/adapters/controller/card-stats.go
+  - internal/adapters/controller/card.go
+  - internal/adapters/controller/controller.go
+
+#6.7
+meow-bk-controllers2:
+  - prompts/instructions.md
+  - internal/adapters/controller/default_deck.go
   - internal/adapters/controller/deck.go
   - internal/adapters/controller/import.go
   - internal/adapters/controller/session.go
@@ -58,7 +71,7 @@ meow-bk-repo:
   - internal/adapters/repositories/user.go
   - internal/adapters/repositories/session_log.go
 
-meow-bk-domain:
+meow-bk-domain1:
   - prompts/instructions.md
   - cmd/main/main.go
   - internal/domain/types/card.go
@@ -70,9 +83,14 @@ meow-bk-domain:
   - internal/domain/decks.go
   - internal/domain/default.go
   - internal/domain/method.go
-  - internal/domain/seeder.go
   - internal/domain/service.go
-  - internal/domain/service_log.go
+
+
+meow-bk-domain2:
+  - prompts/instructions.md
+  - internal/domain/seeder.go
+  - internal/domain/session_log.go
+  - internal/domain/session_overview.go
   - internal/domain/session.go
   - internal/domain/stats.go
   - internal/domain/user.go
