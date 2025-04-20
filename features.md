@@ -30,7 +30,8 @@ https://github.com/remarkjs/react-markdown#use
 
 remove DecksDashboard?
 
-
+consider adding a title to the markdown
+<!-- title:foo -->
 
 logging session stats
 This is there, but kinda coupled and does not really work for resort.

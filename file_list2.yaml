@@ -1,21 +1,17 @@
 #readme.md
-#observations.md
-#directives.md
-#  - meowmorize-frontend/src/components/DecksDashboard.jsx  
-#  - meowmorize-frontend/src/components/DecksDashboard.css
  
-meow-proj:
-  - prompts/instructions.md
-  - meowmorize-frontend/package.json
-  - meowmorize-frontend/src/App.css
-  - meowmorize-frontend/src/App.js
-  - meowmorize-frontend/src/index.css
-  - meowmorize-frontend/src/index.js  
+  
+# 4k
+meow-example:
+  - internal/adapters/controller/card.go
+  - internal/adapters/controller/controller.go
+  - internal/adapters/repositories/card.go
   - cmd/main/main.go
+  - cmd/concat/concat.go
+  - internal/domain/types/card.go
+  - internal/domain/types/deck.go
+  - internal/domain/create.go
+  - internal/domain/service.go
   - helper
   - docker-compose.yml
-  - Dockerfile.backend
-  - meowmorize-frontend/Dockerfile
-  - meowmorize-frontend/.env
-
-# Add more groups as needed
+  - Dockerfile

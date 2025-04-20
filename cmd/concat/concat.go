@@ -16,7 +16,7 @@ type FileGroups map[string][]string
 
 func main() {
 	// Specify the YAML file containing the grouped file paths
-	yamlFile := "file_list.yaml" // adjust this to your YAML file
+	yamlFile := "file_list2.yaml" // adjust this to your YAML file
 	// Define the output directory (optional)
 	outputDir := "output" // all combined files will be placed here
 
