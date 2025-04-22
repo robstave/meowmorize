@@ -114,13 +114,13 @@ func (_m *MeowDomain) CreateCard(card types.Card, deckID string) (*types.Card, e
 	return r0, r1
 }
 
-// CreateDeck provides a mock function with given fields: _a0
-func (_m *MeowDomain) CreateDeck(_a0 types.Deck) error {
-	ret := _m.Called(_a0)
+// CreateDeck provides a mock function with given fields: deck
+func (_m *MeowDomain) CreateDeck(deck types.Deck) error {
+	ret := _m.Called(deck)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(types.Deck) error); ok {
-		r0 = rf(_a0)
+		r0 = rf(deck)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -128,20 +128,20 @@ func (_m *MeowDomain) CreateDeck(_a0 types.Deck) error {
 	return r0
 }
 
-// CreateDefaultDeck provides a mock function with given fields: defaultDeck, userID
-func (_m *MeowDomain) CreateDefaultDeck(defaultDeck bool, userID string) (types.Deck, error) {
-	ret := _m.Called(defaultDeck, userID)
+// CreateDefaultDeck provides a mock function with given fields: defaultData, userID
+func (_m *MeowDomain) CreateDefaultDeck(defaultData bool, userID string) (types.Deck, error) {
+	ret := _m.Called(defaultData, userID)
 
 	var r0 types.Deck
 	if rf, ok := ret.Get(0).(func(bool, string) types.Deck); ok {
-		r0 = rf(defaultDeck, userID)
+		r0 = rf(defaultData, userID)
 	} else {
 		r0 = ret.Get(0).(types.Deck)
 	}
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(bool, string) error); ok {
-		r1 = rf(defaultDeck, userID)
+		r1 = rf(defaultData, userID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -272,6 +272,27 @@ func (_m *MeowDomain) GetDeckByID(deckID string) (types.Deck, error) {
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string) error); ok {
 		r1 = rf(deckID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetExplanation provides a mock function with given fields: prompt
+func (_m *MeowDomain) GetExplanation(prompt string) (string, error) {
+	ret := _m.Called(prompt)
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(string) string); ok {
+		r0 = rf(prompt)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(prompt)
 	} else {
 		r1 = ret.Error(1)
 	}

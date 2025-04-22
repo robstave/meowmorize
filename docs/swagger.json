@@ -66,6 +66,75 @@
                 }
             }
         },
+        "/cards/explain": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get an AI-generated explanation for a flashcard based on the provided prompt",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Get LLM explanation for a card",
+                "parameters": [
+                    {
+                        "description": "LLM Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.LLMRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/cards/stats": {
             "post": {
                 "security": [
@@ -1551,6 +1620,21 @@
                 },
                 "viewed_count": {
                     "type": "integer"
+                }
+            }
+        },
+        "controller.LLMRequest": {
+            "type": "object",
+            "required": [
+                "card_id",
+                "prompt"
+            ],
+            "properties": {
+                "card_id": {
+                    "type": "string"
+                },
+                "prompt": {
+                    "type": "string"
                 }
             }
         },

@@ -267,5 +267,14 @@ export const getSessionOverview = async (deckId) => {
   }
 };
 
+// New function to explain card
+export const explainCard = async (cardId, prompt) => {
+  try {
+    const response = await api.post(`/cards/explain/${cardId}`, { prompt });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 
 export default api;

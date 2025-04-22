@@ -11,3 +11,8 @@ func setupRepositories() (*mocks.CardRepository, *mocks.UserRepository, *mocks.D
 	sessionRepo := new(mocks.SessionLogRepository)
 	return cardRepo, userRepo, dr, sessionRepo
 }
+
+func setupLLMRepository() *mocks.LLMRepository {
+	llmRepo := new(mocks.LLMRepository)
+	return llmRepo
+}

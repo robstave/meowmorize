@@ -13,6 +13,7 @@ import (
 
 func TestCreateDeck_Success(t *testing.T) {
 	cardRepo, userRepo, deckRepo, sessionRepo := setupRepositories()
+	llmRepo := setupLLMRepository()
 
 	testDeck := types.Deck{
 		ID:          "deck1",
@@ -36,7 +37,7 @@ func TestCreateDeck_Success(t *testing.T) {
 	deckRepo.On("CreateDeck", testDeck).Return(nil)
 	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
-	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo)
+	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
 	err := s.CreateDeck(testDeck)
 	assert.NoError(t, err)
 	deckRepo.AssertExpectations(t)
@@ -44,6 +45,7 @@ func TestCreateDeck_Success(t *testing.T) {
 
 func TestCreateDeck_Failure(t *testing.T) {
 	cardRepo, userRepo, deckRepo, sessionRepo := setupRepositories()
+	llmRepo := setupLLMRepository()
 
 	testDeck := types.Deck{
 		ID:          "deck2",
@@ -56,7 +58,7 @@ func TestCreateDeck_Failure(t *testing.T) {
 	deckRepo.On("CreateDeck", testDeck).Return(expectedErr)
 	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
-	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo)
+	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
 	err := s.CreateDeck(testDeck)
 	assert.Error(t, err)
 	assert.Equal(t, expectedErr, err)
@@ -65,12 +67,13 @@ func TestCreateDeck_Failure(t *testing.T) {
 
 func TestDeleteDeck_Success(t *testing.T) {
 	cardRepo, userRepo, deckRepo, sessionRepo := setupRepositories()
+	llmRepo := setupLLMRepository()
 
 	deckID := "deck1"
 	deckRepo.On("DeleteDeck", deckID).Return(nil)
 	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
-	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo)
+	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
 	err := s.DeleteDeck(deckID)
 	assert.NoError(t, err)
 	deckRepo.AssertExpectations(t)
@@ -78,13 +81,14 @@ func TestDeleteDeck_Success(t *testing.T) {
 
 func TestDeleteDeck_Failure(t *testing.T) {
 	cardRepo, userRepo, deckRepo, sessionRepo := setupRepositories()
+	llmRepo := setupLLMRepository()
 
 	deckID := "deck2"
 	expectedErr := errors.New("delete failed")
 	deckRepo.On("DeleteDeck", deckID).Return(expectedErr)
 	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
-	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo)
+	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
 	err := s.DeleteDeck(deckID)
 	assert.Error(t, err)
 	assert.Equal(t, expectedErr, err)
@@ -93,6 +97,7 @@ func TestDeleteDeck_Failure(t *testing.T) {
 
 func TestGetDeckByID_Success(t *testing.T) {
 	cardRepo, userRepo, deckRepo, sessionRepo := setupRepositories()
+	llmRepo := setupLLMRepository()
 
 	expectedDeck := types.Deck{
 		ID:          "deck1",
@@ -104,7 +109,7 @@ func TestGetDeckByID_Success(t *testing.T) {
 	deckRepo.On("GetDeckByID", "deck1").Return(expectedDeck, nil)
 	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
-	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo)
+	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
 	deck, err := s.GetDeckByID("deck1")
 	assert.NoError(t, err)
 	assert.Equal(t, expectedDeck, deck)
@@ -113,12 +118,13 @@ func TestGetDeckByID_Success(t *testing.T) {
 
 func TestGetDeckByID_Failure(t *testing.T) {
 	cardRepo, userRepo, deckRepo, sessionRepo := setupRepositories()
+	llmRepo := setupLLMRepository()
 
 	expectedErr := errors.New("not found")
 	deckRepo.On("GetDeckByID", "nonexistent").Return(types.Deck{}, expectedErr)
 	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
-	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo)
+	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
 	deck, err := s.GetDeckByID("nonexistent")
 	assert.Error(t, err)
 	assert.Equal(t, expectedErr, err)
@@ -128,6 +134,7 @@ func TestGetDeckByID_Failure(t *testing.T) {
 
 func TestGetAllDecks_Success(t *testing.T) {
 	cardRepo, userRepo, deckRepo, sessionRepo := setupRepositories()
+	llmRepo := setupLLMRepository()
 
 	expectedDecks := []types.Deck{
 		{
@@ -147,7 +154,7 @@ func TestGetAllDecks_Success(t *testing.T) {
 	deckRepo.On("GetAllDecksByUser", "user1").Return(expectedDecks, nil)
 	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
-	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo)
+	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
 	decks, err := s.GetAllDecks("user1")
 	assert.NoError(t, err)
 	assert.Equal(t, expectedDecks, decks)
@@ -156,6 +163,7 @@ func TestGetAllDecks_Success(t *testing.T) {
 
 func TestUpdateDeck_Success(t *testing.T) {
 	cardRepo, userRepo, deckRepo, sessionRepo := setupRepositories()
+	llmRepo := setupLLMRepository()
 
 	testDeck := types.Deck{
 		ID:          "deck1",
@@ -167,7 +175,7 @@ func TestUpdateDeck_Success(t *testing.T) {
 	deckRepo.On("UpdateDeck", testDeck).Return(nil)
 	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
-	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo)
+	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
 	err := s.UpdateDeck(testDeck)
 	assert.NoError(t, err)
 	deckRepo.AssertExpectations(t)
@@ -175,6 +183,7 @@ func TestUpdateDeck_Success(t *testing.T) {
 
 func TestUpdateDeck_Failure(t *testing.T) {
 	cardRepo, userRepo, deckRepo, sessionRepo := setupRepositories()
+	llmRepo := setupLLMRepository()
 
 	testDeck := types.Deck{
 		ID:          "deck2",
@@ -187,7 +196,7 @@ func TestUpdateDeck_Failure(t *testing.T) {
 	deckRepo.On("UpdateDeck", testDeck).Return(expectedErr)
 	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
-	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo)
+	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
 	err := s.UpdateDeck(testDeck)
 	assert.Error(t, err)
 	assert.Equal(t, expectedErr, err)

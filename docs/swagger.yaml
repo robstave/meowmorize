@@ -90,6 +90,16 @@ definitions:
       viewed_count:
         type: integer
     type: object
+  controller.LLMRequest:
+    properties:
+      card_id:
+        type: string
+      prompt:
+        type: string
+    required:
+    - card_id
+    - prompt
+    type: object
   controller.LoginRequest:
     properties:
       password:
@@ -408,6 +418,51 @@ paths:
       summary: Update an existing card
       tags:
       - cards
+  /cards/explain:
+    post:
+      consumes:
+      - application/json
+      description: Get an AI-generated explanation for a flashcard based on the provided
+        prompt
+      parameters:
+      - description: LLM Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.LLMRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get LLM explanation for a card
+      tags:
+      - Cards
   /cards/stats:
     post:
       consumes:

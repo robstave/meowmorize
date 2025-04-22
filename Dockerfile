@@ -18,6 +18,8 @@ RUN apk update && apk add --no-cache git gcc musl-dev
 # Copy go module files and download dependencies
 COPY go.mod go.sum ./
 RUN go mod download
+# Copy the .env file
+COPY .env ./
 # Copy the entire project
 COPY . .
 # Copy the React build output from the frontend stage into the expected directory
@@ -34,6 +36,8 @@ COPY --from=builder /app/backend .
 # Copy the React build output
 COPY --from=builder /app/meowmorize-frontend/build ./meowmorize-frontend/build
 # Create a directory for SQLite data
+# Copy the .env file
+COPY --from=builder /app/.env .
 RUN mkdir -p /app/data
 # Expose the desired port (e.g., 8999)
 EXPOSE 8999
@@ -44,7 +48,10 @@ ENV PORT=8999
 # Optional default values for the initial user credentials
 # ENV DEFAULT_USER_USERNAME=meow
 # ENV DEFAULT_USER_PASSWORD=meow
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup && chown -R appuser:appgroup /app
+# Add a non-root user for security
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup \
+    && chown -R appuser:appgroup /app \
+    && chmod 600 /app/.env
 USER appuser
 # Run the backend binary
 CMD ["./backend"]
