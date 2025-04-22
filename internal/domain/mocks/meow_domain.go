@@ -434,6 +434,20 @@ func (_m *MeowDomain) GetUserByUsername(username string) (*types.User, error) {
 	return r0, r1
 }
 
+// IsLLMAvailable provides a mock function with given fields:
+func (_m *MeowDomain) IsLLMAvailable() bool {
+	ret := _m.Called()
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func() bool); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	return r0
+}
+
 // SeedUser provides a mock function with given fields:
 func (_m *MeowDomain) SeedUser() error {
 	ret := _m.Called()

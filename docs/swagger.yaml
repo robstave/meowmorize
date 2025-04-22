@@ -463,6 +463,30 @@ paths:
       summary: Get LLM explanation for a card
       tags:
       - Cards
+  /cards/explain/status:
+    get:
+      description: Check if the LLM service is available and properly initialized
+      parameters:
+      - description: LLM Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.LLMRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get LLM service status
+      tags:
+      - Cards
   /cards/stats:
     post:
       consumes:

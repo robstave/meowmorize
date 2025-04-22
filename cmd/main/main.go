@@ -120,6 +120,7 @@ func main() {
 	protectedCardGroup := cardGroup.Group("", jwtMiddleware)
 	protectedCardGroup.POST("/stats", meowController.UpdateCardStats)
 	protectedCardGroup.POST("/explain/:id", meowController.ExplainCard)
+	protectedCardGroup.GET("/explain/status", meowController.GetLLMStatus)
 	protectedCardGroup.GET("/:id", meowController.GetCardByID)
 	protectedCardGroup.POST("/:id", meowController.CreateCard)
 	protectedCardGroup.PUT("/:id", meowController.UpdateCard)

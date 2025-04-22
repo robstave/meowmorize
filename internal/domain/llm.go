@@ -3,6 +3,8 @@ package domain
 
 import (
 	"context"
+
+	types "github.com/robstave/meowmorize/internal/domain/types"
 )
 
 // GetExplanation sends a prompt to the LLM service and returns the response
@@ -17,4 +19,13 @@ func (s *Service) GetExplanation(prompt string) (string, error) {
 	}
 
 	return response, nil
+}
+
+func (s *Service) IsLLMAvailable() bool {
+	if s.llmRepo == nil {
+		return false
+	}
+	// Try a simple prompt to verify LLM is working
+	_, err := s.llmRepo.RunPrompt(context.Background(), "test")
+	return err != types.ErrLLMNotInitialized
 }

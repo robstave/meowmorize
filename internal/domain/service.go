@@ -40,6 +40,7 @@ type MeowDomain interface {
 
 	// LLM methods
 	GetExplanation(prompt string) (string, error)
+	IsLLMAvailable() bool
 
 	// Session Management
 	StartSession(deckID string, count int, method types.SessionMethod, userID string) error

@@ -277,4 +277,15 @@ export const explainCard = async (cardId, prompt) => {
   }
 };
 
+// Check if LLM service is available
+export const getLLMStatus = async () => {
+  try {
+    const response = await api.get('/cards/explain/status');
+    return response.data.available;
+  } catch (error) {
+    console.error('Failed to check LLM status:', error);
+    return false;
+  }
+};
+
 export default api;

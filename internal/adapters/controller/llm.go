@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
+	types "github.com/robstave/meowmorize/internal/domain/types"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -66,10 +68,28 @@ Question: %s`, card.Front.Text, card.Back.Text, req.Prompt)
 	response, err := c.service.GetExplanation(formattedPrompt)
 	if err != nil {
 		c.logger.Error("Failed to get LLM explanation", "error", err)
+		if err == types.ErrLLMNotInitialized {
+			return ctx.JSON(http.StatusServiceUnavailable, echo.Map{"message": "LLM service is not available"})
+		}
 		return ctx.JSON(http.StatusInternalServerError, echo.Map{"message": "Failed to generate explanation"})
 	}
 
 	return ctx.JSON(http.StatusOK, echo.Map{
 		"explanation": response,
+	})
+}
+
+// @Summary Get LLM service status
+// @Description Check if the LLM service is available and properly initialized
+// @Tags Cards
+// @Produce json
+// @Param request body LLMRequest true "LLM Request"
+// @Security BearerAuth
+// @Success 200 {object} map[string]bool
+// @Router /cards/explain/status [get]
+func (c *MeowController) GetLLMStatus(ctx echo.Context) error {
+	isAvailable := c.service.IsLLMAvailable()
+	return ctx.JSON(http.StatusOK, map[string]bool{
+		"available": isAvailable,
 	})
 }

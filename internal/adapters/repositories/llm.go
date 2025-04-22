@@ -4,6 +4,8 @@ package repositories
 import (
 	"context"
 
+	types "github.com/robstave/meowmorize/internal/domain/types"
+
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/googleai"
 )
@@ -15,11 +17,21 @@ type LLMRepository interface {
 
 // LLMRepositoryLangChain implements LLMRepository using LangChain
 type LLMRepositoryLangChain struct {
-	llm llms.LLM
+	llm     llms.LLM
+	enabled bool
 }
 
 // NewLLMRepositoryLangChain creates a new LLM repository instance
 func NewLLMRepositoryLangChain(apiKey string, model string) (LLMRepository, error) {
+
+	if apiKey == "" {
+		// Return a disabled repository instead of an error
+		return &LLMRepositoryLangChain{
+			llm:     nil,
+			enabled: false,
+		}, nil
+	}
+
 	ctx := context.Background()
 	llm, err := googleai.New(ctx,
 		googleai.WithAPIKey(apiKey),
@@ -29,11 +41,16 @@ func NewLLMRepositoryLangChain(apiKey string, model string) (LLMRepository, erro
 	}
 
 	return &LLMRepositoryLangChain{
-		llm: llm,
+		llm:     llm,
+		enabled: true,
 	}, nil
 }
 
 // RunPrompt sends a prompt to the LLM and returns the response
 func (r *LLMRepositoryLangChain) RunPrompt(ctx context.Context, prompt string) (string, error) {
+
+	if !r.enabled {
+		return "", types.ErrLLMNotInitialized
+	}
 	return llms.GenerateFromSinglePrompt(ctx, r.llm, prompt)
 }

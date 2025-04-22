@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchCardById, deleteCard, explainCard } from '../services/api';
+import { fetchCardById, deleteCard, explainCard, getLLMStatus } from '../services/api';
 import { updateCardStats, getSessionStats, getNextCard, fetchDeckById } from '../services/api';
 import remarkGfm from 'remark-gfm';
 import { Fade } from '@mui/material';
@@ -49,6 +49,7 @@ const CardPage = () => {
   const [showFront, setShowFront] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isLLMAvailable, setIsLLMAvailable] = useState(false);
 
   const [passCount, setPassCount] = useState(0);
   const [skipCount, setSkipCount] = useState(0);
@@ -94,8 +95,12 @@ const CardPage = () => {
   useEffect(() => {
     const getCard = async () => {
       try {
-        const data = await fetchCardById(id);
+        const [data, llmStatus] = await Promise.all([
+          fetchCardById(id),
+          getLLMStatus()
+        ]);
         setCard(data);
+        setIsLLMAvailable(llmStatus);
         setShowFront(true);
 
         setPassCount(data.pass_count);
@@ -339,14 +344,16 @@ const CardPage = () => {
         {/* Only show explain button and menu when viewing the back */}
         {!showFront && (
           <>
-            <Button 
-              variant="outlined" 
-              color="info" 
-              onClick={handleExplain}
-              disabled={explaining}
-            >
-              {explaining ? 'Explaining...' : 'Explain'}
-            </Button>
+            {isLLMAvailable && (
+              <Button 
+                variant="outlined" 
+                color="info" 
+                onClick={handleExplain}
+                disabled={explaining}
+              >
+                {explaining ? 'Explaining...' : 'Explain'}
+              </Button>
+            )}
 
             <IconButton
               aria-label="more"
