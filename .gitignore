@@ -1,5 +1,6 @@
 /output/*.*
 main
+.env
 file_list2.yaml
 meowmorize.db
 meowmorize.db-*
