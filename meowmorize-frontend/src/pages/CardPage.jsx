@@ -1,62 +1,56 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { fetchCardById, deleteCard, explainCard, getLLMStatus } from '../services/api';
-import { updateCardStats, getSessionStats, getNextCard, fetchDeckById } from '../services/api';
-import remarkGfm from 'remark-gfm';
-import { Fade } from '@mui/material';
-import {
-  Container,
-  Typography,
-  Button,
-  Box,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  DialogContentText,
-  Snackbar,
-  CircularProgress,
-  Alert,
-  Rating,
-  Link,
+import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
+// API imports
+import { 
+  fetchCardById, 
+  deleteCard, 
+  explainCard, 
+  getLLMStatus,
+  updateCardStats, 
+  getSessionStats, 
+  getNextCard, 
+  fetchDeckById 
+} from '../services/api';
+
+// Material UI imports
+import { 
+  Container, Typography, Button, Box, IconButton,
+  Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText,
+  Snackbar, CircularProgress, Alert, Rating, Link, 
+  Menu, MenuItem, Fade
 } from '@mui/material';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
+import MuiAlert from '@mui/material/Alert';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 
+// Markdown related imports
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
 
-import { Link as RouterLink } from 'react-router-dom';
-
-import MuiAlert from '@mui/material/Alert'; // For Snackbar Alert
-
+// Components
 import PieStatusChart from '../components/CatStatusChart';
 import CardStatsBar from '../components/CardStatsBar';
 import { ThemeContext } from '../context/ThemeContext';
-import rehypeHighlight from 'rehype-highlight';
 
 const AlertSnackbar = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
 const CardPage = () => {
-  const { deckId: deckId, id: id } = useParams(); // Get card ID from URL
-
+  const { deckId, id } = useParams();
   const navigate = useNavigate();
-  const [card, setCard] = useState(null);
-  const [deckName, setDeckName] = useState(''); // New state for deck name
-  const [showFront, setShowFront] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [isLLMAvailable, setIsLLMAvailable] = useState(false);
+  const { isDarkMode } = useContext(ThemeContext);
 
+  // Card data states
+  const [card, setCard] = useState(null);
+  const [deckName, setDeckName] = useState('');
+  const [showFront, setShowFront] = useState(true);
+  const [stars, setStars] = useState(0);
+  
+  // Stats states
   const [passCount, setPassCount] = useState(0);
   const [skipCount, setSkipCount] = useState(0);
   const [failCount, setFailCount] = useState(0);
-
-  const [stars, setStars] = useState(0); // New state for stars
-
   const [sessionStats, setSessionStats] = useState({
     total_cards: 0,
     viewed_count: 0,
@@ -64,25 +58,22 @@ const CardPage = () => {
     current_index: 0,
   });
 
-  // State for Delete Card Dialog
+  // UI states
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isLLMAvailable, setIsLLMAvailable] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-
-  // State for Snackbar Notifications
+  const [anchorEl, setAnchorEl] = useState(null);
+  const openMenu = Boolean(anchorEl);
+  const [explanation, setExplanation] = useState('');
+  const [explaining, setExplaining] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
-    severity: 'success', // 'success' | 'error' | 'warning' | 'info'
+    severity: 'success',
   });
 
-  // Access ThemeContext to get isDarkMode
-  const { isDarkMode } = useContext(ThemeContext); // Ensure ThemeContext is correctly set up
-
-  const [anchorEl, setAnchorEl] = useState(null);
-  const openMenu = Boolean(anchorEl);
-
-  const [explanation, setExplanation] = useState('');
-  const [explaining, setExplaining] = useState(false);
-
+  // Menu handling functions
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -91,72 +82,77 @@ const CardPage = () => {
     setAnchorEl(null);
   };
 
-  // Fetch the card on component mount or when the ID changes
+  // Fetch the card data
   useEffect(() => {
-    const getCard = async () => {
+    const fetchCardData = async () => {
       try {
-        // Clear explanation text when loading a new card
+        setLoading(true);
         setExplanation('');
         
-        const [data, llmStatus] = await Promise.all([
+        // Fetch card data and LLM status in parallel
+        const [cardData, llmStatus] = await Promise.all([
           fetchCardById(id),
           getLLMStatus()
         ]);
-        setCard(data);
+        
+        // Update card state
+        setCard(cardData);
         setIsLLMAvailable(llmStatus);
         setShowFront(true);
+        
+        // Update card stats
+        setPassCount(cardData.pass_count);
+        setSkipCount(cardData.skip_count);
+        setFailCount(cardData.fail_count);
+        setStars(cardData.star_rating || 0);
 
-        setPassCount(data.pass_count);
-        setSkipCount(data.skip_count);
-        setFailCount(data.fail_count);
-        setStars(data.star_rating || 0); // Initialize stars
-
-        const stats = await getSessionStats(deckId);
-        setSessionStats(stats);
-
-        // Fetch deck details to get the deck name
-        const deckData = await fetchDeckById(deckId);
+        // Fetch session stats and deck info
+        const [sessionData, deckData] = await Promise.all([
+          getSessionStats(deckId),
+          fetchDeckById(deckId)
+        ]);
+        
+        setSessionStats(sessionData);
         setDeckName(deckData.name);
       } catch (err) {
+        console.error('Error fetching card data:', err);
         setError('Failed to fetch card details. Please try again later.');
-        console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
-    getCard();
-  }, [id]);
+    fetchCardData();
+  }, [id, deckId]);
 
   // Function to handle card actions: pass, fail, skip
   const handleCardAction = async (action, value) => {
     if (!card) return;
 
     try {
+      // Handle star rating separately
       if (action === 'SetStars' && value !== null) {
-        setStars(value); // Update local stars state
+        setStars(value);
         await updateCardStats(card.id, 'SetStars', deckId, value);
         return;
       }
+      
       setLoading(true);
 
-      switch (action) {
-        case 'pass':
-          await updateCardStats(card.id, 'IncrementPass', deckId);
-          break;
-        case 'skip':
-          await updateCardStats(card.id, 'IncrementSkip', deckId);
-          break;
-        case 'fail':
-          await updateCardStats(card.id, 'IncrementFail', deckId);
-          break;
-        default:
-        // code block
+      // Handle card progression actions
+      const actionMap = {
+        'pass': 'IncrementPass',
+        'skip': 'IncrementSkip',
+        'fail': 'IncrementFail'
+      };
+      
+      const apiAction = actionMap[action];
+      if (apiAction) {
+        await updateCardStats(card.id, apiAction, deckId);
       }
 
-      // Fetch the next card
+      // Fetch the next card and progress
       const nextCardId = await getNextCard(deckId);
-
       if (nextCardId) {
         navigate(`/decks/${deckId}/card/${nextCardId}`);
       } else {
@@ -167,7 +163,7 @@ const CardPage = () => {
         });
       }
 
-      // Optionally, refresh session stats
+      // Update session stats
       const stats = await getSessionStats(deckId);
       setSessionStats(stats);
     } catch (err) {
@@ -429,17 +425,15 @@ const CardPage = () => {
 
       <Box sx={{ mt: 4 }}>
         <Typography variant="h6" gutterBottom>
-          Link
+          Reference Link
         </Typography>
         {card.link ? (
-          <Typography>
-            <a href={card.link} target="_blank" rel="noopener noreferrer">
-              {card.link}
-            </a>
-          </Typography>
+          <Link href={card.link} target="_blank" rel="noopener noreferrer" color="primary">
+            {card.link}
+          </Link>
         ) : (
-          <Typography variant="body2" color="textSecondary">
-            No link available.
+          <Typography variant="body2" color="text.secondary">
+            No reference link available
           </Typography>
         )}
       </Box>
