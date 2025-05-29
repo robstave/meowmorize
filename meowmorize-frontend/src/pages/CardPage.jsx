@@ -95,6 +95,9 @@ const CardPage = () => {
   useEffect(() => {
     const getCard = async () => {
       try {
+        // Clear explanation text when loading a new card
+        setExplanation('');
+        
         const [data, llmStatus] = await Promise.all([
           fetchCardById(id),
           getLLMStatus()

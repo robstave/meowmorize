@@ -700,14 +700,20 @@ const DeckPage = () => {
               autoFocus
               margin="dense"
               label="Number of Cards"
-              type="number"
+              type="text"
               fullWidth
               variant="standard"
               value={sessionCount}
-              onChange={handleSessionCountChange}
-              inputProps={{
-                min: 1,
-                max: deck.cards.length,
+              onChange={(event) => {
+                const value = event.target.value;
+                if (value === '') {
+                  setSessionCount('');
+                } else {
+                  const parsedValue = parseInt(value, 10);
+                  if (!isNaN(parsedValue) && parsedValue > 0 && parsedValue <= deck.cards.length) {
+                    setSessionCount(parsedValue);
+                  }
+                }
               }}
               helperText={`Enter a number between 1 and ${deck.cards.length}`}
             />
