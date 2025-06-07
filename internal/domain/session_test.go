@@ -120,6 +120,11 @@ func TestAdjustSession_Success(t *testing.T) {
 	deckRepo.On("GetDeckByID", deckID).Return(deck, nil)
 	deckRepo.On("UpdateDeck", mock.AnythingOfType("types.Deck")).Return(nil)
 
+	// Expect session log creation
+	sessionRepo.On("CreateLog", mock.MatchedBy(func(log types.SessionLog) bool {
+		return log.DeckID == deckID && log.CardID == "card1" && log.Action == string(types.IncrementPass)
+	})).Return(nil)
+
 	// Initialize service.
 	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
 
