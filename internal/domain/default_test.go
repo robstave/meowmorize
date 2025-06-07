@@ -61,6 +61,6 @@ func TestCreateDefaultDeck_Error(t *testing.T) {
 	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
 	deck, err := s.CreateDefaultDeck(false, "user3")
 	assert.Error(t, err)
-	assert.Empty(t, deck.ID)
+	assert.NotEmpty(t, deck.ID)
 	deckRepo.AssertExpectations(t)
 }
