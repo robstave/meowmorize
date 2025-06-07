@@ -101,6 +101,10 @@ const DeckPage = () => {
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [newDeckDescription, setNewDeckDescription] = useState('');
 
+  // States for editing deck icon URL
+  const [isEditingIcon, setIsEditingIcon] = useState(false);
+  const [newIconUrl, setNewIconUrl] = useState('');
+
   const [sessions, setSessions] = useState([]);
 
 
@@ -181,7 +185,11 @@ const DeckPage = () => {
     }
 
     try {
-      const updatedDeck = await updateDeck(id, { name: newDeckName, description: deck.description });
+      const updatedDeck = await updateDeck(id, {
+        name: newDeckName,
+        description: deck.description,
+        icon_url: deck.icon_url,
+      });
       setDeck(updatedDeck);
       setDecks((prevDecks) =>
         prevDecks.map((d) => (d.id === id ? updatedDeck : d))
@@ -219,7 +227,11 @@ const DeckPage = () => {
 
   const handleDeckDescriptionSave = async () => {
     try {
-      const updatedDeck = await updateDeck(id, { name: deck.name, description: newDeckDescription });
+      const updatedDeck = await updateDeck(id, {
+        name: deck.name,
+        description: newDeckDescription,
+        icon_url: deck.icon_url,
+      });
       setDeck(updatedDeck);
       setDecks((prevDecks) =>
         prevDecks.map((d) => (d.id === id ? updatedDeck : d))
@@ -243,6 +255,74 @@ const DeckPage = () => {
   const handleDeckDescriptionCancel = () => {
     setIsEditingDescription(false);
     setNewDeckDescription('');
+  };
+
+  // Handlers for icon URL editing
+  const handleIconClick = () => {
+    setIsEditingIcon(true);
+    setNewIconUrl(deck.icon_url || '');
+  };
+
+  const handleIconChange = (event) => {
+    setNewIconUrl(event.target.value);
+  };
+
+  const handleIconSave = async () => {
+    try {
+      const updatedDeck = await updateDeck(id, {
+        name: deck.name,
+        description: deck.description,
+        icon_url: newIconUrl,
+      });
+      setDeck(updatedDeck);
+      setDecks((prevDecks) =>
+        prevDecks.map((d) => (d.id === id ? updatedDeck : d))
+      );
+      setSnackbar({
+        open: true,
+        message: 'Deck icon updated successfully!',
+        severity: 'success',
+      });
+      setIsEditingIcon(false);
+    } catch (err) {
+      console.error(err);
+      setSnackbar({
+        open: true,
+        message: 'Failed to update deck icon. Please try again.',
+        severity: 'error',
+      });
+    }
+  };
+
+  const handleIconCancel = () => {
+    setIsEditingIcon(false);
+    setNewIconUrl('');
+  };
+
+  const handleIconReset = async () => {
+    try {
+      const updatedDeck = await updateDeck(id, {
+        name: deck.name,
+        description: deck.description,
+        icon_url: '',
+      });
+      setDeck(updatedDeck);
+      setDecks((prevDecks) =>
+        prevDecks.map((d) => (d.id === id ? updatedDeck : d))
+      );
+      setSnackbar({
+        open: true,
+        message: 'Deck icon removed.',
+        severity: 'success',
+      });
+    } catch (err) {
+      console.error(err);
+      setSnackbar({
+        open: true,
+        message: 'Failed to remove icon. Please try again.',
+        severity: 'error',
+      });
+    }
   };
 
   // Handlers for Export Dialog
@@ -484,6 +564,55 @@ const DeckPage = () => {
               Save
             </Button>
             <Button variant="outlined" color="secondary" onClick={handleDeckDescriptionCancel} sx={{ ml: 1 }}>
+              Cancel
+            </Button>
+          </Box>
+        )}
+      </Box>
+
+      {/* Editable Deck Icon */}
+      <Box sx={{ mt: 1 }}>
+        {!isEditingIcon ? (
+          deck.icon_url ? (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <img
+                src={deck.icon_url}
+                alt="icon"
+                width={64}
+                height={64}
+                style={{ marginRight: 8, cursor: 'pointer' }}
+                onClick={handleIconClick}
+              />
+              <Button size="small" onClick={handleIconClick} sx={{ mr: 1 }}>
+                Change
+              </Button>
+              <Button size="small" color="secondary" onClick={handleIconReset}>
+                Reset
+              </Button>
+            </Box>
+          ) : (
+            <Typography
+              variant="body2"
+              color="textSecondary"
+              onClick={handleIconClick}
+              sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+            >
+              Click to set icon URL
+            </Typography>
+          )
+        ) : (
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <TextField
+              variant="standard"
+              fullWidth
+              value={newIconUrl}
+              onChange={handleIconChange}
+              label="Icon URL"
+            />
+            <Button variant="contained" color="primary" onClick={handleIconSave} sx={{ ml: 1 }}>
+              Save
+            </Button>
+            <Button variant="outlined" color="secondary" onClick={handleIconCancel} sx={{ ml: 1 }}>
               Cancel
             </Button>
           </Box>
