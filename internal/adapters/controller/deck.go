@@ -109,6 +109,7 @@ func (hc *MeowController) UpdateDeck(c echo.Context) error {
 	// Update deck fields; ensure ownership is not modified
 	existingDeck.Name = req.Name
 	existingDeck.Description = req.Description
+	existingDeck.IconURL = req.IconURL
 	// Note: Cards association may be handled via a separate endpoint
 
 	if err := hc.service.UpdateDeck(existingDeck); err != nil {
@@ -222,6 +223,7 @@ func (hc *MeowController) GetDeckByID(c echo.Context) error {
 type UpdateDeckRequest struct {
 	Name        string `json:"name" validate:"required"`
 	Description string `json:"description" validate:"required"`
+	IconURL     string `json:"icon_url"`
 }
 
 // CollapseDecksRequest represents the expected payload for collapsing decks
