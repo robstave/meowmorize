@@ -36,6 +36,7 @@ const Dashboard = () => {
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const [editIconUrl, setEditIconUrl] = useState('');
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [deckToDelete, setDeckToDelete] = useState(null);
   const [snackbar, setSnackbar] = useState({
@@ -96,6 +97,7 @@ const Dashboard = () => {
     setSelectedDeck(deck);
     setEditName(deck.name);
     setEditDescription(deck.description || '');
+    setEditIconUrl(deck.icon_url || '');
     setOpenEditDialog(true);
   };
 
@@ -103,6 +105,7 @@ const Dashboard = () => {
     setSelectedDeck(null);
     setEditName('');
     setEditDescription('');
+    setEditIconUrl('');
     setOpenEditDialog(false);
   };
 
@@ -122,6 +125,7 @@ const Dashboard = () => {
       const updatedDeck = {
         name: editName,
         description: editDescription,
+        icon_url: editIconUrl,
       };
       const response = await updateDeck(selectedDeck.id, updatedDeck);
       setDecks((prevDecks) =>
@@ -222,7 +226,8 @@ const Dashboard = () => {
       <TableContainer component={Paper}>
         <Table aria-label="decks table">
           <TableHead>
-            <TableRow>
+          <TableRow>
+              <TableCell>Icon</TableCell>
               <TableCell sortDirection={orderBy === 'name' ? order : false}>
                 <TableSortLabel
                   active={orderBy === 'name'}
@@ -263,9 +268,20 @@ const Dashboard = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {sortedDecks.map((deck) => (
-              <TableRow key={deck.id}>
-                <TableCell component="th" scope="row">
+          {sortedDecks.map((deck) => (
+            <TableRow key={deck.id}>
+              <TableCell>
+                {deck.icon_url ? (
+                  <img
+                    src={deck.icon_url}
+                    alt="icon"
+                    style={{ width: 64, height: 64, objectFit: 'contain' }}
+                  />
+                ) : (
+                  ''
+                )}
+              </TableCell>
+              <TableCell component="th" scope="row">
                   <Typography
                     component={RouterLink}
                     to={`/decks/${deck.id}`}
@@ -315,7 +331,7 @@ const Dashboard = () => {
         <DialogTitle id="edit-deck-dialog-title">Edit Deck</DialogTitle>
         <DialogContent>
           <DialogContentText id="edit-deck-dialog-description">
-            Update the name and description of the deck.
+            Update the name, description and icon of the deck.
           </DialogContentText>
           <TextField
             autoFocus
@@ -337,6 +353,15 @@ const Dashboard = () => {
             onChange={(e) => setEditDescription(e.target.value)}
             multiline
             rows={4}
+          />
+          <TextField
+            margin="dense"
+            label="Icon URL"
+            type="text"
+            fullWidth
+            variant="standard"
+            value={editIconUrl}
+            onChange={(e) => setEditIconUrl(e.target.value)}
           />
         </DialogContent>
         <DialogActions>
