@@ -18,6 +18,7 @@ func (s *Service) CreateDefaultDeck(defaultData bool, userID string) (types.Deck
 		UserID:      userID,
 		Name:        "Default Deck",
 		Description: "This is the default deck containing basic cards.",
+		IconURL:     "",
 	}
 
 	if defaultData {
