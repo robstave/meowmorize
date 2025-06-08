@@ -49,6 +49,7 @@ import {
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DeleteIcon from '@mui/icons-material/Delete';
 import GetAppIcon from '@mui/icons-material/GetApp';
+import EditIcon from '@mui/icons-material/Edit';
 import { saveAs } from 'file-saver';
 import ImportMarkdownDialog from '../components/ImportMarkdownDialog';
 import MuiAlert from '@mui/material/Alert';
@@ -578,17 +579,23 @@ const DeckPage = () => {
               <img
                 src={deck.icon_url}
                 alt="icon"
-                width={64}
-                height={64}
+                width={256}
+                height={256}
                 style={{ marginRight: 8, cursor: 'pointer' }}
                 onClick={handleIconClick}
               />
-              <Button size="small" onClick={handleIconClick} sx={{ mr: 1 }}>
-                Change
-              </Button>
-              <Button size="small" color="secondary" onClick={handleIconReset}>
-                Reset
-              </Button>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Tooltip title="Change icon">
+                  <IconButton size="small" onClick={handleIconClick} color="primary">
+                    <EditIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Remove icon">
+                  <IconButton size="small" color="error" onClick={handleIconReset}>
+                    <DeleteIcon />
+                  </IconButton>
+                </Tooltip>
+              </Box>
             </Box>
           ) : (
             <Typography
