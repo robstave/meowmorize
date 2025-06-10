@@ -20,6 +20,10 @@ func (s *Service) SeedUser() error {
 	if defaultPassword == "" {
 		defaultPassword = "meow"
 	}
+	defaultRole := os.Getenv("DEFAULT_USER_ROLE")
+	if defaultRole == "" {
+		defaultRole = "admin"
+	}
 
 	// Check if the user already exists
 	existingUser, err := s.userRepo.GetUserByUsername(defaultUsername)
@@ -42,6 +46,7 @@ func (s *Service) SeedUser() error {
 		ID:       uuid.New().String(),
 		Username: defaultUsername,
 		Password: string(hashedPassword),
+		Role:     defaultRole,
 	}
 
 	if err := s.userRepo.CreateUser(user); err != nil {

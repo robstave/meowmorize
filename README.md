@@ -231,6 +231,7 @@ docker run -d \
   -e DB_PATH=/app/data/db.sqlite3 \
   -e DEFAULT_USER_USERNAME=mycustomuser \
   -e DEFAULT_USER_PASSWORD=mycustompass \
+  -e DEFAULT_USER_ROLE=mycustomrole \
   rstave/meowmorize:latest
 ```
 
@@ -457,7 +458,7 @@ Ensure all dependencies are installed and run the following commands using the h
 
 - **Database Reset**: To start fresh, simply delete the `meowmorize.db` file located at the root directory and restart the backend application.
 - **Ports Configuration**: The frontend listens on port `8999` as specified in the `.env` file. Ensure this port is available or adjust the configuration as needed.
-- **User Authentication**: The application initializes with a default user. Ensure to secure and manage user credentials appropriately.
+- **User Authentication**: The application initializes with a default user. Customize the username, password, and role using the `DEFAULT_USER_USERNAME`, `DEFAULT_USER_PASSWORD`, and `DEFAULT_USER_ROLE` environment variables (role defaults to `admin`).
 
 ## License
 
