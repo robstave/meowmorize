@@ -47,15 +47,17 @@ const ImportPage = () => {
   });
   const { loadDecks } = useContext(DeckContext);
 
-  const handleFileChange = (event) => {
+  const handleFileSelect = async (event) => {
     const file = event.target.files[0];
+    if (!file) return;
     setSelectedFile(file);
     setMessage({ type: '', text: '' });
     setSnackbar({ open: false, message: '', severity: 'success' });
+    await handleImport(file);
   };
 
-  const handleImport = async () => {
-    if (!selectedFile) {
+  const handleImport = async (file = selectedFile) => {
+    if (!file) {
       setMessage({ type: 'error', text: 'Please select a file to import.' });
       setSnackbar({
         open: true,
@@ -65,7 +67,7 @@ const ImportPage = () => {
       return;
     }
 
-    const fileName = selectedFile.name.toLowerCase();
+    const fileName = file.name.toLowerCase();
     setLoading(true);
     setMessage({ type: '', text: '' });
 
@@ -73,7 +75,7 @@ const ImportPage = () => {
       // JSON Import: Send the file to your JSON import API
       if (fileName.endsWith('.json')) {
         const formData = new FormData();
-        formData.append('deck_file', selectedFile);
+        formData.append('deck_file', file);
         const response = await importDeck(formData);
         // If a custom title was provided, update the deck
         if (deckTitle.trim() !== 'Default Deck') {
@@ -95,7 +97,7 @@ const ImportPage = () => {
         fileName.endsWith('.markdown') ||
         fileName.endsWith('.txt')
       ) {
-        const text = await selectedFile.text();
+        const text = await file.text();
         const cards = parseMarkdownToCards(text);
         if (cards.length === 0) {
           setMessage({
@@ -188,30 +190,18 @@ const ImportPage = () => {
             variant="contained"
             component="label"
             startIcon={<UploadFileIcon />}
+            disabled={loading}
           >
-            Choose File
+            {loading ? <CircularProgress size={24} /> : 'Import Deck'}
             <input
               type="file"
               accept=".json,.md,.markdown,.txt"
               hidden
-              onChange={handleFileChange}
+              onChange={handleFileSelect}
             />
           </Button>
         </Tooltip>
-        {selectedFile && (
-          <Typography variant="body1">
-            Selected File: {selectedFile.name}
-          </Typography>
-        )}
         {message.text && <Alert severity={message.type}>{message.text}</Alert>}
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleImport}
-          disabled={loading}
-        >
-          {loading ? <CircularProgress size={24} /> : 'Import Deck'}
-        </Button>
       </Box>
       {/* Optionally include additional instructions via Accordion */}
       <Box sx={{ mt: 4 }}>
