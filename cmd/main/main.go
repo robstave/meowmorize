@@ -104,6 +104,8 @@ func main() {
 		SigningKey: JWTSecret,
 	})
 
+	adminGroup := api.Group("/admin", jwtMiddleware, controller.AdminMiddleware)
+
 	// Protect deck, card, and session routes
 	protectedDeckGroup := deckGroup.Group("", jwtMiddleware)
 	protectedDeckGroup.GET("", meowController.GetAllDecks)
@@ -139,6 +141,10 @@ func main() {
 
 	// Get distinct session log IDs for a user (optionally by deck):
 	protectedSessionGroup.GET("/ids", meowController.GetSessionLogIds)
+
+	adminGroup.GET("/users", meowController.AdminGetAllUsers)
+	adminGroup.POST("/users", meowController.AdminCreateUser)
+	adminGroup.DELETE("/users/:id", meowController.AdminDeleteUser)
 
 	// Swagger endpoint
 	e.GET("/swagger/*", httpSwagger.WrapHandler)

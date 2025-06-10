@@ -55,6 +55,8 @@ type MeowDomain interface {
 	// User-related methods
 	GetUserByUsername(username string) (*types.User, error)
 	CreateUser(user types.User) error
+	GetAllUsers() ([]types.User, error)
+	DeleteUser(userID string) error
 	SeedUser() error
 
 	GetSessionLogsBySessionID(sessionID string) ([]types.SessionLog, error)
