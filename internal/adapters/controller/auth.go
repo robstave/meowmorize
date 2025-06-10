@@ -72,6 +72,7 @@ func (hc *MeowController) Login(c echo.Context) error {
 	claims := token.Claims.(jwt.MapClaims)
 
 	claims["username"] = user.Username
+	claims["role"] = user.Role
 	claims["exp"] = time.Now().Add(time.Hour * 72).Unix() // Token expires after 72 hours
 
 	t, err := token.SignedString(JWTSecret)
