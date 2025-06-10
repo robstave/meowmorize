@@ -1,7 +1,10 @@
 const jsonInstructions = `
-The app imports and exports in a JSON format. This is a more native format that preserves title, description, metrics, and stars.
+**JSON Format**
 
-_Note:_ This app may undergo some changes as we plan to decouple cards from decks.
+- Use this when you want to preserve deck titles, descriptions and statistics.
+- Files exported from MeowMorize already follow this structure.
+
+_Note:_ Future versions may decouple cards from decks.
 `;
 
 export default jsonInstructions;
