@@ -41,29 +41,6 @@ func (_m *UserRepository) DeleteUser(userID string) error {
 	return r0
 }
 
-// GetUserByUsername provides a mock function with given fields: username
-func (_m *UserRepository) GetUserByUsername(username string) (*types.User, error) {
-	ret := _m.Called(username)
-
-	var r0 *types.User
-	if rf, ok := ret.Get(0).(func(string) *types.User); ok {
-		r0 = rf(username)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*types.User)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(username)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // GetAllUsers provides a mock function with given fields:
 func (_m *UserRepository) GetAllUsers() ([]types.User, error) {
 	ret := _m.Called()
@@ -80,6 +57,29 @@ func (_m *UserRepository) GetAllUsers() ([]types.User, error) {
 	var r1 error
 	if rf, ok := ret.Get(1).(func() error); ok {
 		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetUserByUsername provides a mock function with given fields: username
+func (_m *UserRepository) GetUserByUsername(username string) (*types.User, error) {
+	ret := _m.Called(username)
+
+	var r0 *types.User
+	if rf, ok := ret.Get(0).(func(string) *types.User); ok {
+		r0 = rf(username)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*types.User)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(username)
 	} else {
 		r1 = ret.Error(1)
 	}
