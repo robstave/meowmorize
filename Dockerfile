@@ -48,6 +48,8 @@ ENV PORT=8999
 # Optional default values for the initial user credentials
 # ENV DEFAULT_USER_USERNAME=meow
 # ENV DEFAULT_USER_PASSWORD=meow
+# ENV DEFAULT_USER_ROLE=admin
+
 # Add a non-root user for security
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup \
     && chown -R appuser:appgroup /app \

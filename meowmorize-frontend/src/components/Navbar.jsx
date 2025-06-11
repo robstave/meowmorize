@@ -199,6 +199,11 @@ const Navbar = () => {
               </MenuItem>
               <MenuItem onClick={handleCreateEmptyDeck}>Create Empty Deck</MenuItem>
               <MenuItem onClick={handleOpenCollapseDialog}>Collapse Decks</MenuItem>
+              {auth.user && auth.user.role === 'admin' && (
+                <MenuItem component={RouterLink} to="/admin/users" onClick={handleMenuClose}>
+                  User Management
+                </MenuItem>
+              )}
 
             </Menu>
           </div>

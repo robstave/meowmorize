@@ -30,7 +30,6 @@ api.interceptors.request.use(
 );
 
 
-
 // Fetch all decks
 export const fetchDecks = async () => {
   try {
@@ -285,6 +284,34 @@ export const getLLMStatus = async () => {
   } catch (error) {
     console.error('Failed to check LLM status:', error);
     return false;
+  }
+};
+
+// Admin User Management APIs
+export const getAllUsers = async () => {
+  try {
+    const response = await api.get('/admin/users');
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const createUser = async (userData) => {
+  try {
+    const response = await api.post('/admin/users', userData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteUser = async (userId) => {
+  try {
+    const response = await api.delete(`/admin/users/${userId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
   }
 };
 

@@ -11,6 +11,8 @@ import (
 type UserRepository interface {
 	GetUserByUsername(username string) (*types.User, error)
 	CreateUser(user types.User) error
+	GetAllUsers() ([]types.User, error)
+	DeleteUser(userID string) error
 }
 
 type UserRepositorySQLite struct {
@@ -32,4 +34,14 @@ func (r *UserRepositorySQLite) GetUserByUsername(username string) (*types.User, 
 
 func (r *UserRepositorySQLite) CreateUser(user types.User) error {
 	return r.db.Create(&user).Error
+}
+
+func (r *UserRepositorySQLite) GetAllUsers() ([]types.User, error) {
+	var users []types.User
+	result := r.db.Find(&users)
+	return users, result.Error
+}
+
+func (r *UserRepositorySQLite) DeleteUser(userID string) error {
+	return r.db.Delete(&types.User{}, "id = ?", userID).Error
 }
