@@ -25,7 +25,7 @@ import {
 import { 
   Add as AddIcon, 
   Delete as DeleteIcon,
-  Admin as AdminIcon,
+  AdminPanelSettings as AdminIcon,
   Person as PersonIcon
 } from '@mui/icons-material';
 import { getAllUsers, createUser, deleteUser } from '../services/api';
