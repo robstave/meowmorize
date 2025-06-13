@@ -315,4 +315,13 @@ export const deleteUser = async (userId) => {
   }
 };
 
+export const changePassword = async (password) => {
+  try {
+    const response = await api.put('/user/password', { password });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export default api;

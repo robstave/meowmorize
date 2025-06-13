@@ -142,6 +142,9 @@ func main() {
 	// Get distinct session log IDs for a user (optionally by deck):
 	protectedSessionGroup.GET("/ids", meowController.GetSessionLogIds)
 
+	userGroup := api.Group("/user", jwtMiddleware)
+	userGroup.PUT("/password", meowController.ChangePassword)
+
 	adminGroup.GET("/users", meowController.AdminGetAllUsers)
 	adminGroup.POST("/users", meowController.AdminCreateUser)
 	adminGroup.DELETE("/users/:id", meowController.AdminDeleteUser)
