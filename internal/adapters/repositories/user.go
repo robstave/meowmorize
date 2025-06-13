@@ -13,6 +13,7 @@ type UserRepository interface {
 	CreateUser(user types.User) error
 	GetAllUsers() ([]types.User, error)
 	DeleteUser(userID string) error
+	UpdateUserPassword(userID string, password string) error
 }
 
 type UserRepositorySQLite struct {
@@ -44,4 +45,8 @@ func (r *UserRepositorySQLite) GetAllUsers() ([]types.User, error) {
 
 func (r *UserRepositorySQLite) DeleteUser(userID string) error {
 	return r.db.Delete(&types.User{}, "id = ?", userID).Error
+}
+
+func (r *UserRepositorySQLite) UpdateUserPassword(userID string, password string) error {
+	return r.db.Model(&types.User{}).Where("id = ?", userID).Update("password", password).Error
 }

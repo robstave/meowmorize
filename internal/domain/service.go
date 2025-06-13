@@ -57,6 +57,7 @@ type MeowDomain interface {
 	CreateUser(user types.User) error
 	GetAllUsers() ([]types.User, error)
 	DeleteUser(userID string) error
+	UpdateUserPassword(userID string, password string) error
 	SeedUser() error
 
 	GetSessionLogsBySessionID(sessionID string) ([]types.SessionLog, error)

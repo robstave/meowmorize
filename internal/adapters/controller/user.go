@@ -77,3 +77,42 @@ func (hc *MeowController) AdminDeleteUser(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, echo.Map{"message": "user deleted"})
 }
+
+// ChangePasswordRequest represents the payload for updating a user's password
+type ChangePasswordRequest struct {
+	Password string `json:"password"`
+}
+
+// ChangePassword allows a logged in user to change their own password
+// @Summary Change user password
+// @Description Update the authenticated user's password
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param password body ChangePasswordRequest true "New password"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /user/password [put]
+func (hc *MeowController) ChangePassword(c echo.Context) error {
+	var req ChangePasswordRequest
+	if err := c.Bind(&req); err != nil {
+		hc.logger.Error("failed to bind password request", "error", err)
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "invalid request payload"})
+	}
+
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		hc.logger.Error("failed to get user from token", "error", err)
+		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "unauthorized"})
+	}
+
+	if err := hc.service.UpdateUserPassword(userID, req.Password); err != nil {
+		hc.logger.Error("failed to update password", "error", err)
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "failed to update password"})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{"message": "password updated"})
+}
