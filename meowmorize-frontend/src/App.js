@@ -12,6 +12,7 @@ import DeckPage from './pages/DeckPage'; //
 import CardPage from './pages/CardPage'; //
 import CardForm from './pages/CardForm'; //
 import UserManagement from './pages/UserManagement'; // Import UserManagement page
+import ChangePassword from './pages/ChangePassword';
 import { lightTheme, darkTheme } from './theme';
 import LoginPage from './pages/LoginPage'; // Import LoginPage
 import { AuthContext } from './context/AuthContext'; // Import AuthContext
@@ -58,16 +59,17 @@ function App() {
           <Route path="/decks/:deckId/card/:id" element={auth.token ? <CardPage /> : <Navigate to="/login" />} />
           <Route path="/card-form" element={auth.token ? <CardForm /> : <Navigate to="/login" />} />
           <Route path="/card-form/:id" element={auth.token ? <CardForm /> : <Navigate to="/login" />} />
-          <Route 
-            path="/admin/users" 
+          <Route
+            path="/admin/users"
             element={
               auth.token && auth.user?.role === 'admin' ? (
                 <UserManagement />
               ) : (
                 <Navigate to="/" />
               )
-            } 
+            }
           />
+          <Route path="/password" element={auth.token ? <ChangePassword /> : <Navigate to="/login" />} />
 
 
           {/* Route to handle Swagger UI redirect */}

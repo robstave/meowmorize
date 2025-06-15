@@ -8,10 +8,13 @@ import {
   MenuItem,
   Snackbar,
   IconButton,
+  Badge
 } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import Logo from '../logo512.png'; // Adjust the path if necessary
 import MenuIcon from '@mui/icons-material/Menu';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import StarIcon from '@mui/icons-material/Star';
 
 import { createEmptyDeck, fetchDecks } from '../services/api';
 
@@ -33,6 +36,8 @@ const Navbar = () => {
   const { auth, logout } = useContext(AuthContext);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
+  const [userAnchorEl, setUserAnchorEl] = React.useState(null);
+  const userMenuOpen = Boolean(userAnchorEl);
 
   const [collapseDialogOpen, setCollapseDialogOpen] = useState(false);
 
@@ -72,9 +77,22 @@ const Navbar = () => {
     setAnchorEl(event.currentTarget);
   };
 
+  const handleUserMenuOpen = (event) => {
+    setUserAnchorEl(event.currentTarget);
+  };
+
+  const handleChangePassword = () => {
+    navigate('/password');
+    handleUserMenuClose();
+  };
+
   // Handler to close the dropdown menu
   const handleMenuClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleUserMenuClose = () => {
+    setUserAnchorEl(null);
   };
 
   // Handler for logout
@@ -221,6 +239,29 @@ const Navbar = () => {
           }
           label="Dark Mode"
         />
+
+        {auth.token && (
+          <>
+            <IconButton color="inherit" onClick={handleUserMenuOpen}>
+              <Badge
+                overlap="circular"
+                badgeContent={auth.user?.role === 'admin' ? (
+                  <StarIcon sx={{ fontSize: '0.8rem', color: 'gold' }} />
+                ) : null}
+              >
+                <AccountCircleIcon />
+              </Badge>
+            </IconButton>
+            <Menu
+              anchorEl={userAnchorEl}
+              open={userMenuOpen}
+              onClose={handleUserMenuClose}
+              MenuListProps={{ 'aria-labelledby': 'user-menu-button' }}
+            >
+              <MenuItem onClick={handleChangePassword}>Change Password</MenuItem>
+            </Menu>
+          </>
+        )}
 
         {/* Authentication Buttons */}
         {!auth.token ? (
