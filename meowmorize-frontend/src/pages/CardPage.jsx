@@ -26,6 +26,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
+import rehypeSanitize from 'rehype-sanitize';
 
 // Components
 import PieStatusChart from '../components/CatStatusChart';
@@ -284,7 +285,7 @@ const CardPage = () => {
             <Typography variant="h6" gutterBottom>
               {showFront ? 'Front' : 'Back'}
             </Typography>
-            <ReactMarkdown rehypePlugins={[rehypeHighlight]} remarkPlugins={[remarkGfm]}>
+            <ReactMarkdown rehypePlugins={[rehypeHighlight, rehypeSanitize]} remarkPlugins={[remarkGfm]}>
               {showFront ? card.front.text : card.back.text}
             </ReactMarkdown>
           </Box>
@@ -392,7 +393,7 @@ const CardPage = () => {
             Explanation
           </Typography>
           <Typography variant="body1" component="div">
-            <ReactMarkdown rehypePlugins={[rehypeHighlight]} remarkPlugins={[remarkGfm]}>
+            <ReactMarkdown rehypePlugins={[rehypeHighlight, rehypeSanitize]} remarkPlugins={[remarkGfm]}>
               {explanation}
             </ReactMarkdown>
           </Typography>
