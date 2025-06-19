@@ -2,6 +2,17 @@
 
 # Helper Script for Managing the Go Application
 
+# Function to check if port 8999 is in use
+check_port() {
+    echo "Checking port 8999..."
+    if command -v lsof >/dev/null 2>&1; then
+        sudo lsof -i :8999
+    else
+        echo "lsof is not installed. Please install it first:"
+        echo "sudo apt-get install lsof"
+    fi
+}
+
 # Function to run the main application
 run_main() {
     echo "Running the main application..."
@@ -85,7 +96,7 @@ usage() {
     echo "  npm-test    javascript test"
     echo "  push-docker push to docker "
     echo "  all         Run all build/run commands"
-
+    echo "  port        Check what process is using port 8999"
     echo "  test        Run tests"
     echo "  help        Display this help message"
 }
@@ -127,6 +138,9 @@ case "$1" in
         ;;
     test)
         run_tests
+        ;;
+    port)
+        check_port
         ;;
     all)
         run_npm_build

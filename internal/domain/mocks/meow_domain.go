@@ -555,6 +555,20 @@ func (_m *MeowDomain) UpdateDeck(deck types.Deck) error {
 	return r0
 }
 
+// UpdateUserPassword provides a mock function with given fields: userID, password
+func (_m *MeowDomain) UpdateUserPassword(userID string, password string) error {
+	ret := _m.Called(userID, password)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, string) error); ok {
+		r0 = rf(userID, password)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 type mockConstructorTestingTNewMeowDomain interface {
 	mock.TestingT
 	Cleanup(func())
