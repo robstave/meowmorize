@@ -81,6 +81,7 @@ const UserManagement = () => {
   };
 
   const handleDeleteUser = async (userId, username) => {
+    console.log(`Deleting user with ID: ${userId} and username: ${username}`);
     if (window.confirm(`Are you sure you want to delete user "${username}"?`)) {
       try {
         await deleteUser(userId);

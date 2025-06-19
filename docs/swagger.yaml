@@ -1,5 +1,14 @@
 basePath: /api
 definitions:
+  controller.AdminCreateUserRequest:
+    properties:
+      password:
+        type: string
+      role:
+        type: string
+      username:
+        type: string
+    type: object
   controller.CardContentReq:
     properties:
       text:
@@ -29,6 +38,11 @@ definitions:
     required:
     - action
     - card_id
+    type: object
+  controller.ChangePasswordRequest:
+    properties:
+      password:
+        type: string
     type: object
   controller.ClearDeckStatsRequest:
     properties:
@@ -316,7 +330,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/types.User'
+          $ref: '#/definitions/controller.AdminCreateUserRequest'
       produces:
       - application/json
       responses:
@@ -1366,6 +1380,50 @@ paths:
       summary: Get session statistics
       tags:
       - Sessions
+  /user/password:
+    put:
+      consumes:
+      - application/json
+      description: Update the authenticated user's password
+      parameters:
+      - description: New password
+        in: body
+        name: password
+        required: true
+        schema:
+          $ref: '#/definitions/controller.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Change user password
+      tags:
+      - Users
 securityDefinitions:
   BearerAuth:
     in: header
