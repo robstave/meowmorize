@@ -39,7 +39,7 @@ func (hc *MeowController) StartSession(c echo.Context) error {
 	userID, err := getUserIDFromContext(c)
 	if err != nil {
 		hc.logger.Error("Failed to extract user id from token", "error", err)
-		userID = "demo_user"
+		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "unauthorized"})
 	}
 
 	// Optional: Add validation here if using a validation library
