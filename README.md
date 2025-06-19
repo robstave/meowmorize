@@ -459,6 +459,7 @@ Ensure all dependencies are installed and run the following commands using the h
 - **Database Reset**: To start fresh, simply delete the `meowmorize.db` file located at the root directory and restart the backend application.
 - **Ports Configuration**: The frontend listens on port `8999` as specified in the `.env` file. Ensure this port is available or adjust the configuration as needed.
 - **User Authentication**: The application initializes with a default user. Customize the username, password, and role using the `DEFAULT_USER_USERNAME`, `DEFAULT_USER_PASSWORD`, and `DEFAULT_USER_ROLE` environment variables (role defaults to `admin`).
+- **JWT Secret**: Set the `JWT_SECRET` environment variable to the secret used for signing JWT tokens. The application will exit if this variable is missing.
 
 ## License
 

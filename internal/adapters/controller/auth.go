@@ -10,9 +10,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// JWTSecret is the secret key used to sign JWT tokens.
-// In a production environment, ensure this is secure and not hard-coded.
-var JWTSecret = []byte("your_secret_key")
+// JWTSecret is the secret key used to sign JWT tokens. It is initialized at
+// startup using InitJWTSecret. In a production environment, ensure this value
+// is stored securely and not hard-coded.
+var JWTSecret []byte
+
+// InitJWTSecret sets the JWT secret used for signing tokens.
+func InitJWTSecret(secret string) {
+	JWTSecret = []byte(secret)
+}
 
 // LoginRequest represents the expected payload for login
 type LoginRequest struct {

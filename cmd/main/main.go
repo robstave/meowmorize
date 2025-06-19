@@ -78,6 +78,14 @@ func main() {
 	// Initialize Service
 	service := domain.NewService(slogger, deckRepo, cardRepo, userRepo, sessionLogRepo, llmRepo)
 
+	// Read JWT secret from environment
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		slogger.Error("JWT_SECRET environment variable is required")
+		log.Fatal("JWT_SECRET environment variable is required")
+	}
+	controller.InitJWTSecret(jwtSecret)
+
 	// Initialize Controller
 	meowController := controller.NewMeowController(service, slogger)
 
