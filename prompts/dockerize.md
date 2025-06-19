@@ -25,11 +25,6 @@ run_main() {
     go run cmd/main/main.go
 }
 
-# Function to run the concat command
-run_concat() {
-    echo "Running the concat command..."
-    go run cmd/concat/concat.go
-}
 
 # Function to initialize swagger
 init_swagger() {
@@ -72,11 +67,10 @@ run_tests() {
 
 # Function to display usage information
 usage() {
-    echo "Usage: $0 {run|concat|swagger|redoswagger|mocks|npm|test|help}"
+    echo "Usage: $0 {run|swagger|redoswagger|mocks|npm|test|help}"
     echo ""
     echo "Commands:"
     echo "  run         Run the main application"
-    echo "  concat      Run the concat command"
     echo "  swagger     Initialize swagger docs"
     echo "  redoswagger Redo swagger docs from cmd/main directory"
     echo "  mocks       Generate mock files"
@@ -96,9 +90,6 @@ fi
 case "$1" in
     run)
         run_main
-        ;;
-    concat)
-        run_concat
         ;;
     swagger)
         init_swagger

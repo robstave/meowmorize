@@ -12,7 +12,7 @@ I LOVE [Obsidian](https://obsidian.md/). I love markdown.  I wanted an option to
 
 - **Play with ChatGPT**. My job really does not allow for unfettered use of ChatGTP in coding. This is understandable for a cybersecurity company. But personal apps...have at it!
 
-In a year ( its 2025), my little process will seem quaint.  I have yaml files to outline what files to concat so I can paste large chunks ( about 7k tokens ?) into the chat.  It works pretty well.  Copilot really doesnt work like that. Cursor does, but it seems like they have a little ways to go before I pay for another chat service. By the end of 2025, an agent will just take your full repo and suck it in.  It probably can now, but not as an affordable option for the unwashed masses.
+In a year (its 2025), my little process will seem quaint. I used to rely on YAML files to specify groups of source files to paste into ChatGPT for coding help. That approach is obsolete now as tools have improved and can handle larger contexts directly.
 
 An interesting twist that makes this project unique is the ability to bulk import cards from a chat friendly ( Markdown ) format.
 
@@ -367,7 +367,7 @@ docker run -d \
 MeowMorize utilizes a helper script to streamline various build and deployment tasks. Below are the available commands and their descriptions:
 
 ```bash
-./helper {run|concat|swagger|redoswagger|mocks|npm-build|npm-test|push-docker|test|help}
+./helper {run|swagger|redoswagger|mocks|npm-build|npm-test|push-docker|test|help}
 ```
 
 ##### Commands
@@ -378,11 +378,6 @@ MeowMorize utilizes a helper script to streamline various build and deployment t
   ./helper run
   ```
 
-- **concat**: Concatenate files for Chat pasting purposes.
-
-  ```bash
-  ./helper concat
-  ```
 
 - **swagger**: Initialize Swagger documentation.
 
