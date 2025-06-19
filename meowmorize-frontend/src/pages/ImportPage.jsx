@@ -18,6 +18,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MuiAlert from '@mui/material/Alert';
 import ReactMarkdown from 'react-markdown';
+import rehypeSanitize from 'rehype-sanitize';
 import {
   importDeck,
   createEmptyDeck,
@@ -213,7 +214,9 @@ const ImportPage = () => {
             <Typography>Markdown</Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <ReactMarkdown>{markdownInstructions}</ReactMarkdown>
+            <ReactMarkdown rehypePlugins={[rehypeSanitize]}>
+              {markdownInstructions}
+            </ReactMarkdown>
           </AccordionDetails>
         </Accordion>
         <Accordion>
@@ -221,7 +224,9 @@ const ImportPage = () => {
             <Typography>JSON</Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <ReactMarkdown>{jsonInstructions}</ReactMarkdown>
+            <ReactMarkdown rehypePlugins={[rehypeSanitize]}>
+              {jsonInstructions}
+            </ReactMarkdown>
           </AccordionDetails>
         </Accordion>
       </Box>
