@@ -40,7 +40,7 @@ func (c *MeowController) UpdateCardStats(ctx echo.Context) error {
 	userID, err := getUserIDFromContext(ctx)
 	if err != nil {
 		c.logger.Error("Failed to extract user id from token", "error", err)
-		userID = "demo_user"
+		return ctx.JSON(http.StatusUnauthorized, echo.Map{"message": "unauthorized"})
 	}
 
 	// Optional: Add validation here if using a validation library
