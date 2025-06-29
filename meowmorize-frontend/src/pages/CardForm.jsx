@@ -104,7 +104,7 @@ const CardForm = () => {
         e.preventDefault();
 
         // Basic validation
-        if (!formData.deck_id) {
+        if (!isEditMode && !formData.deck_id) {
             setError('Deck ID is required.');
             return;
         }
