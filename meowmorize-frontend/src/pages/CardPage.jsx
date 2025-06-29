@@ -57,6 +57,7 @@ const CardPage = () => {
     viewed_count: 0,
     remaining: 0,
     current_index: 0,
+    card_stats: [],
   });
 
   // UI states
