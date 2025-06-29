@@ -13,11 +13,11 @@ import {
 } from '../services/api';
 
 // Material UI imports
-import { 
+import {
   Container, Typography, Button, Box, IconButton,
   Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText,
-  Snackbar, CircularProgress, Alert, Rating, Link, 
-  Menu, MenuItem, Fade
+  Snackbar, CircularProgress, Alert, Rating, Link,
+  Menu, MenuItem, Fade, Backdrop
 } from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -239,14 +239,8 @@ const CardPage = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
-  if (loading) {
-    return (
-      <Container sx={{ mt: 4, textAlign: 'center' }}>
-        <CircularProgress />
-        <Typography variant="body1">Loading card details...</Typography>
-      </Container>
-    );
-  }
+
+  // Display error message if card fetch failed
 
   if (error) {
     return (
@@ -471,6 +465,14 @@ const CardPage = () => {
           {snackbar.message}
         </AlertSnackbar>
       </Snackbar>
+
+      {/* Loading overlay to smooth card transitions */}
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </Container>
   );
 };
