@@ -250,6 +250,20 @@ const CardPage = () => {
     );
   }
 
+  // Avoid rendering until the first card is loaded
+  if (!card) {
+    return (
+      <Container sx={{ mt: 4 }}>
+        <Backdrop
+          sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={loading}
+        >
+          <CircularProgress color="inherit" />
+        </Backdrop>
+      </Container>
+    );
+  }
+
   return (
     <Container sx={{ mt: 4 }}>
       {/* Deck Title as a Link */}
