@@ -6,6 +6,7 @@ type Card struct {
 	ID         string    `gorm:"primaryKey" json:"id"`
 	Front      CardFront `gorm:"embedded;embeddedPrefix:front_" json:"front"`
 	Back       CardBack  `gorm:"embedded;embeddedPrefix:back_" json:"back"`
+	UserID     string    `gorm:"not null" json:"user_id"`
 	Link       string    `gorm:"type:text" json:"link"`
 	PassCount  int       `gorm:"default:0" json:"pass_count"`
 	FailCount  int       `gorm:"default:0" json:"fail_count"`

@@ -118,8 +118,11 @@ func (c *MeowController) CreateCard(ctx echo.Context) error {
 		Link: req.Link,
 	}
 
+	// Set card owner
+	newCard.UserID = userID
+
 	// Call the service to create the card
-	ccard, err := c.service.CreateCard(newCard, deckID)
+	ccard, err := c.service.CreateCard(newCard, deckID, userID)
 	if err != nil {
 		c.logger.Error("Failed to create card", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create card")

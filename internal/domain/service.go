@@ -32,7 +32,7 @@ type MeowDomain interface {
 
 	// Card methods
 	GetCardByID(cardID string) (*types.Card, error)
-	CreateCard(card types.Card, deckID string) (*types.Card, error)
+	CreateCard(card types.Card, deckID string, userID string) (*types.Card, error)
 	UpdateCard(card types.Card) error
 	DeleteCardByID(cardID string) error
 	CloneCardToDeck(cardID string, targetDeckID string) (*types.Card, error)
@@ -90,4 +90,17 @@ func NewService(logger *slog.Logger,
 	}
 
 	return service
+}
+
+// backfillCardOwners sets the user_id on any cards within the deck that do not have an owner
+func (s *Service) backfillCardOwners(deck types.Deck, userID string) error {
+	for _, card := range deck.Cards {
+		if card.UserID == "" {
+			card.UserID = userID
+			if err := s.cardRepo.UpdateCard(card); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

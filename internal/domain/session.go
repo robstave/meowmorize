@@ -26,6 +26,11 @@ func (s *Service) StartSession(deckID string, count int, method types.SessionMet
 		return err
 	}
 
+	// backfill any cards without an owner
+	if err := s.backfillCardOwners(deck, userID); err != nil {
+		s.logger.Error("failed to backfill card owners", "error", err)
+	}
+
 	// Update LastAccessed
 	deck.LastAccessed = time.Now()
 	if err := s.deckRepo.UpdateDeck(deck); err != nil {

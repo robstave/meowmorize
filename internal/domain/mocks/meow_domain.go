@@ -91,13 +91,13 @@ func (_m *MeowDomain) CollapseDecks(targetDeckID string, sourceDeckID string) er
 	return r0
 }
 
-// CreateCard provides a mock function with given fields: card, deckID
-func (_m *MeowDomain) CreateCard(card types.Card, deckID string) (*types.Card, error) {
-	ret := _m.Called(card, deckID)
+// CreateCard provides a mock function with given fields: card, deckID, userID
+func (_m *MeowDomain) CreateCard(card types.Card, deckID string, userID string) (*types.Card, error) {
+	ret := _m.Called(card, deckID, userID)
 
 	var r0 *types.Card
-	if rf, ok := ret.Get(0).(func(types.Card, string) *types.Card); ok {
-		r0 = rf(card, deckID)
+	if rf, ok := ret.Get(0).(func(types.Card, string, string) *types.Card); ok {
+		r0 = rf(card, deckID, userID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*types.Card)
@@ -105,8 +105,8 @@ func (_m *MeowDomain) CreateCard(card types.Card, deckID string) (*types.Card, e
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(types.Card, string) error); ok {
-		r1 = rf(card, deckID)
+	if rf, ok := ret.Get(1).(func(types.Card, string, string) error); ok {
+		r1 = rf(card, deckID, userID)
 	} else {
 		r1 = ret.Error(1)
 	}

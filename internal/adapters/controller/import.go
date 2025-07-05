@@ -66,6 +66,11 @@ func (hc *MeowController) ImportDeck(c echo.Context) error {
 	// Set the deck owner from the JWT (override any owner info in the JSON).
 	deck.UserID = userID
 
+	// Ensure each card is owned by the importing user
+	for i := range deck.Cards {
+		deck.Cards[i].UserID = userID
+	}
+
 	// Since the many-to-many relation is managed via a join table, there's no need to assign a DeckID to each card.
 	// The association will be saved automatically via deck.Cards in the CreateDeck service method.
 
