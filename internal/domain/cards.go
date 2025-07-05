@@ -27,11 +27,12 @@ func (s *Service) GetCardByID(cardID string) (*types.Card, error) {
 	return card, nil
 }
 
-func (s *Service) CreateCard(card types.Card, deckID string) (*types.Card, error) {
+func (s *Service) CreateCard(card types.Card, deckID string, userID string) (*types.Card, error) {
 	// Create the card in the cards table
 	if card.ID == "" {
 		card.ID = uuid.New().String()
 	}
+	card.UserID = userID
 	if err := s.cardRepo.CreateCard(card); err != nil {
 		return nil, err
 	}

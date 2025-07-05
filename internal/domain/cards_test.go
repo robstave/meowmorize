@@ -86,7 +86,7 @@ func TestCardService_CreateCard_Success(t *testing.T) {
 	dr.On("AddCardToDeck", "deck1", mock.AnythingOfType("types.Card")).Return(nil)
 
 	dm := NewService(logger.InitializeLogger(), dr, cardRepo, userRepo, sessionRepo, llmRepo)
-	createdCard, err := dm.CreateCard(newCard, "deck1")
+	createdCard, err := dm.CreateCard(newCard, "deck1", "user1")
 	assert.NoError(t, err)
 	assert.NotNil(t, createdCard)
 	// Verify that a new ID was assigned.
