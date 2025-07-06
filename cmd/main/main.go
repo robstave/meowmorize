@@ -70,13 +70,11 @@ func main() {
 	}
 
 	// Initialize Repositories
-	deckRepo := repositories.NewDeckRepositorySQLite(db)
-	cardRepo := repositories.NewCardRepositorySQLite(db)
-	userRepo := repositories.NewUserRepositorySQLite(db)
+	flashcardRepo := repositories.NewFlashcardsRepositorySQLite(db)
 	sessionLogRepo := repositories.NewSessionLogRepositorySQLite(db)
 
 	// Initialize Service
-	service := domain.NewService(slogger, deckRepo, cardRepo, userRepo, sessionLogRepo, llmRepo)
+	service := domain.NewService(slogger, flashcardRepo, sessionLogRepo, llmRepo)
 
 	// Read JWT secret from environment
 	jwtSecret := os.Getenv("JWT_SECRET")

@@ -8,19 +8,19 @@ import (
 
 // Implement the methods
 func (s *Service) GetUserByUsername(username string) (*types.User, error) {
-	return s.userRepo.GetUserByUsername(username)
+	return s.flashcardRepo.GetUserByUsername(username)
 }
 
 func (s *Service) CreateUser(user types.User) error {
-	return s.userRepo.CreateUser(user)
+	return s.flashcardRepo.CreateUser(user)
 }
 
 func (s *Service) GetAllUsers() ([]types.User, error) {
-	return s.userRepo.GetAllUsers()
+	return s.flashcardRepo.GetAllUsers()
 }
 
 func (s *Service) DeleteUser(userID string) error {
-	return s.userRepo.DeleteUser(userID)
+	return s.flashcardRepo.DeleteUser(userID)
 }
 
 func (s *Service) UpdateUserPassword(userID string, password string) error {
@@ -28,5 +28,5 @@ func (s *Service) UpdateUserPassword(userID string, password string) error {
 	if err != nil {
 		return err
 	}
-	return s.userRepo.UpdateUserPassword(userID, string(hashedPassword))
+	return s.flashcardRepo.UpdateUserPassword(userID, string(hashedPassword))
 }

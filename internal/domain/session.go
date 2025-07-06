@@ -20,20 +20,21 @@ func (s *Service) StartSession(deckID string, count int, method types.SessionMet
 	defer s.sessionsMu.Unlock()
 
 	// Fetch the deck
-	deck, err := s.deckRepo.GetDeckByID(deckID)
+	deck, err := s.flashcardRepo.GetDeckByID(deckID)
 	if err != nil {
 		s.logger.Error("Failed to fetch deck", "deck_id", deckID, "error", err)
 		return err
 	}
 
 	// backfill any cards without an owner
-	if err := s.backfillCardOwners(deck, userID); err != nil {
-		s.logger.Error("failed to backfill card owners", "error", err)
-	}
+	// keep for now
+	//if err := s.backfillCardOwners(deck, userID); err != nil {
+	//	s.logger.Error("failed to backfill card owners", "error", err)
+	//}
 
 	// Update LastAccessed
 	deck.LastAccessed = time.Now()
-	if err := s.deckRepo.UpdateDeck(deck); err != nil {
+	if err := s.flashcardRepo.UpdateDeck(deck); err != nil {
 		s.logger.Error("Failed to update deck's LastAccessed", "deck_id", deckID, "error", err)
 		return err
 	}

@@ -4,12 +4,14 @@ import (
 	"github.com/robstave/meowmorize/internal/adapters/repositories/mocks"
 )
 
-func setupRepositories() (*mocks.CardRepository, *mocks.UserRepository, *mocks.DeckRepository, *mocks.SessionLogRepository) {
-	cardRepo := new(mocks.CardRepository)
-	userRepo := new(mocks.UserRepository)
-	dr := new(mocks.DeckRepository)
+func setupRepositories() (*mocks.FlashcardsRepository, *mocks.SessionLogRepository) {
+	flashRepo := &mocks.FlashcardsRepository{
+		DeckRepository: new(mocks.DeckRepository),
+		CardRepository: new(mocks.CardRepository),
+		UserRepository: new(mocks.UserRepository),
+	}
 	sessionRepo := new(mocks.SessionLogRepository)
-	return cardRepo, userRepo, dr, sessionRepo
+	return flashRepo, sessionRepo
 }
 
 func setupLLMRepository() *mocks.LLMRepository {

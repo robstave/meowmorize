@@ -26,7 +26,7 @@ func (s *Service) SeedUser() error {
 	}
 
 	// Check if the user already exists
-	existingUser, err := s.userRepo.GetUserByUsername(defaultUsername)
+	existingUser, err := s.flashcardRepo.GetUserByUsername(defaultUsername)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func (s *Service) SeedUser() error {
 		Role:     defaultRole,
 	}
 
-	if err := s.userRepo.CreateUser(user); err != nil {
+	if err := s.flashcardRepo.CreateUser(user); err != nil {
 		return err
 	}
 

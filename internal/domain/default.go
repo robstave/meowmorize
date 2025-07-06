@@ -58,7 +58,7 @@ func (s *Service) CreateDefaultDeck(defaultData bool, userID string) (types.Deck
 	}
 
 	// Save the default deck to the database
-	err := s.deckRepo.CreateDeck(defaultDeck)
+	err := s.flashcardRepo.CreateDeck(defaultDeck)
 	if err != nil {
 		s.logger.Error("Failed to create default deck", "error", err)
 		return defaultDeck, err
