@@ -10,9 +10,7 @@ import (
 
 type Service struct {
 	logger         *slog.Logger
-	deckRepo       repositories.DeckRepository
-	cardRepo       repositories.CardRepository
-	userRepo       repositories.UserRepository
+	flashcardRepo  repositories.FlashcardsRepository
 	sessionLogRepo repositories.SessionLogRepository
 	llmRepo        repositories.LLMRepository
 	sessions       map[string]*types.Session
@@ -66,17 +64,13 @@ type MeowDomain interface {
 }
 
 func NewService(logger *slog.Logger,
-	deckRepo repositories.DeckRepository,
-	cardRepo repositories.CardRepository,
-	userRepo repositories.UserRepository,
+	flashcardRepo repositories.FlashcardsRepository,
 	sessionLogRepo repositories.SessionLogRepository,
 	llmRepo repositories.LLMRepository) MeowDomain {
 
 	service := &Service{
 		logger:         logger,
-		deckRepo:       deckRepo,
-		cardRepo:       cardRepo,
-		userRepo:       userRepo,
+		flashcardRepo:  flashcardRepo,
 		sessionLogRepo: sessionLogRepo,
 		llmRepo:        llmRepo,
 		sessions:       make(map[string]*types.Session),
@@ -97,7 +91,7 @@ func (s *Service) backfillCardOwners(deck types.Deck, userID string) error {
 	for _, card := range deck.Cards {
 		if card.UserID == "" {
 			card.UserID = userID
-			if err := s.cardRepo.UpdateCard(card); err != nil {
+			if err := s.flashcardRepo.UpdateCard(card); err != nil {
 				return err
 			}
 		}

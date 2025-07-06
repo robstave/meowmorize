@@ -15,7 +15,7 @@ import (
 // - clearStats: If true, resets the pass, fail, and skip counts for all cards in the deck.
 func (s *Service) ClearDeckStats(deckID string, clearSession bool, clearStats bool) error {
 	// Retrieve the deck to ensure it exists
-	deck, err := s.deckRepo.GetDeckByID(deckID)
+	deck, err := s.flashcardRepo.GetDeckByID(deckID)
 	if err != nil {
 		s.logger.Error("Failed to retrieve deck  lear", "deck_id", deckID, "error", err)
 		return err
@@ -64,7 +64,7 @@ func (s *Service) ClearDeckStats(deckID string, clearSession bool, clearStats bo
 			card.FailCount = 0
 			card.SkipCount = 0
 
-			if err := s.cardRepo.UpdateCard(card); err != nil {
+			if err := s.flashcardRepo.UpdateCard(card); err != nil {
 				s.logger.Error("Failed to update card stats", "card_id", card.ID, "error", err)
 				return err
 			}

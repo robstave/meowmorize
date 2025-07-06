@@ -13,7 +13,7 @@ func (s *Service) CreateDeck(deck types.Deck) error {
 			"back", card.Back.Text)
 	}
 
-	err := s.deckRepo.CreateDeck(deck)
+	err := s.flashcardRepo.CreateDeck(deck)
 	if err != nil {
 		s.logger.Error("Failed to create deck", "error", err)
 		return err
@@ -26,7 +26,7 @@ func (s *Service) DeleteDeck(deckID string) error {
 
 	s.logger.Error("Deleting deck domain", "deckID", deckID)
 
-	err := s.deckRepo.DeleteDeck(deckID)
+	err := s.flashcardRepo.DeleteDeck(deckID)
 	if err != nil {
 		s.logger.Error("Failed to delete deck", "deckID", deckID, "error", err)
 		return err
@@ -37,7 +37,7 @@ func (s *Service) DeleteDeck(deckID string) error {
 
 // GetDeckByID retrieves a deck by its ID
 func (s *Service) GetDeckByID(deckID string) (types.Deck, error) {
-	deck, err := s.deckRepo.GetDeckByID(deckID)
+	deck, err := s.flashcardRepo.GetDeckByID(deckID)
 	if err != nil {
 		s.logger.Error("Failed to get deck by ID", "deck_id", deckID, "error", err)
 		return types.Deck{}, err
@@ -46,11 +46,11 @@ func (s *Service) GetDeckByID(deckID string) (types.Deck, error) {
 }
 
 func (s *Service) GetAllDecks(userID string) ([]types.Deck, error) {
-	return s.deckRepo.GetAllDecksByUser(userID)
+	return s.flashcardRepo.GetAllDecksByUser(userID)
 }
 
 func (s *Service) UpdateDeck(deck types.Deck) error {
-	err := s.deckRepo.UpdateDeck(deck)
+	err := s.flashcardRepo.UpdateDeck(deck)
 	if err != nil {
 		s.logger.Error("Failed to update deck", "error", err)
 		return err

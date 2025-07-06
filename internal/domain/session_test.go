@@ -31,15 +31,15 @@ func TestStartSession_Success(t *testing.T) {
 		Cards: []types.Card{card1, card2},
 	}
 
-	cardRepo, userRepo, deckRepo, sessionRepo := setupRepositories()
+	flashRepo, sessionRepo := setupRepositories()
 	llmRepo := setupLLMRepository()
 
 	// Expectations for SeedUser and deck retrieval/update.
-	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
-	deckRepo.On("GetDeckByID", deckID).Return(deck, nil)
-	deckRepo.On("UpdateDeck", mock.AnythingOfType("types.Deck")).Return(nil)
+	flashRepo.UserRepository.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
+	flashRepo.DeckRepository.On("GetDeckByID", deckID).Return(deck, nil)
+	flashRepo.DeckRepository.On("UpdateDeck", mock.AnythingOfType("types.Deck")).Return(nil)
 
-	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
+	s := NewService(logger.InitializeLogger(), flashRepo, sessionRepo, llmRepo)
 	err := s.StartSession(deckID, -1, types.RandomMethod, "meow")
 	assert.NoError(t, err)
 
@@ -48,24 +48,24 @@ func TestStartSession_Success(t *testing.T) {
 	assert.Equal(t, 2, stats.TotalCards)
 	assert.Equal(t, 0, stats.ViewedCount)
 
-	deckRepo.AssertExpectations(t)
-	userRepo.AssertExpectations(t)
+	flashRepo.DeckRepository.AssertExpectations(t)
+	flashRepo.UserRepository.AssertExpectations(t)
 }
 
 func TestStartSession_Failure_GetDeck(t *testing.T) {
 	deckID := uuid.New().String()
-	cardRepo, userRepo, deckRepo, sessionRepo := setupRepositories()
+	flashRepo, sessionRepo := setupRepositories()
 	llmRepo := setupLLMRepository()
 
-	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
+	flashRepo.UserRepository.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
-	deckRepo.On("GetDeckByID", deckID).Return(types.Deck{}, errors.New("deck not found"))
-	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
+	flashRepo.DeckRepository.On("GetDeckByID", deckID).Return(types.Deck{}, errors.New("deck not found"))
+	s := NewService(logger.InitializeLogger(), flashRepo, sessionRepo, llmRepo)
 	err := s.StartSession(deckID, 1, types.RandomMethod, "meow")
 	assert.Error(t, err)
 
-	deckRepo.AssertExpectations(t)
-	userRepo.AssertExpectations(t)
+	flashRepo.DeckRepository.AssertExpectations(t)
+	flashRepo.UserRepository.AssertExpectations(t)
 }
 
 func TestStartSession_Failure_UpdateDeck(t *testing.T) {
@@ -80,20 +80,20 @@ func TestStartSession_Failure_UpdateDeck(t *testing.T) {
 		Name:  "Test Deck",
 		Cards: []types.Card{card1},
 	}
-	cardRepo, userRepo, deckRepo, sessionRepo := setupRepositories()
+	flashRepo, sessionRepo := setupRepositories()
 	llmRepo := setupLLMRepository()
 
-	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
+	flashRepo.UserRepository.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
-	deckRepo.On("GetDeckByID", deckID).Return(deck, nil)
-	deckRepo.On("UpdateDeck", mock.AnythingOfType("types.Deck")).Return(errors.New("update failed"))
+	flashRepo.DeckRepository.On("GetDeckByID", deckID).Return(deck, nil)
+	flashRepo.DeckRepository.On("UpdateDeck", mock.AnythingOfType("types.Deck")).Return(errors.New("update failed"))
 
-	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
+	s := NewService(logger.InitializeLogger(), flashRepo, sessionRepo, llmRepo)
 	err := s.StartSession(deckID, 1, types.RandomMethod, "meow")
 	assert.Error(t, err)
 
-	deckRepo.AssertExpectations(t)
-	userRepo.AssertExpectations(t)
+	flashRepo.DeckRepository.AssertExpectations(t)
+	flashRepo.UserRepository.AssertExpectations(t)
 }
 
 func TestAdjustSession_Success(t *testing.T) {
@@ -110,15 +110,15 @@ func TestAdjustSession_Success(t *testing.T) {
 		Cards: []types.Card{card},
 	}
 
-	cardRepo, userRepo, deckRepo, sessionRepo := setupRepositories()
+	flashRepo, sessionRepo := setupRepositories()
 	llmRepo := setupLLMRepository()
 
 	// Expect SeedUser call.
-	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
+	flashRepo.UserRepository.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
 	// Expect deck retrieval and update.
-	deckRepo.On("GetDeckByID", deckID).Return(deck, nil)
-	deckRepo.On("UpdateDeck", mock.AnythingOfType("types.Deck")).Return(nil)
+	flashRepo.DeckRepository.On("GetDeckByID", deckID).Return(deck, nil)
+	flashRepo.DeckRepository.On("UpdateDeck", mock.AnythingOfType("types.Deck")).Return(nil)
 
 	// Expect session log creation
 	sessionRepo.On("CreateLog", mock.MatchedBy(func(log types.SessionLog) bool {
@@ -126,7 +126,7 @@ func TestAdjustSession_Success(t *testing.T) {
 	})).Return(nil)
 
 	// Initialize service.
-	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
+	s := NewService(logger.InitializeLogger(), flashRepo, sessionRepo, llmRepo)
 
 	// Start session.
 	err := s.StartSession(deckID, 1, types.RandomMethod, "meow")
@@ -150,9 +150,9 @@ func TestAdjustSession_Success(t *testing.T) {
 	}
 	assert.True(t, found, "Card stat not found in session")
 
-	deckRepo.AssertExpectations(t)
-	userRepo.AssertExpectations(t)
-	// No expectations were set on cardRepo, so no assertion needed for it.
+	flashRepo.DeckRepository.AssertExpectations(t)
+	flashRepo.UserRepository.AssertExpectations(t)
+	// No expectations were set on flashRepo.CardRepository, so no assertion needed for it.
 }
 
 func TestAdjustSession_InvalidCard(t *testing.T) {
@@ -167,15 +167,15 @@ func TestAdjustSession_InvalidCard(t *testing.T) {
 		Name:  "Test Deck",
 		Cards: []types.Card{card},
 	}
-	cardRepo, userRepo, deckRepo, sessionRepo := setupRepositories()
+	flashRepo, sessionRepo := setupRepositories()
 	llmRepo := setupLLMRepository()
 
-	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
+	flashRepo.UserRepository.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
-	deckRepo.On("GetDeckByID", deckID).Return(deck, nil)
-	deckRepo.On("UpdateDeck", mock.AnythingOfType("types.Deck")).Return(nil)
+	flashRepo.DeckRepository.On("GetDeckByID", deckID).Return(deck, nil)
+	flashRepo.DeckRepository.On("UpdateDeck", mock.AnythingOfType("types.Deck")).Return(nil)
 
-	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
+	s := NewService(logger.InitializeLogger(), flashRepo, sessionRepo, llmRepo)
 	err := s.StartSession(deckID, 1, types.RandomMethod, "meow")
 	assert.NoError(t, err)
 
@@ -184,9 +184,9 @@ func TestAdjustSession_InvalidCard(t *testing.T) {
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "card not found in session")
 
-	deckRepo.AssertExpectations(t)
-	userRepo.AssertExpectations(t)
-	cardRepo.AssertExpectations(t)
+	flashRepo.DeckRepository.AssertExpectations(t)
+	flashRepo.UserRepository.AssertExpectations(t)
+	flashRepo.CardRepository.AssertExpectations(t)
 }
 
 func TestGetNextCard_Success(t *testing.T) {
@@ -206,14 +206,14 @@ func TestGetNextCard_Success(t *testing.T) {
 		Name:  "Test Deck",
 		Cards: []types.Card{card1, card2},
 	}
-	cardRepo, userRepo, deckRepo, sessionRepo := setupRepositories()
+	flashRepo, sessionRepo := setupRepositories()
 	llmRepo := setupLLMRepository()
 
-	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
-	deckRepo.On("GetDeckByID", deckID).Return(deck, nil)
-	deckRepo.On("UpdateDeck", mock.AnythingOfType("types.Deck")).Return(nil)
+	flashRepo.UserRepository.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
+	flashRepo.DeckRepository.On("GetDeckByID", deckID).Return(deck, nil)
+	flashRepo.DeckRepository.On("UpdateDeck", mock.AnythingOfType("types.Deck")).Return(nil)
 
-	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
+	s := NewService(logger.InitializeLogger(), flashRepo, sessionRepo, llmRepo)
 	err := s.StartSession(deckID, -1, types.RandomMethod, "meow")
 	assert.NoError(t, err)
 
@@ -223,22 +223,22 @@ func TestGetNextCard_Success(t *testing.T) {
 	// Check that the returned card ID is one of the deck's cards.
 	assert.Contains(t, []string{"card1", "card2"}, nextCardID)
 
-	deckRepo.AssertExpectations(t)
-	userRepo.AssertExpectations(t)
+	flashRepo.DeckRepository.AssertExpectations(t)
+	flashRepo.UserRepository.AssertExpectations(t)
 }
 
 func TestGetNextCard_NoSession(t *testing.T) {
-	cardRepo, userRepo, deckRepo, sessionRepo := setupRepositories()
+	flashRepo, sessionRepo := setupRepositories()
 	llmRepo := setupLLMRepository()
 
-	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
+	flashRepo.UserRepository.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
-	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
+	s := NewService(logger.InitializeLogger(), flashRepo, sessionRepo, llmRepo)
 	nextCardID, err := s.GetNextCard("non-existent-deck")
 	assert.Error(t, err)
 	assert.Empty(t, nextCardID)
 
-	userRepo.AssertExpectations(t)
+	flashRepo.UserRepository.AssertExpectations(t)
 }
 
 func TestClearSession_Success(t *testing.T) {
@@ -253,14 +253,14 @@ func TestClearSession_Success(t *testing.T) {
 		Name:  "Test Deck",
 		Cards: []types.Card{card},
 	}
-	cardRepo, userRepo, deckRepo, sessionRepo := setupRepositories()
+	flashRepo, sessionRepo := setupRepositories()
 	llmRepo := setupLLMRepository()
 
-	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
-	deckRepo.On("GetDeckByID", deckID).Return(deck, nil)
-	deckRepo.On("UpdateDeck", mock.AnythingOfType("types.Deck")).Return(nil)
+	flashRepo.UserRepository.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
+	flashRepo.DeckRepository.On("GetDeckByID", deckID).Return(deck, nil)
+	flashRepo.DeckRepository.On("UpdateDeck", mock.AnythingOfType("types.Deck")).Return(nil)
 
-	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
+	s := NewService(logger.InitializeLogger(), flashRepo, sessionRepo, llmRepo)
 	err := s.StartSession(deckID, 1, types.RandomMethod, "meow")
 	assert.NoError(t, err)
 
@@ -272,20 +272,20 @@ func TestClearSession_Success(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 0, stats.TotalCards)
 
-	userRepo.AssertExpectations(t)
-	deckRepo.AssertExpectations(t)
+	flashRepo.UserRepository.AssertExpectations(t)
+	flashRepo.DeckRepository.AssertExpectations(t)
 }
 
 func TestGetSessionStats_NoSession(t *testing.T) {
-	cardRepo, userRepo, deckRepo, sessionRepo := setupRepositories()
+	flashRepo, sessionRepo := setupRepositories()
 	llmRepo := setupLLMRepository()
 
-	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
+	flashRepo.UserRepository.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
-	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
+	s := NewService(logger.InitializeLogger(), flashRepo, sessionRepo, llmRepo)
 	stats, err := s.GetSessionStats("non-existent-deck")
 	assert.NoError(t, err)
 	assert.Equal(t, 0, stats.TotalCards)
 
-	userRepo.AssertExpectations(t)
+	flashRepo.UserRepository.AssertExpectations(t)
 }

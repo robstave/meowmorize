@@ -11,15 +11,15 @@ import (
 )
 
 func TestGetExplanation(t *testing.T) {
-	cardRepo, userRepo, deckRepo, sessionRepo := setupRepositories()
+	flashRepo, sessionRepo := setupRepositories()
 	llmRepo := setupLLMRepository()
 
 	// Seed user expectation
-	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
+	flashRepo.UserRepository.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
 	llmRepo.On("RunPrompt", mock.Anything, "test prompt").Return("answer", nil)
 
-	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
+	s := NewService(logger.InitializeLogger(), flashRepo, sessionRepo, llmRepo)
 	resp, err := s.GetExplanation("test prompt")
 	assert.NoError(t, err)
 	assert.Equal(t, "answer", resp)
@@ -27,14 +27,14 @@ func TestGetExplanation(t *testing.T) {
 }
 
 func TestGetExplanation_Error(t *testing.T) {
-	cardRepo, userRepo, deckRepo, sessionRepo := setupRepositories()
+	flashRepo, sessionRepo := setupRepositories()
 	llmRepo := setupLLMRepository()
 
-	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
+	flashRepo.UserRepository.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
 	llmRepo.On("RunPrompt", mock.Anything, "bad prompt").Return("", errors.New("fail"))
 
-	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
+	s := NewService(logger.InitializeLogger(), flashRepo, sessionRepo, llmRepo)
 	resp, err := s.GetExplanation("bad prompt")
 	assert.Error(t, err)
 	assert.Equal(t, "", resp)
@@ -42,14 +42,14 @@ func TestGetExplanation_Error(t *testing.T) {
 }
 
 func TestIsLLMAvailable(t *testing.T) {
-	cardRepo, userRepo, deckRepo, sessionRepo := setupRepositories()
+	flashRepo, sessionRepo := setupRepositories()
 	llmRepo := setupLLMRepository()
 
-	userRepo.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
+	flashRepo.UserRepository.On("GetUserByUsername", "meow").Return(&types.User{ID: "dummy", Username: "meow"}, nil)
 
 	// LLM not initialized
 	llmRepo.On("RunPrompt", mock.Anything, "test").Return("", types.ErrLLMNotInitialized)
-	s := NewService(logger.InitializeLogger(), deckRepo, cardRepo, userRepo, sessionRepo, llmRepo)
+	s := NewService(logger.InitializeLogger(), flashRepo, sessionRepo, llmRepo)
 	assert.False(t, s.IsLLMAvailable())
 
 	// LLM initialized and returns without error
