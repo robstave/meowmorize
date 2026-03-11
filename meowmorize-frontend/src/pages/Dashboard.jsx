@@ -29,6 +29,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Link as RouterLink } from 'react-router-dom';
 import { DeckContext } from '../context/DeckContext';
 import { formatLastAccessed } from '../utils/dateUtils';
+import ByteBeatSphere from '../components/ByteBeatSphere';
 
 const Dashboard = () => {
   const { decks, setDecks, loading, error } = useContext(DeckContext);
@@ -223,6 +224,7 @@ const Dashboard = () => {
       <Typography variant="h4" gutterBottom>
         All Decks
       </Typography>
+      <ByteBeatSphere />
       <TableContainer component={Paper}>
         <Table aria-label="decks table">
           <TableHead>
