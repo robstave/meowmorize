@@ -1,5 +1,4 @@
 
-
 Need
 ------------------
 Dark mode, the cat graph has no ears.  Darkmode needs a white line, not black
@@ -38,6 +37,20 @@ This is there, but kinda coupled and does not really work for resort.
 maybe do all that processing in a channel.
 
 
+ByteBeat concept notes
+------------------
+- Rename/brand concept as **ByteBeat**.
+- Core audio texture idea: bake ByteBeat formulas into gameplay.
+- Candidate formula (8 kHz):
+  `t*(t^t+(t>>15|1)^(t-1280^t)>>10)`
+- Enemy idea: add a sphere enemy that emits ByteBeat audio.
+  - Volume increases as the sphere gets closer to the player.
+  - The enemy "texture" / vibe is represented by the generated waveform.
+- References:
+  - https://medium.com/small-tech/bytebeat-experiments-9d11eee630c8
+  - https://zopium.neocities.org/bytebeat/?KHQ+PjZ8dHx0Pj4odD4+MTYpKSoxMCsoKHQ+PjExKSY3KSx8fHx8fDgwMDAsfHx8fHxi
+
+
 ----
 progress
 
@@ -62,5 +75,4 @@ done
 added clone, update and delete apis
 
 collapse decks
-
 
